@@ -1,0 +1,29 @@
+
+BINDIR_DEFAULT=/usr/local/bin
+
+all:	${PROG}
+
+install:
+	if [ -z "${BINDIR}" ]; then		\
+		BINDIR="${BINDIR_DEFAULT}";	\
+	else					\
+		BINDIR="${BINDIR}";		\
+	fi;					\
+	make BINDIR="$${BINDIR}" install_bindirset
+
+install_bindirset:${PROG}
+	mkdir -p ${BINDIR}
+	cp ${PROG} ${BINDIR}/_inst.${PROG}.$$$$_ &&	\
+	    strip ${BINDIR}/_inst.${PROG}.$$$$_ &&	\
+	    chmod 0555 ${BINDIR}/_inst.${PROG}.$$$$_ && \
+	    mv -f ${BINDIR}/_inst.${PROG}.$$$$_ ${BINDIR}/${PROG}
+
+clean:
+	rm -f ${PROG} ${SRCS:.c=.o}
+
+${PROG}:${SRCS:.c=.o}
+	${CC} -o ${PROG} ${LDADD} ${SRCS:.c=.o}
+
+${SRCS:.c=.o}:
+	${CC} ${CFLAGS} ${IDIRS} -c $<
+
