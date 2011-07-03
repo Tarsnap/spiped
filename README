@@ -152,7 +152,7 @@ Security proof
 
 2. Provided that at least one party is following the protocol and the key
 file has been used for fewer than 2^64 connections, the probability of the
-tuple (K, nonce_C, nonce_S) being non-unique is less than 2^192.
+tuple (K, nonce_C, nonce_S) being non-unique is less than 2^(-192).
 
 3. Under the random oracle model, the probability of an attacker without
 access to K guessing either of dhmac_C and dhmac_S is less than
