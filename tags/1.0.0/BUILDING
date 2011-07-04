@@ -1,0 +1,16 @@
+To build and install spiped, run:
+# make BINDIR=/path/to/target/directory install
+
+Spiped should build and run on any IEEE Std 1003.1 (POSIX) compliant
+system which
+1. Includes the Software Development Utilities option,
+2. Has OpenSSL available via -lcrypto and #include <openssl/foo>, and
+3. Provides /dev/urandom.
+
+If your OS needs extra compiler options to find and use OpenSSL, please
+make local changes to the Makefile.  If your OS provides random bytes
+via some mechanism other than /dev/urandom, please make local changes to
+lib/util/entropy.c and notify the author.
+
+If spiped fails to build or run for other reasons, please notify the
+author.
