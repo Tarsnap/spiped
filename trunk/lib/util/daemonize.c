@@ -95,7 +95,7 @@ daemonize(const char * spid)
 
 	/* Tell the parent to suicide. */
 	while (write(fd[1], &dummy, 1) == -1) {
-		if (errno == ENOENT)
+		if (errno == EINTR)
 			continue;
 		warnp("write");
 		goto die;
