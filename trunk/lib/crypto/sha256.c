@@ -233,6 +233,10 @@ SHA256_Update(SHA256_CTX * ctx, const void *in, size_t len)
 	uint32_t r;
 	const unsigned char *src = in;
 
+	/* Return immediately if we have nothing to do. */
+	if (len == 0)
+		return;
+
 	/* Number of bytes left in the buffer from previous updates. */
 	r = (ctx->count[1] >> 3) & 0x3f;
 
