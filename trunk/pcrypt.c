@@ -146,7 +146,7 @@ err0:
 /**
  * pcrypt_mkkeys(K, nonce_l, nonce_r, yh_r, x, nofps, decr, eh_c, eh_s):
  * Using the key file hash ${K}, the local and remote nonces ${nonce_l} and
- * ${nonce_r}, the remote MACed diffie-hellman handshake paramter ${yh_r},
+ * ${nonce_r}, the remote MACed diffie-hellman handshake parameter ${yh_r},
  * and the local diffie-hellman secret ${x}, generate the keys ${eh_c} and
  * ${eh_s}.  If ${nofps} is non-zero, we are performing weak handshaking and
  * y_SC is set to 1 rather than being computed.  If ${decr} is non-zero,
