@@ -19,7 +19,7 @@ void * events_immediate_register(int (*)(void *), void *, int);
  */
 void events_immediate_cancel(void *);
 
-/* "op" paramter to events_network_register. */
+/* "op" parameter to events_network_register. */
 #define EVENTS_NETWORK_OP_READ 	0
 #define EVENTS_NETWORK_OP_WRITE	1
 
