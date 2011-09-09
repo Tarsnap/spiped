@@ -14,7 +14,7 @@ Functions with external linkage are declared like this:
 
 The identical comment appears in the C file where the function is defined.
 
-Static functions may have the the above form of comment, or simply a
+Static functions may have the above form of comment, or simply a
 /* Brief description of what the function does. */
 line before the function.
 
@@ -90,6 +90,12 @@ If size_t is needed, <stddef.h> should be included to provide it unless
 
 If the C99 integer types (uint8_t, int64_t, etc.) are required, <stdint.h>
 should be included to provide them unless <inttypes.h> is already required.
+
+The type 'char' should only be used to represent human-readable characters
+(input from users, output to users, pathnames, et cetera).  The type
+'char *' should normally be a NUL-terminated string.  The types 'signed
+char' and 'unsigned char' should never be used; C99 integer types should
+be used instead.
 
 When a struct is referenced, the idiom
 	/* Opaque types. */
