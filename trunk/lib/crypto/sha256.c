@@ -1,28 +1,3 @@
-/*-
- * Copyright 2005,2007,2009,2011 Colin Percival
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
 #include <stdint.h>
 #include <string.h>
 
@@ -32,10 +7,10 @@
 
 /*
  * Encode a length len/4 vector of (uint32_t) into a length len vector of
- * (unsigned char) in big-endian form.  Assumes len is a multiple of 4.
+ * (uint8_t) in big-endian form.  Assumes len is a multiple of 4.
  */
 static void
-be32enc_vect(unsigned char *dst, const uint32_t *src, size_t len)
+be32enc_vect(uint8_t *dst, const uint32_t *src, size_t len)
 {
 	size_t i;
 
@@ -44,11 +19,11 @@ be32enc_vect(unsigned char *dst, const uint32_t *src, size_t len)
 }
 
 /*
- * Decode a big-endian length len vector of (unsigned char) into a length
+ * Decode a big-endian length len vector of (uint8_t) into a length
  * len/4 vector of (uint32_t).  Assumes len is a multiple of 4.
  */
 static void
-be32dec_vect(uint32_t *dst, const unsigned char *src, size_t len)
+be32dec_vect(uint32_t *dst, const uint8_t *src, size_t len)
 {
 	size_t i;
 
@@ -86,7 +61,7 @@ be32dec_vect(uint32_t *dst, const unsigned char *src, size_t len)
  * the 512-bit input block to produce a new state.
  */
 static void
-SHA256_Transform(uint32_t * state, const unsigned char block[64])
+SHA256_Transform(uint32_t * state, const uint8_t block[64])
 {
 	uint32_t W[64];
 	uint32_t S[8];
@@ -177,7 +152,7 @@ SHA256_Transform(uint32_t * state, const unsigned char block[64])
 	t0 = t1 = 0;
 }
 
-static unsigned char PAD[64] = {
+static uint8_t PAD[64] = {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -188,7 +163,7 @@ static unsigned char PAD[64] = {
 static void
 SHA256_Pad(SHA256_CTX * ctx)
 {
-	unsigned char len[8];
+	uint8_t len[8];
 	uint32_t r, plen;
 
 	/*
@@ -206,7 +181,10 @@ SHA256_Pad(SHA256_CTX * ctx)
 	SHA256_Update(ctx, len, 8);
 }
 
-/* SHA-256 initialization.  Begins a SHA-256 operation. */
+/**
+ * SHA256_Init(ctx):
+ * Initialize the SHA256 context ${ctx}.
+ */
 void
 SHA256_Init(SHA256_CTX * ctx)
 {
@@ -225,13 +203,16 @@ SHA256_Init(SHA256_CTX * ctx)
 	ctx->state[7] = 0x5BE0CD19;
 }
 
-/* Add bytes into the hash. */
+/**
+ * SHA256_Update(ctx, in, len):
+ * Input ${len} bytes from ${in} into the SHA256 context ${ctx}.
+ */
 void
 SHA256_Update(SHA256_CTX * ctx, const void *in, size_t len)
 {
 	uint32_t bitlen[2];
 	uint32_t r;
-	const unsigned char *src = in;
+	const uint8_t *src = in;
 
 	/* Return immediately if we have nothing to do. */
 	if (len == 0)
@@ -272,12 +253,13 @@ SHA256_Update(SHA256_CTX * ctx, const void *in, size_t len)
 	memcpy(ctx->buf, src, len);
 }
 
-/*
- * SHA-256 finalization.  Pads the input data, exports the hash value,
- * and clears the context state.
+/**
+ * SHA256_Final(digest, ctx):
+ * Output the SHA256 hash of the data input to the context ${ctx} into the
+ * buffer ${digest}.
  */
 void
-SHA256_Final(unsigned char digest[32], SHA256_CTX * ctx)
+SHA256_Final(uint8_t digest[32], SHA256_CTX * ctx)
 {
 
 	/* Add padding. */
@@ -290,9 +272,12 @@ SHA256_Final(unsigned char digest[32], SHA256_CTX * ctx)
 	memset((void *)ctx, 0, sizeof(*ctx));
 }
 
-/* Compute the SHA-256 hash of a buffer. */
+/**
+ * SHA256_Buf(in, len, digest):
+ * Compute the SHA256 hash of ${len} bytes from $in} and write it to ${digest}.
+ */
 void
-SHA256_Buf(const void * in, size_t len, unsigned char digest[32])
+SHA256_Buf(const void * in, size_t len, uint8_t digest[32])
 {
 	SHA256_CTX ctx;
 
@@ -301,13 +286,17 @@ SHA256_Buf(const void * in, size_t len, unsigned char digest[32])
 	SHA256_Final(digest, &ctx);
 }
 
-/* Initialize an HMAC-SHA256 operation with the given key. */
+/**
+ * HMAC_SHA256_Init(ctx, K, Klen):
+ * Initialize the HMAC-SHA256 context ${ctx} with ${Klen} bytes of key from
+ * ${K}.
+ */
 void
 HMAC_SHA256_Init(HMAC_SHA256_CTX * ctx, const void * _K, size_t Klen)
 {
-	unsigned char pad[64];
-	unsigned char khash[32];
-	const unsigned char * K = _K;
+	uint8_t pad[64];
+	uint8_t khash[32];
+	const uint8_t * K = _K;
 	size_t i;
 
 	/* If Klen > 64, the key is really SHA256(K). */
@@ -335,9 +324,13 @@ HMAC_SHA256_Init(HMAC_SHA256_CTX * ctx, const void * _K, size_t Klen)
 
 	/* Clean the stack. */
 	memset(khash, 0, 32);
+	memset(pad, 0, 64);
 }
 
-/* Add bytes to the HMAC-SHA256 operation. */
+/**
+ * HMAC_SHA256_Update(ctx, in, len):
+ * Input ${len} bytes from ${in} into the HMAC-SHA256 context ${ctx}.
+ */
 void
 HMAC_SHA256_Update(HMAC_SHA256_CTX * ctx, const void *in, size_t len)
 {
@@ -346,11 +339,15 @@ HMAC_SHA256_Update(HMAC_SHA256_CTX * ctx, const void *in, size_t len)
 	SHA256_Update(&ctx->ictx, in, len);
 }
 
-/* Finish an HMAC-SHA256 operation. */
+/**
+ * HMAC_SHA256_Final(digest, ctx):
+ * Output the HMAC-SHA256 of the data input to the context ${ctx} into the
+ * buffer ${digest}.
+ */
 void
-HMAC_SHA256_Final(unsigned char digest[32], HMAC_SHA256_CTX * ctx)
+HMAC_SHA256_Final(uint8_t digest[32], HMAC_SHA256_CTX * ctx)
 {
-	unsigned char ihash[32];
+	uint8_t ihash[32];
 
 	/* Finish the inner SHA256 operation. */
 	SHA256_Final(ihash, &ctx->ictx);
@@ -365,10 +362,14 @@ HMAC_SHA256_Final(unsigned char digest[32], HMAC_SHA256_CTX * ctx)
 	memset(ihash, 0, 32);
 }
 
-/* Compute the HMAC-SHA256 of a buffer. */
+/**
+ * HMAC_SHA256_Buf(K, Klen, in, len, digest):
+ * Compute the HMAC-SHA256 of ${len} bytes from ${in} using the key ${K} of
+ * length ${Klen}, and write the result to ${digest}.
+ */
 void
 HMAC_SHA256_Buf(const void * K, size_t Klen, const void * in, size_t len,
-    unsigned char digest[32])
+    uint8_t digest[32])
 {
 	HMAC_SHA256_CTX ctx;
 
