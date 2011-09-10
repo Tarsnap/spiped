@@ -19,7 +19,7 @@ usage(void)
 
 	fprintf(stderr, "usage: spiped {-e | -d} -s <source socket> "
 	    "-t <target socket> -k <key file>\n"
-	    "    [-f] [-n <max # connections>] "
+	    "    [-DfF] [-n <max # connections>] "
 	    "[-o <connection timeout>] [-p <pidfile>]\n");
 	exit(1);
 }
@@ -70,8 +70,10 @@ main(int argc, char * argv[])
 {
 	/* Command-line parameters. */
 	int opt_d = 0;
+	int opt_D = 0;
 	int opt_e = 0;
 	int opt_f = 0;
+	int opt_F = 0;
 	const char * opt_k = NULL;
 	intmax_t opt_n = 0;
 	double opt_o = 0.0;
@@ -89,12 +91,17 @@ main(int argc, char * argv[])
 	WARNP_INIT;
 
 	/* Parse the command line. */
-	while ((ch = getopt(argc, argv, "defk:n:o:p:s:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "dDefFk:n:o:p:s:t:")) != -1) {
 		switch (ch) {
 		case 'd':
 			if (opt_d || opt_e)
 				usage();
 			opt_d = 1;
+			break;
+		case 'D':
+			if (opt_D)
+				usage();
+			opt_D = 1;
 			break;
 		case 'e':
 			if (opt_d || opt_e)
@@ -105,6 +112,11 @@ main(int argc, char * argv[])
 			if (opt_f)
 				usage();
 			opt_f = 1;
+			break;
+		case 'F':
+			if (opt_F)
+				usage();
+			opt_F = 1;
 			break;
 		case 'k':
 			if (opt_k)
@@ -172,10 +184,27 @@ main(int argc, char * argv[])
 	if (opt_t == NULL)
 		usage();
 
-	/* Resolve source address. */
-	if ((sas_s = sock_resolve(opt_s)) == NULL) {
-		warnp("Error resolving socket address: %s", opt_s);
+	/* Figure out where our pid should be written. */
+	if (opt_p == NULL) {
+		if (asprintf(&opt_p, "%s.pid", opt_s) == -1) {
+			warnp("asprintf");
+			exit(1);
+		}
+	}
+
+	/* Daemonize early if we're going to wait for DNS to be ready. */
+	if (opt_D && !opt_F && daemonize(opt_p)) {
+		warnp("Failed to daemonize");
 		exit(1);
+	}
+
+	/* Resolve source address. */
+	while ((sas_s = sock_resolve(opt_s)) == NULL) {
+		if (!opt_D) {
+			warnp("Error resolving socket address: %s", opt_s);
+			exit(1);
+		}
+		sleep(1);
 	}
 	if (sas_s[0] == NULL) {
 		warn0("No addresses found for %s", opt_s);
@@ -183,9 +212,12 @@ main(int argc, char * argv[])
 	}
 
 	/* Resolve target address. */
-	if ((sas_t = sock_resolve(opt_t)) == NULL) {
-		warnp("Error resolving socket address: %s", opt_t);
-		exit(1);
+	while ((sas_t = sock_resolve(opt_t)) == NULL) {
+		if (!opt_D) {
+			warnp("Error resolving socket address: %s", opt_t);
+			exit(1);
+		}
+		sleep(1);
 	}
 	if (sas_t[0] == NULL) {
 		warn0("No addresses found for %s", opt_t);
@@ -203,13 +235,7 @@ main(int argc, char * argv[])
 		exit(1);
 
 	/* Daemonize and write pid. */
-	if (opt_p == NULL) {
-		if (asprintf(&opt_p, "%s.pid", opt_s) == -1) {
-			warnp("asprintf");
-			exit(1);
-		}
-	}
-	if (daemonize(opt_p)) {
+	if (!opt_F && daemonize(opt_p)) {
 		warnp("Failed to daemonize");
 		exit(1);
 	}
