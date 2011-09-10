@@ -31,7 +31,7 @@ Usage
 -----
 
 usage: spiped {-e | -d} -s <source socket> -t <target socket> -k <key file>
-    [-f] [-n <max # connections>] [-o <connection timeout>] [-p <pidfile>]
+    [-DfF] [-n <max # connections>] [-o <connection timeout>] [-p <pidfile>]
 
 Options:
     -e
@@ -54,10 +54,19 @@ Options:
 	Address to which spiped should connect.
     -k <key file>
 	Use the provided key file to authenticate and encrypt.
+    -D
+	Wait for DNS.  Normally when spiped is launched it resolves addresses
+	and binds to its source socket before the parent process returns; with
+	this option it will daemonize first and retry failed DNS lookups until
+	they succeed.  This allows spiped to launch even if DNS isn't set up
+	yet, but at the expense of losing the guarantee that once spiped has
+	finished launching it will be ready to create pipes.
     -f
 	Use fast/weak handshaking: This reduces the CPU time spent in the
 	initial connection setup, at the expense of losing perfect forward
 	secrecy.
+    -F
+	Run in foreground.  This can be useful with systems like daemontools.
     -n <max # connections>
 	Limit on the number of simultaneous connections allowed.  Defaults
 	to 100 connections.
