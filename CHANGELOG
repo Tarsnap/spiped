@@ -1,2 +1,8 @@
+spiped-1.1.0
+* New option -D: Wait until DNS lookups succeed.
+* New option -F: Don't daemonize.
+* Use SO_REUSEADDR to avoid 'socket address already in use' error (most
+  importantly, if spiped is killed and restarted).
+* Minor bug and style fixes.
 spiped-1.0.0
 * Initial release
