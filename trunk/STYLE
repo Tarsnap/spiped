@@ -85,6 +85,8 @@ each (non-empty) group:
 5. header files from the program being built, in alphabetical order.
 6. header files (usually just one) defining the interface for this C file.
 
+If ssize_t is needed, <unistd.h> should be included to provide it.
+
 If size_t is needed, <stddef.h> should be included to provide it unless
 <stdio.h>, <stdlib.h>, <string.h>, or <unistd.h> is already required.
 
