@@ -311,18 +311,25 @@ err0:
 
 /**
  * sock_listener(sa):
- * Create a socket, bind it to the socket address ${sa}, mark it for
- * listening, and mark it as non-blocking.
+ * Create a socket, set SO_REUSEADDR, bind it to the socket address ${sa},
+ * mark it for listening, and mark it as non-blocking.
  */
 int
 sock_listener(const struct sock_addr * sa)
 {
 	int s;
+	int val = 1;
 
 	/* Create a socket. */
 	if ((s = socket(sa->ai_family, sa->ai_socktype, 0)) == -1) {
 		warnp("socket(%d, %d)", sa->ai_family, sa->ai_socktype);
 		goto err0;
+	}
+
+	/* Set SO_REUSEADDR. */
+	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val))) {
+		warnp("setsockopt(SO_REUSEADDR)");
+		goto err1;
 	}
 
 	/* Bind the socket. */
