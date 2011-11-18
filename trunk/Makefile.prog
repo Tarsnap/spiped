@@ -22,7 +22,7 @@ clean:
 	rm -f ${PROG} ${SRCS:.c=.o}
 
 ${PROG}:${SRCS:.c=.o}
-	${CC} -o ${PROG} ${LDADD} ${SRCS:.c=.o}
+	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDADD}
 
 ${SRCS:.c=.o}:
 	${CC} ${CFLAGS} ${IDIRS} -c $<
