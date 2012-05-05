@@ -142,7 +142,7 @@ and parse it as a 4-tuple of 256-bit values
 
 Thereafter, the client and server exchange 1060-byte packets P generated from
 plaintext messages M of 1--1024 bytes
-    msg_padded = P || ( 0x00 x (1024 - length(P))) || bigendian32(length(P))
+    msg_padded = M || ( 0x00 x (1024 - length(M))) || bigendian32(length(M))
     msg_encrypted = AES256-CTR(E, msg_padded, packet#)
     P = msg_encrypted || HMAC-SHA256(H, msg_encrypted || bigendian64(packet#))
 where E and H are E_C and H_C or E_S and H_S depending on whether the packet
