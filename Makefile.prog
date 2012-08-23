@@ -1,17 +1,7 @@
 
-BINDIR_DEFAULT=/usr/local/bin
-
 all:	${PROG}
 
-install:
-	if [ -z "${BINDIR}" ]; then		\
-		BINDIR="${BINDIR_DEFAULT}";	\
-	else					\
-		BINDIR="${BINDIR}";		\
-	fi;					\
-	make BINDIR="$${BINDIR}" install_bindirset
-
-install_bindirset:${PROG}
+install:${PROG}
 	mkdir -p ${BINDIR}
 	cp ${PROG} ${BINDIR}/_inst.${PROG}.$$$$_ &&	\
 	    strip ${BINDIR}/_inst.${PROG}.$$$$_ &&	\
