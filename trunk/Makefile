@@ -11,7 +11,7 @@ SRCS	+=	conn.c
 
 # spipe protocol
 .PATH.c	:	proto
-SRCS	+=	pcrypt.c
+SRCS	+=	proto_crypt.c
 SRCS	+=	proto_handshake.c
 SRCS	+=	proto_pipe.c
 IDIRS	+=	-I proto

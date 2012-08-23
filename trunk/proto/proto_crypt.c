@@ -11,7 +11,7 @@
 #include "sysendian.h"
 #include "warnp.h"
 
-#include "pcrypt.h"
+#include "proto_crypt.h"
 
 struct proto_keys {
 	AES_KEY k_aes;
@@ -55,13 +55,13 @@ err0:
 }
 
 /**
- * pcrypt_dhmac(K, nonce_l, nonce_r, dhmac_l, dhmac_r, decr):
+ * proto_crypt_dhmac(K, nonce_l, nonce_r, dhmac_l, dhmac_r, decr):
  * Using the key file hash ${K}, and the local and remote nonces ${nonce_l}
  * and ${nonce_r}, compute the local and remote diffie-hellman parameter MAC
  * keys ${dhmac_l} and ${dhmac_r}.  If ${decr} is non-zero, "local" == "S"
  * and "remote" == "C"; otherwise the assignments are opposite.
  */
-void pcrypt_dhmac(const uint8_t K[32],
+void proto_crypt_dhmac(const uint8_t K[32],
     const uint8_t nonce_l[PCRYPT_NONCE_LEN],
     const uint8_t nonce_r[PCRYPT_NONCE_LEN],
     uint8_t dhmac_l[PCRYPT_DHMAC_LEN], uint8_t dhmac_r[PCRYPT_DHMAC_LEN],
@@ -86,13 +86,13 @@ void pcrypt_dhmac(const uint8_t K[32],
 }
 
 /**
- * pcrypt_dh_validate(yh_r, dhmac_r):
+ * proto_crypt_dh_validate(yh_r, dhmac_r):
  * Return non-zero if the value ${yh_r} received from the remote party is not
  * correctly MACed using the diffie-hellman parameter MAC key ${dhmac_r}, or
  * if the included y value is >= the diffie-hellman group modulus.
  */
 int
-pcrypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
+proto_crypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
     const uint8_t dhmac_r[PCRYPT_DHMAC_LEN])
 {
 	uint8_t hbuf[32];
@@ -110,13 +110,13 @@ pcrypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
 }
 
 /**
- * pcrypt_dh_generate(yh_l, x, dhmac_l, nofps):
+ * proto_crypt_dh_generate(yh_l, x, dhmac_l, nofps):
  * Using the MAC key ${dhmac_l}, generate the MACed diffie-hellman handshake
  * parameter ${yh_l}.  Store the diffie-hellman private value in ${x}.  If
  * ${nofps} is non-zero, skip diffie-hellman generation and use y = 1.
  */
 int
-pcrypt_dh_generate(uint8_t yh_l[PCRYPT_YH_LEN], uint8_t x[PCRYPT_X_LEN],
+proto_crypt_dh_generate(uint8_t yh_l[PCRYPT_YH_LEN], uint8_t x[PCRYPT_X_LEN],
     const uint8_t dhmac_l[PCRYPT_DHMAC_LEN], int nofps)
 {
 
@@ -144,7 +144,7 @@ err0:
 }
 
 /**
- * pcrypt_mkkeys(K, nonce_l, nonce_r, yh_r, x, nofps, decr, eh_c, eh_s):
+ * proto_crypt_mkkeys(K, nonce_l, nonce_r, yh_r, x, nofps, decr, eh_c, eh_s):
  * Using the key file hash ${K}, the local and remote nonces ${nonce_l} and
  * ${nonce_r}, the remote MACed diffie-hellman handshake parameter ${yh_r},
  * and the local diffie-hellman secret ${x}, generate the keys ${eh_c} and
@@ -153,7 +153,8 @@ err0:
  * "local" == "S" and "remote" == "C"; otherwise the assignments are opposite.
  */
 int
-pcrypt_mkkeys(const uint8_t K[32], const uint8_t nonce_l[PCRYPT_NONCE_LEN],
+proto_crypt_mkkeys(const uint8_t K[32],
+    const uint8_t nonce_l[PCRYPT_NONCE_LEN],
     const uint8_t nonce_r[PCRYPT_NONCE_LEN],
     const uint8_t yh_r[PCRYPT_YH_LEN], const uint8_t x[PCRYPT_X_LEN],
     int nofps, int decr,
@@ -194,19 +195,19 @@ pcrypt_mkkeys(const uint8_t K[32], const uint8_t nonce_l[PCRYPT_NONCE_LEN],
 	return (0);
 
 err1:
-	pcrypt_free(*eh_c);
+	proto_crypt_free(*eh_c);
 err0:
 	/* Failure! */
 	return (-1);
 }
 
 /**
- * pcrypt_enc(ibuf, len, obuf, k):
+ * proto_crypt_enc(ibuf, len, obuf, k):
  * Encrypt ${len} bytes from ${ibuf} into PCRYPT_ESZ bytes using the keys in
  * ${k}, and write the result into ${obuf}.
  */
 void
-pcrypt_enc(uint8_t * ibuf, size_t len, uint8_t obuf[PCRYPT_ESZ],
+proto_crypt_enc(uint8_t * ibuf, size_t len, uint8_t obuf[PCRYPT_ESZ],
     struct proto_keys * k)
 {
 	HMAC_SHA256_CTX ctx;
@@ -239,12 +240,12 @@ pcrypt_enc(uint8_t * ibuf, size_t len, uint8_t obuf[PCRYPT_ESZ],
 }
 
 /**
- * pcrypt_dec(ibuf, obuf, k):
+ * proto_crypt_dec(ibuf, obuf, k):
  * Decrypt PCRYPT_ESZ bytes from ${ibuf} using the keys in ${k}.  If the data
  * is valid, write it into ${obuf} and return the length; otherwise, return
  * -1.
  */
-ssize_t pcrypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
+ssize_t proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
     struct proto_keys * k)
 {
 	HMAC_SHA256_CTX ctx;
@@ -282,11 +283,11 @@ ssize_t pcrypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
 }
 
 /**
- * pcrypt_free(k):
+ * proto_crypt_free(k):
  * Free the protocol key structure ${k}.
  */
 void
-pcrypt_free(struct proto_keys * k)
+proto_crypt_free(struct proto_keys * k)
 {
 
 	/* Free the key structure. */

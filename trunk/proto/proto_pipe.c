@@ -8,7 +8,7 @@
 
 #include "network.h"
 
-#include "pcrypt.h"
+#include "proto_crypt.h"
 
 #include "proto_pipe.h"
 
@@ -101,10 +101,10 @@ callback_pipe_read(void * cookie, ssize_t len)
 
 	/* Encrypt or decrypt the data. */
 	if (P->decr) {
-		if ((P->wlen = pcrypt_dec(P->ebuf, P->dbuf, P->k)) == -1)
+		if ((P->wlen = proto_crypt_dec(P->ebuf, P->dbuf, P->k)) == -1)
 			goto fail;
 	} else {
-		pcrypt_enc(P->dbuf, len, P->ebuf, P->k);
+		proto_crypt_enc(P->dbuf, len, P->ebuf, P->k);
 		P->wlen = PCRYPT_ESZ;
 	}
 

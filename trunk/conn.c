@@ -10,7 +10,7 @@
 
 #include "proto_handshake.h"
 #include "proto_pipe.h"
-#include "pcrypt.h"
+#include "proto_crypt.h"
 
 #include "conn.h"
 
@@ -143,8 +143,8 @@ dropconn(struct conn_state * C)
 		events_timer_cancel(C->handshake_timeout_cookie);
 
 	/* Free protocol keys. */
-	pcrypt_free(C->k_f);
-	pcrypt_free(C->k_r);
+	proto_crypt_free(C->k_f);
+	proto_crypt_free(C->k_r);
 
 	/* Shut down pipes. */
 	if (C->pipe_f != NULL)

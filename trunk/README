@@ -205,8 +205,8 @@ Code layout
 
 main.c		-- Command-line parsing, initialization, and event loop.
 conn.c		-- Accepts and sets up connections.
-proto_handshake.c
-		-- Performs the handshaking portion of the spiped protocol.
-proto_pipe.c	-- Performs the data-shuttling portion of the spiped protocol.
-pcrypt.c	-- Does the cryptographic work for the spiped protocol.
+proto/*		-- Implements the spiped protocol.
+  _handshake.c	-- Performs the handshaking portion of the protocol.
+  _pipe.c	-- Performs the data-shuttling portion of the protocol.
+  _crypt.c	-- Does the cryptographic bits needed by _handshake and _pipe.
 lib/*		-- Library code (mostly originating from tarsnap and kivaloo).
