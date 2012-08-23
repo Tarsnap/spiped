@@ -6,7 +6,7 @@
 #include "crypto_entropy.h"
 #include "network.h"
 
-#include "pcrypt.h"
+#include "proto_crypt.h"
 
 #include "proto_handshake.h"
 
@@ -161,7 +161,7 @@ gotnonces(struct handshake_cookie * H)
 {
 
 	/* Compute the diffie-hellman parameter MAC keys. */
-	pcrypt_dhmac(H->kfhash, H->nonce_local, H->nonce_remote,
+	proto_crypt_dhmac(H->kfhash, H->nonce_local, H->nonce_remote,
 	    H->dhmac_local, H->dhmac_remote, H->decr);
 
 	/*
@@ -209,7 +209,7 @@ callback_dh_read(void * cookie, ssize_t len)
 		return (handshakefail(H));
 
 	/* Is the value we read valid? */
-	if (pcrypt_dh_validate(H->yh_remote, H->dhmac_remote))
+	if (proto_crypt_dh_validate(H->yh_remote, H->dhmac_remote))
 		return (handshakefail(H));
 
 	/*
@@ -230,7 +230,8 @@ dhwrite(struct handshake_cookie * H)
 {
 
 	/* Generate a signed diffie-hellman parameter. */
-	if (pcrypt_dh_generate(H->yh_local, H->x, H->dhmac_local, H->nofps))
+	if (proto_crypt_dh_generate(H->yh_local, H->x, H->dhmac_local, 
+	    H->nofps))
 		goto err0;
 
 	/* Write our signed diffie-hellman parameter. */
@@ -284,7 +285,7 @@ handshakedone(struct handshake_cookie * H)
 	assert(H->write_cookie == NULL);
 
 	/* Perform the final computation. */
-	if (pcrypt_mkkeys(H->kfhash, H->nonce_local, H->nonce_remote,
+	if (proto_crypt_mkkeys(H->kfhash, H->nonce_local, H->nonce_remote,
 	    H->yh_remote, H->x, H->nofps, H->decr, &c, &s))
 		goto err0;
 
