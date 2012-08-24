@@ -12,6 +12,7 @@
 #include "warnp.h"
 
 #include "conn.h"
+#include "proto_crypt.h"
 
 static void
 usage(void)
@@ -22,41 +23,6 @@ usage(void)
 	    "    [-DfF] [-n <max # connections>] "
 	    "[-o <connection timeout>] [-p <pidfile>]\n");
 	exit(1);
-}
-
-/* Compute the SHA256 hash of the file contents. */
-static void
-SHA256File(const char * filename, uint8_t hbuf[32])
-{
-	FILE * f;
-	SHA256_CTX ctx;
-	uint8_t buf[BUFSIZ];
-	size_t lenread;
-
-	/* Open the file. */
-	if ((f = fopen(filename, "r")) == NULL) {
-		warnp("Cannot open file: %s", filename);
-		exit(1);
-	}
-
-	/* Initialize the SHA256 hash context. */
-	SHA256_Init(&ctx);
-
-	/* Read the file until we hit EOF. */
-	while ((lenread = fread(buf, 1, BUFSIZ, f)) > 0)
-		SHA256_Update(&ctx, buf, lenread);
-
-	/* Did we hit EOF? */
-	if (! feof(f)) {
-		warnp("Error reading file: %s", filename);
-		exit(1);
-	}
-
-	/* Close the file. */
-	fclose(f);
-
-	/* Compute the final hash. */
-	SHA256_Final(hbuf, &ctx);
 }
 
 /* Simplify error-handling in command-line parse loop. */
@@ -84,7 +50,7 @@ main(int argc, char * argv[])
 	/* Working variables. */
 	struct sock_addr ** sas_s;
 	struct sock_addr ** sas_t;
-	uint8_t kfhash[32];
+	struct proto_secret * K;
 	int ch;
 	int s;
 
@@ -224,8 +190,11 @@ main(int argc, char * argv[])
 		exit(1);
 	}
 
-	/* Compute the SHA256 of the key file. */
-	SHA256File(opt_k, kfhash);
+	/* Load the keying data. */
+	if ((K = proto_crypt_secret(opt_k)) == NULL) {
+		warnp("Error reading shared secret");
+		exit(1);
+	}
 
 	/* Create and bind a socket, and mark it as listening. */
 	if (sas_s[1] != NULL)
@@ -241,7 +210,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Start accepting connections. */
-	if (conn_accept(s, sas_t, opt_d, opt_f, kfhash, opt_n, opt_o)) {
+	if (conn_accept(s, sas_t, opt_d, opt_f, K, opt_n, opt_o)) {
 		warnp("Failed to initialize connection acceptor");
 		exit(1);
 	}

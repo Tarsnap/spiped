@@ -19,7 +19,7 @@ struct accept_state {
 	struct sock_addr * const * sas;
 	int decr;
 	int nofps;
-	uint8_t kfhash[32];
+	const struct proto_secret * K;
 	size_t nconn;
 	size_t nconn_max;
 	double timeo;
@@ -79,7 +79,7 @@ starthandshake(struct conn_state * C, int s, int decr)
 
 	/* Start the handshake. */
 	if ((C->handshake_cookie = proto_handshake(s, decr, C->A->nofps,
-	    C->A->kfhash, callback_handshake_done, C)) == NULL)
+	    C->A->K, callback_handshake_done, C)) == NULL)
 		goto err1;
 
 	/* Success! */
@@ -352,7 +352,7 @@ callback_pipestatus(void * cookie)
 }
 
 /**
- * conn_accept(s, sas, decr, nofps, kfhash, nconn_max, timeo):
+ * conn_accept(s, sas, decr, nofps, K, nconn_max, timeo):
  * Start accepting connections on the socket ${s}.  Connect to the target
  * addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
  * ${decr} is non-zero, decrypt the incoming connections.  Don't accept more
@@ -362,7 +362,7 @@ callback_pipestatus(void * cookie)
  */
 int
 conn_accept(int s, struct sock_addr * const * sas, int decr, int nofps,
-    uint8_t kfhash[32], size_t nconn_max, double timeo)
+    const struct proto_secret * K, size_t nconn_max, double timeo)
 {
 	struct accept_state * A;
 
@@ -373,7 +373,7 @@ conn_accept(int s, struct sock_addr * const * sas, int decr, int nofps,
 	A->sas = sas;
 	A->decr = decr;
 	A->nofps = nofps;
-	memcpy(A->kfhash, kfhash, 32);
+	A->K = K;
 	A->nconn = 0;
 	A->nconn_max = nconn_max;
 	A->timeo = timeo;
