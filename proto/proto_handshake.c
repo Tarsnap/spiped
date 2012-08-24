@@ -16,7 +16,7 @@ struct handshake_cookie {
 	int s;
 	int decr;
 	int nofps;
-	uint8_t kfhash[32];
+	const struct proto_secret * K;
 	uint8_t nonce_local[PCRYPT_NONCE_LEN];
 	uint8_t nonce_remote[PCRYPT_NONCE_LEN];
 	uint8_t dhmac_local[PCRYPT_DHMAC_LEN];
@@ -60,18 +60,18 @@ handshakefail(struct handshake_cookie * H)
 }
 
 /**
- * proto_handshake(s, decr, nofps, kfhash, callback, cookie):
+ * proto_handshake(s, decr, nofps, K, callback, cookie):
  * Perform a protocol handshake on socket ${s}.  If ${decr} is non-zero we are
  * at the receiving end of the connection; otherwise at the sending end.  If
  * ${nofps} is non-zero, perform a "weak" handshake without forward perfect
- * secrecy.  The key file's hash is ${kfhash}.  Upon completion, invoke
+ * secrecy.  The shared protocol secret is ${K}.  Upon completion, invoke
  * ${callback}(${cookie}, f, r) where f contains the keys needed for the
  * forward direction and r contains the keys needed for the reverse direction;
  * or w = r = NULL if the handshake failed.  Return a cookie which can be
  * passed to proto_handshake_cancel to cancel the handshake.
  */
 void *
-proto_handshake(int s, int decr, int nofps, const uint8_t kfhash[32],
+proto_handshake(int s, int decr, int nofps, const struct proto_secret * K,
     int (* callback)(void *, struct proto_keys *, struct proto_keys *),
     void * cookie)
 {
@@ -85,7 +85,7 @@ proto_handshake(int s, int decr, int nofps, const uint8_t kfhash[32],
 	H->s = s;
 	H->decr = decr;
 	H->nofps = nofps;
-	memcpy(H->kfhash, kfhash, 32);
+	H->K = K;
 
 	/* Generate a 32-byte connection nonce. */
 	if (crypto_entropy_read(H->nonce_local, 32))
@@ -161,7 +161,7 @@ gotnonces(struct handshake_cookie * H)
 {
 
 	/* Compute the diffie-hellman parameter MAC keys. */
-	proto_crypt_dhmac(H->kfhash, H->nonce_local, H->nonce_remote,
+	proto_crypt_dhmac(H->K, H->nonce_local, H->nonce_remote,
 	    H->dhmac_local, H->dhmac_remote, H->decr);
 
 	/*
@@ -285,7 +285,7 @@ handshakedone(struct handshake_cookie * H)
 	assert(H->write_cookie == NULL);
 
 	/* Perform the final computation. */
-	if (proto_crypt_mkkeys(H->kfhash, H->nonce_local, H->nonce_remote,
+	if (proto_crypt_mkkeys(H->K, H->nonce_local, H->nonce_remote,
 	    H->yh_remote, H->x, H->nofps, H->decr, &c, &s))
 		goto err0;
 

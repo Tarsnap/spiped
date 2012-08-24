@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -12,6 +13,10 @@
 #include "warnp.h"
 
 #include "proto_crypt.h"
+
+struct proto_secret {
+	uint8_t K[32];
+};
 
 struct proto_keys {
 	AES_KEY k_aes;
@@ -55,13 +60,67 @@ err0:
 }
 
 /**
+ * proto_crypt_secret(filename):
+ * Read the key file ${filename} and return a protocol secret structure.
+ */
+struct proto_secret *
+proto_crypt_secret(const char * filename)
+{
+	SHA256_CTX ctx;
+	FILE * f;
+	struct proto_secret * K;
+	uint8_t buf[BUFSIZ];
+	size_t lenread;
+
+	/* Allocate a protocol secret structure. */
+	if ((K = malloc(sizeof(struct proto_secret))) == NULL)
+		goto err0;
+
+	/* Open the file. */
+	if ((f = fopen(filename, "r")) == NULL) {
+		warnp("Cannot open file: %s", filename);
+		goto err1;
+	}
+
+	/* Initialize the SHA256 hash context. */
+	SHA256_Init(&ctx);
+
+	/* Read the file until we hit EOF. */
+	while ((lenread = fread(buf, 1, BUFSIZ, f)) > 0)
+		SHA256_Update(&ctx, buf, lenread);
+
+	/* Did we hit EOF? */
+	if (! feof(f)) {
+		warnp("Error reading file: %s", filename);
+		goto err2;
+	}
+
+	/* Close the file. */
+	fclose(f);
+
+	/* Compute the final hash. */
+	SHA256_Final(K->K, &ctx);
+
+	/* Success! */
+	return (K);
+
+err2:
+	fclose(f);
+err1:
+	free(K);
+err0:
+	/* Failure! */
+	return (NULL);
+}
+
+/**
  * proto_crypt_dhmac(K, nonce_l, nonce_r, dhmac_l, dhmac_r, decr):
  * Using the key file hash ${K}, and the local and remote nonces ${nonce_l}
  * and ${nonce_r}, compute the local and remote diffie-hellman parameter MAC
  * keys ${dhmac_l} and ${dhmac_r}.  If ${decr} is non-zero, "local" == "S"
  * and "remote" == "C"; otherwise the assignments are opposite.
  */
-void proto_crypt_dhmac(const uint8_t K[32],
+void proto_crypt_dhmac(const struct proto_secret * K,
     const uint8_t nonce_l[PCRYPT_NONCE_LEN],
     const uint8_t nonce_r[PCRYPT_NONCE_LEN],
     uint8_t dhmac_l[PCRYPT_DHMAC_LEN], uint8_t dhmac_r[PCRYPT_DHMAC_LEN],
@@ -76,7 +135,7 @@ void proto_crypt_dhmac(const uint8_t K[32],
 	    PCRYPT_NONCE_LEN);
 
 	/* Compute dk_1. */
-	PBKDF2_SHA256(K, 32, nonce_CS, PCRYPT_NONCE_LEN * 2, 1,
+	PBKDF2_SHA256(K->K, 32, nonce_CS, PCRYPT_NONCE_LEN * 2, 1,
 	    dk_1, PCRYPT_DHMAC_LEN * 2);
 
 	/* Copy out diffie-hellman parameter MAC keys (in the right order). */
@@ -145,7 +204,7 @@ err0:
 
 /**
  * proto_crypt_mkkeys(K, nonce_l, nonce_r, yh_r, x, nofps, decr, eh_c, eh_s):
- * Using the key file hash ${K}, the local and remote nonces ${nonce_l} and
+ * Using the protocol secret ${K}, the local and remote nonces ${nonce_l} and
  * ${nonce_r}, the remote MACed diffie-hellman handshake parameter ${yh_r},
  * and the local diffie-hellman secret ${x}, generate the keys ${eh_c} and
  * ${eh_s}.  If ${nofps} is non-zero, we are performing weak handshaking and
@@ -153,7 +212,7 @@ err0:
  * "local" == "S" and "remote" == "C"; otherwise the assignments are opposite.
  */
 int
-proto_crypt_mkkeys(const uint8_t K[32],
+proto_crypt_mkkeys(const struct proto_secret * K,
     const uint8_t nonce_l[PCRYPT_NONCE_LEN],
     const uint8_t nonce_r[PCRYPT_NONCE_LEN],
     const uint8_t yh_r[PCRYPT_YH_LEN], const uint8_t x[PCRYPT_X_LEN],
@@ -182,7 +241,7 @@ proto_crypt_mkkeys(const uint8_t K[32],
 	}
 
 	/* Compute dk_2. */
-	PBKDF2_SHA256(K, 32, nonce_y,
+	PBKDF2_SHA256(K->K, 32, nonce_y,
 	    PCRYPT_NONCE_LEN * 2 + CRYPTO_DH_KEYLEN, 1, dk_2, 128);
 
 	/* Create key structures. */

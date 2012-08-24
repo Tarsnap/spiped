@@ -7,6 +7,7 @@
 #include "crypto_dh.h"
 
 struct proto_keys;
+struct proto_secret;
 
 /* Size of nonce. */
 #define PCRYPT_NONCE_LEN 32
@@ -21,13 +22,19 @@ struct proto_keys;
 #define PCRYPT_YH_LEN (CRYPTO_DH_PUBLEN + 32)
 
 /**
+ * proto_crypt_secret(filename):
+ * Read the key file ${filename} and return a protocol secret structure.
+ */
+struct proto_secret * proto_crypt_secret(const char *);
+
+/**
  * proto_crypt_dhmac(K, nonce_l, nonce_r, dhmac_l, dhmac_r, decr):
- * Using the key file hash ${K}, and the local and remote nonces ${nonce_l}
+ * Using the protocol secret ${K}, and the local and remote nonces ${nonce_l}
  * and ${nonce_r}, compute the local and remote diffie-hellman parameter MAC
  * keys ${dhmac_l} and ${dhmac_r}.  If ${decr} is non-zero, "local" == "S"
  * and "remote" == "C"; otherwise the assignments are opposite.
  */
-void proto_crypt_dhmac(const uint8_t[32],
+void proto_crypt_dhmac(const struct proto_secret *,
     const uint8_t[PCRYPT_NONCE_LEN], const uint8_t[PCRYPT_NONCE_LEN],
     uint8_t[PCRYPT_DHMAC_LEN], uint8_t[PCRYPT_DHMAC_LEN], int);
 
@@ -51,14 +58,14 @@ int proto_crypt_dh_generate(uint8_t[PCRYPT_YH_LEN], uint8_t[PCRYPT_X_LEN],
 
 /**
  * proto_crypt_mkkeys(K, nonce_l, nonce_r, yh_r, x, nofps, decr, eh_c, eh_s):
- * Using the key file hash ${K}, the local and remote nonces ${nonce_l} and
+ * Using the protocol secret ${K}, the local and remote nonces ${nonce_l} and
  * ${nonce_r}, the remote MACed diffie-hellman handshake parameter ${yh_r},
  * and the local diffie-hellman secret ${x}, generate the keys ${eh_c} and
  * ${eh_s}.  If ${nofps} is non-zero, we are performing weak handshaking and
  * y_SC is set to 1 rather than being computed.  If ${decr} is non-zero,
  * "local" == "S" and "remote" == "C"; otherwise the assignments are opposite.
  */
-int proto_crypt_mkkeys(const uint8_t[32],
+int proto_crypt_mkkeys(const struct proto_secret *,
     const uint8_t[PCRYPT_NONCE_LEN], const uint8_t[PCRYPT_NONCE_LEN],
     const uint8_t[PCRYPT_YH_LEN], const uint8_t[PCRYPT_X_LEN], int, int,
     struct proto_keys **, struct proto_keys **);

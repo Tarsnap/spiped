@@ -5,8 +5,11 @@
 
 #include "sock.h"
 
+/* Opaque structure. */
+struct proto_secret;
+
 /**
- * conn_accept(s, sas, decr, nofps, kfhash, nconn_max, timeo):
+ * conn_accept(s, sas, decr, nofps, K, nconn_max, timeo):
  * Start accepting connections on the socket ${s}.  Connect to the target
  * addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
  * ${decr} is non-zero, decrypt the incoming connections.  Don't accept more
@@ -14,7 +17,7 @@
  * forward secrecy.  Drop connections if the handshake or connecting to the
  * target takes more than ${timeo} seconds.
  */
-int conn_accept(int, struct sock_addr * const *, int, int, uint8_t[32],
-    size_t, double);
+int conn_accept(int, struct sock_addr * const *, int, int,
+    const struct proto_secret *, size_t, double);
 
 #endif /* !_CONN_H_ */
