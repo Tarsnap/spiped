@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "events.h"
 #include "network.h"
-#include "sock.h"
 #include "warnp.h"
 
 #include "conn.h"

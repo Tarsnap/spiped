@@ -1,8 +1,6 @@
 #ifndef _CONN_H_
 #define _CONN_H_
 
-#include <stdint.h>
-
 /* Opaque structures. */
 struct proto_secret;
 struct sock_addr;

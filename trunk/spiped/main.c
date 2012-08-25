@@ -7,7 +7,6 @@
 #include "asprintf.h"
 #include "daemonize.h"
 #include "events.h"
-#include "sha256.h"
 #include "sock.h"
 #include "warnp.h"
 
