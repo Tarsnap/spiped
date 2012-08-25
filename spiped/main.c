@@ -11,7 +11,7 @@
 #include "sock.h"
 #include "warnp.h"
 
-#include "conn.h"
+#include "dispatch.h"
 #include "proto_crypt.h"
 
 static void
@@ -210,7 +210,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Start accepting connections. */
-	if (conn_accept(s, sas_t, opt_d, opt_f, K, opt_n, opt_o)) {
+	if (dispatch_accept(s, sas_t, opt_d, opt_f, K, opt_n, opt_o)) {
 		warnp("Failed to initialize connection acceptor");
 		exit(1);
 	}
