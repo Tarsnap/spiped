@@ -27,7 +27,12 @@ struct accept_state {
 };
 
 struct conn_state {
-	struct accept_state * A;
+	int (* callback_dead)(void *);
+	void * cookie;
+	int decr;
+	int nofps;
+	const struct proto_secret * K;
+	double timeo;
 	int s;
 	int t;
 	void * connect_cookie;
@@ -74,12 +79,12 @@ starthandshake(struct conn_state * C, int s, int decr)
 
 	/* Start the handshake timer. */
 	if ((C->handshake_timeout_cookie = events_timer_register_double(
-	    callback_handshake_timeout, C, C->A->timeo)) == NULL)
+	    callback_handshake_timeout, C, C->timeo)) == NULL)
 		goto err0;
 
 	/* Start the handshake. */
-	if ((C->handshake_cookie = proto_handshake(s, decr, C->A->nofps,
-	    C->A->K, callback_handshake_done, C)) == NULL)
+	if ((C->handshake_cookie = proto_handshake(s, decr, C->nofps,
+	    C->K, callback_handshake_done, C)) == NULL)
 		goto err1;
 
 	/* Success! */
@@ -99,10 +104,10 @@ launchpipes(struct conn_state * C)
 {
 
 	/* Create two pipes. */
-	if ((C->pipe_f = proto_pipe(C->s, C->t, C->A->decr, C->k_f,
+	if ((C->pipe_f = proto_pipe(C->s, C->t, C->decr, C->k_f,
 	    &C->stat_f, callback_pipestatus, C)) == NULL)
 		goto err0;
-	if ((C->pipe_r = proto_pipe(C->t, C->s, !C->A->decr, C->k_r,
+	if ((C->pipe_r = proto_pipe(C->t, C->s, !C->decr, C->k_r,
 	    &C->stat_r, callback_pipestatus, C)) == NULL)
 		goto err0;
 
@@ -118,10 +123,9 @@ err0:
 static int
 dropconn(struct conn_state * C)
 {
-	int rc = 0;
+	int rc;
 
 	/* Close the incoming connection. */
-	C->A->nconn -= 1;
 	close(C->s);
 
 	/* Close the outgoing connection if it is open. */
@@ -152,9 +156,8 @@ dropconn(struct conn_state * C)
 	if (C->pipe_r != NULL)
 		proto_pipe_cancel(C->pipe_r);
 
-	/* Accept more connections if we need to. */
-	if (doaccept(C->A))
-		rc = -1;
+	/* Notify the upstream that we've dropped a connection. */
+	rc = (C->callback_dead)(C->cookie);
 
 	/* Free the connection cookie. */
 	free(C);
@@ -163,23 +166,44 @@ dropconn(struct conn_state * C)
 	return (rc);
 }
 
-/* Handle an incoming connection. */
+/* A connection has closed.  Accept more if necessary. */
 static int
-callback_gotconn(void * cookie, int s)
+callback_conndied(void * cookie)
 {
 	struct accept_state * A = cookie;
+
+	/* We've lost a connection. */
+	A->nconn -= 1;
+
+	/* Maybe accept more connections. */
+	return (doaccept(A));
+}
+
+/**
+ * conn_create(s, sas, decr, nofps, K, timeo, callback_dead, cookie):
+ * Create a connection with one end at ${s} and the other end connecting to
+ * the target addresses ${sas}.  If ${decr} is 0, encrypt the outgoing data;
+ * if ${decr} is nonzero, decrypt the outgoing data.  If ${nofps} is non-zero,
+ * don't use perfect forward secrecy.  Drop the connection if the handshake or
+ * connecting to the target takes more than ${timeo} seconds.  When the
+ * connection is dropped, invoke ${callback_dead}(${cookie}).
+ */
+int
+conn_create(int s, struct sock_addr * const * sas, int decr, int nofps,
+    const struct proto_secret * K, double timeo,
+    int (* callback_dead)(void *), void * cookie)
+{
 	struct conn_state * C;
-
-	/* This accept is no longer in progress. */
-	A->accept_cookie = NULL;
-
-	/* We have gained a connection. */
-	A->nconn += 1;
 
 	/* Bake a cookie for this connection. */
 	if ((C = malloc(sizeof(struct conn_state))) == NULL)
-		goto err1;
-	C->A = A;
+		goto err0;
+	C->callback_dead = callback_dead;
+	C->cookie = cookie;
+	C->decr = decr;
+	C->nofps = nofps;
+	C->K = K;
+	C->timeo = timeo;
 	C->s = s;
 	C->t = -1;
 	C->connect_cookie = NULL;
@@ -191,18 +215,57 @@ callback_gotconn(void * cookie, int s)
 
 	/* Start the connect timer. */
 	if ((C->connect_timeout_cookie = events_timer_register_double(
-	    callback_connect_timeout, C, C->A->timeo)) == NULL)
-		goto err2;
+	    callback_connect_timeout, C, C->timeo)) == NULL)
+		goto err1;
 
 	/* Connect to target. */
 	if ((C->connect_cookie =
-	    network_connect(A->sas, callback_connect_done, C)) == NULL)
-		goto err3;
+	    network_connect(sas, callback_connect_done, C)) == NULL)
+		goto err2;
 
 	/* If we're decrypting, start the handshake. */
-	if (C->A->decr) {
-		if (starthandshake(C, C->s, C->A->decr))
-			goto err4;
+	if (C->decr) {
+		if (starthandshake(C, C->s, C->decr))
+			goto err3;
+	}
+
+	/* Success! */
+	return (0);
+
+err3:
+	network_connect_cancel(C->connect_cookie);
+err2:
+	events_timer_cancel(C->connect_timeout_cookie);
+err1:
+	free(C);
+err0:
+	/* Failure! */
+	return (-1);
+}
+
+/* Handle an incoming connection. */
+static int
+callback_gotconn(void * cookie, int s)
+{
+	struct accept_state * A = cookie;
+
+	/* This accept is no longer in progress. */
+	A->accept_cookie = NULL;
+
+	/* If we got a -1 descriptor, something went seriously wrong. */
+	if (s == -1) {
+		warnp("network_accept failed");
+		goto err0;
+	}
+
+	/* We have gained a connection. */
+	A->nconn += 1;
+
+	/* Create a new connection. */
+	if (conn_create(s, A->sas, A->decr, A->nofps, A->K, A->timeo,
+	    callback_conndied, A)) {
+		warnp("Failure setting up new connection");
+		goto err1;
 	}
 
 	/* Accept another connection if we can. */
@@ -212,12 +275,6 @@ callback_gotconn(void * cookie, int s)
 	/* Success! */
 	return (0);
 
-err4:
-	network_connect_cancel(C->connect_cookie);
-err3:
-	events_timer_cancel(C->connect_timeout_cookie);
-err2:
-	free(C);
 err1:
 	A->nconn -= 1;
 	close(s);
@@ -244,8 +301,8 @@ callback_connect_done(void * cookie, int t)
 		return (dropconn(C));
 
 	/* If we're encrypting, start the handshake. */
-	if (!C->A->decr) {
-		if (starthandshake(C, C->t, C->A->decr))
+	if (!C->decr) {
+		if (starthandshake(C, C->t, C->decr))
 			goto err1;
 	}
 
