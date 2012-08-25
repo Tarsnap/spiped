@@ -7,6 +7,7 @@ LDADD	+=	-lcrypto
 
 # spiped code
 SRCS	=	main.c
+SRCS	+=	dispatch.c
 SRCS	+=	conn.c
 
 # spipe protocol
