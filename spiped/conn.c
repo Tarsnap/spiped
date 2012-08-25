@@ -1,12 +1,9 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "events.h"
 #include "network.h"
-#include "sock.h"
-#include "warnp.h"
 
 #include "proto_handshake.h"
 #include "proto_pipe.h"
