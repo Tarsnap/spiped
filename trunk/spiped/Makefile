@@ -8,10 +8,10 @@ LDADD	+=	-lcrypto
 # spiped code
 SRCS	=	main.c
 SRCS	+=	dispatch.c
-SRCS	+=	conn.c
 
 # spipe protocol
 .PATH.c	:	../proto
+SRCS	+=	proto_conn.c
 SRCS	+=	proto_crypt.c
 SRCS	+=	proto_handshake.c
 SRCS	+=	proto_pipe.c

@@ -9,7 +9,7 @@
 #include "proto_pipe.h"
 #include "proto_crypt.h"
 
-#include "conn.h"
+#include "proto_conn.h"
 
 struct conn_state {
 	int (* callback_dead)(void *);
@@ -134,7 +134,7 @@ dropconn(struct conn_state * C)
 }
 
 /**
- * conn_create(s, sas, decr, nofps, K, timeo, callback_dead, cookie):
+ * proto_conn_create(s, sas, decr, nofps, K, timeo, callback_dead, cookie):
  * Create a connection with one end at ${s} and the other end connecting to
  * the target addresses ${sas}.  If ${decr} is 0, encrypt the outgoing data;
  * if ${decr} is nonzero, decrypt the outgoing data.  If ${nofps} is non-zero,
@@ -143,7 +143,7 @@ dropconn(struct conn_state * C)
  * connection is dropped, invoke ${callback_dead}(${cookie}).
  */
 int
-conn_create(int s, struct sock_addr * const * sas, int decr, int nofps,
+proto_conn_create(int s, struct sock_addr * const * sas, int decr, int nofps,
     const struct proto_secret * K, double timeo,
     int (* callback_dead)(void *), void * cookie)
 {

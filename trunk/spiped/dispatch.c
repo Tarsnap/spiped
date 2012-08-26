@@ -5,7 +5,8 @@
 #include "network.h"
 #include "warnp.h"
 
-#include "conn.h"
+#include "proto_conn.h"
+
 #include "dispatch.h"
 
 struct accept_state {
@@ -71,7 +72,7 @@ callback_gotconn(void * cookie, int s)
 	A->nconn += 1;
 
 	/* Create a new connection. */
-	if (conn_create(s, A->sas, A->decr, A->nofps, A->K, A->timeo,
+	if (proto_conn_create(s, A->sas, A->decr, A->nofps, A->K, A->timeo,
 	    callback_conndied, A)) {
 		warnp("Failure setting up new connection");
 		goto err1;
