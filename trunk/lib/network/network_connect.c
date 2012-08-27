@@ -113,6 +113,8 @@ failed:
 	return (0);
 
 err1:
+	if (C->s != -1)
+		close(C->s);
 	free(C);
 
 	/* Fatal error. */
