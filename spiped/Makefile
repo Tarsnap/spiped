@@ -17,6 +17,11 @@ SRCS	+=	proto_handshake.c
 SRCS	+=	proto_pipe.c
 IDIRS	+=	-I ../proto
 
+# Fundamental algorithms
+.PATH.c	:	../lib/alg
+SRCS	+=	sha256.c
+IDIRS	+=	-I ../lib/alg
+
 # Data structures
 .PATH.c	:	../lib/datastruct
 SRCS	+=	elasticarray.c
@@ -56,7 +61,6 @@ SRCS	+=	crypto_dh.c
 SRCS	+=	crypto_dh_group14.c
 SRCS	+=	crypto_entropy.c
 SRCS	+=	crypto_verify_bytes.c
-SRCS	+=	sha256.c
 IDIRS	+=	-I ../lib/crypto
 
 # Debugging options
