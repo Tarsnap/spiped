@@ -13,7 +13,8 @@
  */
 void warnp_setprogname(const char *);
 #define WARNP_INIT	do {		\
-	warnp_setprogname(argv[0]);	\
+	if (argv[0] != NULL)		\
+		warnp_setprogname(argv[0]);	\
 } while (0)
 
 /* As in BSD <err.h>. */
