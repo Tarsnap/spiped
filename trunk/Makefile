@@ -1,4 +1,4 @@
-PROGS=	spiped
+PROGS=	spiped spipe
 PUBLISH= ${PROGS} BUILDING CHANGELOG COPYRIGHT README STYLE lib proto
 
 .for D in ${PROGS}
