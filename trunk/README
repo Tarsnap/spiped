@@ -45,6 +45,9 @@ on a server and after copying keyfile to the local system, run
 at which point mail delivered via localhost:25 on the local system will be
 securely transmitted to port 25 on the server.
 
+For a detailed list of the command-line options, see the README file in the
+spiped subdirectory.
+
 Security requirements
 ---------------------
 
