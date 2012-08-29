@@ -160,9 +160,11 @@ valid.
 Code layout
 -----------
 
-main.c		-- Command-line parsing, initialization, and event loop.
-conn.c		-- Accepts and sets up connections.
+spiped/*	-- Code specific to the spiped utility.
+  main.c	-- Command-line parsing, initialization, and event loop.
+  dispatch.c	-- Accepts connections and hands them off to protocol code.
 proto/*		-- Implements the spiped protocol.
+  _conn.c	-- Manages the lifecycle of a connection.
   _handshake.c	-- Performs the handshaking portion of the protocol.
   _pipe.c	-- Performs the data-shuttling portion of the protocol.
   _crypt.c	-- Does the cryptographic bits needed by _handshake and _pipe.
