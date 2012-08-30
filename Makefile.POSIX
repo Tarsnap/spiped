@@ -1,6 +1,6 @@
 .POSIX:
 
-PROGS=		spiped
+PROGS=		spiped spipe
 BINDIR_DEFAULT=	/usr/local/bin
 CFLAGS_DEFAULT=	-O2
 
