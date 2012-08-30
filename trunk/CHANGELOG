@@ -1,3 +1,8 @@
+spiped-1.2.0
+* New utility "spipe": A client for the spiped protocol, handling a single
+  connection with standard input/output as one end.
+* Code rearrangement with no functional consequences.
+* Minor bug and documentation fixes.
 spiped-1.1.0
 * New option -D: Wait until DNS lookups succeed.
 * New option -F: Don't daemonize.
