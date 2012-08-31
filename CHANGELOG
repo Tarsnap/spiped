@@ -1,3 +1,5 @@
+spiped-1.2.1
+* Fix build by adding missing <stdint.h> #include.
 spiped-1.2.0
 * New utility "spipe": A client for the spiped protocol, handling a single
   connection with standard input/output as one end.
