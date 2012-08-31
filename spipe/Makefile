@@ -50,7 +50,6 @@ IDIRS	+=	-I ../lib/events
 
 # Event-driven networking
 .PATH.c	:	../lib/network
-SRCS	+=	network_accept.c
 SRCS	+=	network_buf.c
 SRCS	+=	network_connect.c
 IDIRS	+=	-I ../lib/network
