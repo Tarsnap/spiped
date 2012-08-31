@@ -33,7 +33,6 @@ IDIRS	+=	-I ../lib/datastruct
 # Utility functions
 .PATH.c	:	../lib/util
 SRCS	+=	asprintf.c
-SRCS	+=	daemonize.c
 SRCS	+=	entropy.c
 SRCS	+=	monoclock.c
 SRCS	+=	sock.c
