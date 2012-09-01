@@ -1,7 +1,7 @@
 spipe usage
 ===========
 
-usage: spiped -t <target socket> -k <key file> [-f] [-o <connection timeout>]
+usage: spipe -t <target socket> -k <key file> [-f] [-o <connection timeout>]
 
 Options:
     -t <target socket>
