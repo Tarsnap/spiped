@@ -32,25 +32,25 @@ sock_resolve_unix(const char * addr)
 {
 	struct sock_addr ** sas;
 	struct sock_addr * sa;
-	struct sockaddr_un * sun;
+	struct sockaddr_un * sa_un;
 
 	/* Allocate and populate a sockaddr_un structure. */
-	if ((sun = malloc(sizeof(struct sockaddr_un))) == NULL)
+	if ((sa_un = malloc(sizeof(struct sockaddr_un))) == NULL)
 		goto err0;
-	memset(sun, 0, sizeof(struct sockaddr_un));
-	sun->sun_family = AF_UNIX;
-	if (strlen(addr) >= sizeof(sun->sun_path)) {
+	memset(sa_un, 0, sizeof(struct sockaddr_un));
+	sa_un->sun_family = AF_UNIX;
+	if (strlen(addr) >= sizeof(sa_un->sun_path)) {
 		warn0("socket path too long: %s", addr);
 		goto err1;
 	}
-	strcpy(sun->sun_path, addr);
+	strcpy(sa_un->sun_path, addr);
 
 	/* Allocate and populate our wrapper. */
 	if ((sa = malloc(sizeof(struct sock_addr))) == NULL)
 		goto err1;
 	sa->ai_family = AF_UNIX;
 	sa->ai_socktype = SOCK_STREAM;
-	sa->name = (struct sockaddr *)sun;
+	sa->name = (struct sockaddr *)sa_un;
 	sa->namelen = sizeof(struct sockaddr_un);
 
 	/* Allocate and populate an array of pointers. */
@@ -65,7 +65,7 @@ sock_resolve_unix(const char * addr)
 err2:
 	free(sa);
 err1:
-	free(sun);
+	free(sa_un);
 err0:
 	/* Failure! */
 	return (NULL);
