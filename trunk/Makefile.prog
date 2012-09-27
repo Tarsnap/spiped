@@ -14,6 +14,6 @@ clean:
 ${PROG}:${SRCS:.c=.o}
 	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDADD}
 
-${SRCS:.c=.o}:
+.c.o:
 	${CC} ${CFLAGS} ${IDIRS} -c $<
 
