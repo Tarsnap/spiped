@@ -7,10 +7,6 @@ system which
 2. Has OpenSSL available via -lcrypto and #include <openssl/foo>, and
 3. Provides /dev/urandom.
 
-On some platforms (OS X, maybe others) you will need to remove "-lrt"
-from the LDADD= lines in spiped/Makefile and spipe/Makefile, due to a
-bug in those platforms.
-
 On some platforms (OpenBSD, maybe others) you will need to add
 #include <sys/types.h> at the start of spipe/main.c and spipe/pushbits.c,
 due to a bug on those platforms.

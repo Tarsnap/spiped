@@ -1,5 +1,5 @@
 PROGS=	spiped spipe
-PUBLISH= ${PROGS} BUILDING CHANGELOG COPYRIGHT README STYLE lib proto
+PUBLISH= ${PROGS} BUILDING CHANGELOG COPYRIGHT README STYLE POSIX lib proto
 
 .for D in ${PROGS}
 spiped-${VERSION}/${D}/Makefile:
@@ -7,7 +7,7 @@ spiped-${VERSION}/${D}/Makefile:
 	( cd ${D} && echo -n 'PROG=' && make -V PROG ) >> $@
 	( cd ${D} && echo -n 'SRCS=' && make -V SRCS ) >> $@
 	( cd ${D} && echo -n 'IDIRS=' && make -V IDIRS ) >> $@
-	( cd ${D} && echo -n 'LDADD=' && make -V LDADD ) >> $@
+	( cd ${D} && echo -n 'LDADD_REQ=' && make -V LDADD_REQ ) >> $@
 	cat Makefile.prog >> $@
 	( cd ${D} && make -V SRCS |	\
 	    tr ' ' '\n' |		\
