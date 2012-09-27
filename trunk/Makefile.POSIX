@@ -10,8 +10,9 @@ all:
 	else						\
 		CFLAGS="${CFLAGS}";			\
 	fi;						\
+	LDADD_POSIX=`export CC=${CC}; cd POSIX && . posix-l.sh`;	\
 	for D in ${PROGS} ${BENCH}; do		\
-		( cd $${D} && make CFLAGS="$${CFLAGS}" all ) || exit 2;	\
+		( cd $${D} && make CFLAGS="$${CFLAGS}" LDADD_POSIX="$${LDADD_POSIX}" all ) || exit 2;	\
 	done
 
 install:

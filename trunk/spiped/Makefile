@@ -1,9 +1,12 @@
 # Program name.
 PROG	=	spiped
 
-# Library code required
+# Libraries which are sometimes merged into libc
 LDADD	=	-lrt
-LDADD	+=	-lcrypto
+#LDADD	+=	-lxnet	# Missing on FreeBSD
+
+# Library code required
+LDADD_REQ	=	-lcrypto
 
 # spiped code
 SRCS	=	main.c

@@ -8,5 +8,6 @@ source-${X:.c=.o}: ${X}
 NO_MAN	?=	yes
 WARNS	?=	6
 
-# Make logic (include directories are separated out in individual Makefiles).
+# Make logic (bits which are separated out in individual Makefiles).
 CFLAGS	+=	${IDIRS}
+LDADD	+=	${LDADD_REQ}
