@@ -78,6 +78,8 @@ mpool_##name##_free(type * p)					\
 	} else {						\
 		free(p);					\
 	}							\
-}
+}								\
+								\
+struct mpool_##name##_dummy
 
 #endif /* !_MPOOL_H_ */
