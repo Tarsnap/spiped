@@ -13,8 +13,9 @@ spiped-${VERSION}/${D}/Makefile:
 	    tr ' ' '\n' |		\
 	    sed -E 's/.c$$/.o/' |	\
 	    while read F; do		\
-		echo -n "$${F}: ";	\
-		make source-$${F};	\
+		S=`make source-$${F}`;	\
+		echo "$${F}: $${S}";	\
+		echo "	\$${CC} \$${CFLAGS} \$${IDIRS} -c $${S} -o $${F}"; \
 	    done ) >> $@
 .endfor
 

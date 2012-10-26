@@ -7,14 +7,18 @@ system which
 2. Has OpenSSL available via -lcrypto and #include <openssl/foo>, and
 3. Provides /dev/urandom.
 
+On some platforms (Solaris, maybe others), additional compiler and/or linker
+options are required to find OpenSSL or system libraries; these can be
+provided by adding e.g., CFLAGS="-I/path/to/openssl/headers" (compiler option)
+or LDADD_EXTRA="-L/usr/sfw/lib -lsocket -lnsl" (linker option) to the make
+command line.
+
 On some platforms (OpenBSD, maybe others) you will need to add
 #include <sys/types.h> at the start of spipe/main.c and spipe/pushbits.c,
 due to a bug on those platforms.
 
-If your OS needs extra compiler options to find and use OpenSSL, please
-make local changes to the Makefile.  If your OS provides random bytes
-via some mechanism other than /dev/urandom, please make local changes to
-lib/util/entropy.c and notify the author.
+If your OS provides random bytes via some mechanism other than /dev/urandom,
+please make local changes to lib/util/entropy.c and notify the author.
 
 If spiped fails to build or run for other reasons, please notify the
 author.
