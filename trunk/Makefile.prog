@@ -14,6 +14,3 @@ clean:
 ${PROG}:${SRCS:.c=.o}
 	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDADD_EXTRA} ${LDADD_REQ} ${LDADD_POSIX}
 
-.c.o:
-	${CC} ${CFLAGS} ${IDIRS} -c $<
-
