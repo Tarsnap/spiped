@@ -1,7 +1,7 @@
 # Should be sourced by `command -p sh posix-l.sh` from within a Makefile.
 FIRST=YES
 for LIB in rt xnet; do
-	if ${CC} -o /dev/null -l${LIB} posix-l.c 2>/dev/null; then
+	if ${CC} -l${LIB} posix-l.c 2>/dev/null; then
 		if [ ${FIRST} = "NO" ]; then
 			printf " ";
 		fi
@@ -10,4 +10,5 @@ for LIB in rt xnet; do
 	else
 		echo "WARNING: POSIX violation: make's CC doesn't understand -l${LIB}" >/dev/stderr
 	fi
+	rm -f a.out
 done
