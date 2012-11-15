@@ -1,0 +1,16 @@
+
+all:	${PROG}
+
+install:${PROG}
+	mkdir -p ${BINDIR}
+	cp ${PROG} ${BINDIR}/_inst.${PROG}.$$$$_ &&	\
+	    strip ${BINDIR}/_inst.${PROG}.$$$$_ &&	\
+	    chmod 0555 ${BINDIR}/_inst.${PROG}.$$$$_ && \
+	    mv -f ${BINDIR}/_inst.${PROG}.$$$$_ ${BINDIR}/${PROG}
+
+clean:
+	rm -f ${PROG} ${SRCS:.c=.o}
+
+${PROG}:${SRCS:.c=.o}
+	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDADD_EXTRA} ${LDADD_REQ} ${LDADD_POSIX}
+
