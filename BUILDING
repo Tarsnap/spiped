@@ -13,9 +13,13 @@ provided by adding e.g., CFLAGS="-I/path/to/openssl/headers" (compiler option)
 or LDADD_EXTRA="-L/usr/sfw/lib -lsocket -lnsl" (linker option) to the make
 command line.
 
-On some platforms (OpenBSD, maybe others) you will need to add
-#include <sys/types.h> at the start of spipe/main.c and spipe/pushbits.c,
-due to a bug on those platforms.
+On some platforms (OpenBSD 5.2 and earlier and HEAD prior to 2012-09-15, and
+possibly others) you will need to add #include <sys/types.h> at the start of
+spipe/main.c and spipe/pushbits.c, due to a bug on those platforms.
+
+On some platforms (mostly Linuxes) it is possible to install OpenSSL libaries
+wihout the associated header files; the header files are usually in packages
+named "openssl-devel", "libssl-dev", or similar.
 
 If your OS provides random bytes via some mechanism other than /dev/urandom,
 please make local changes to lib/util/entropy.c and notify the author.
