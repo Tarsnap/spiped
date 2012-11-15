@@ -1,3 +1,8 @@
+spiped-1.2.2
+* Build fixes for some strictly POSIX-conforming platforms.
+* Detect and work around compilers which are POSIX-noncompliant in their
+  handling of -rt and -lxnet options.
+* Minor documentation and typo fixes.
 spiped-1.2.1
 * Fix build by adding missing <stdint.h> #include.
 spiped-1.2.0
