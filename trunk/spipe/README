@@ -5,7 +5,7 @@ usage: spipe -t <target socket> -k <key file> [-f] [-o <connection timeout>]
 
 Options:
     -t <target socket>
-	Address to which spiped should connect.
+	Address to which spipe should connect.
     -k <key file>
 	Use the provided key file to authenticate and encrypt.
     -f
