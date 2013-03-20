@@ -2,6 +2,9 @@
 #define _ASPRINTF_H_
 
 /* Avoid namespace collisions with BSD/GNU asprintf. */
+#ifdef asprintf
+#undef asprintf
+#endif
 #define asprintf compat_asprintf
 
 /**
