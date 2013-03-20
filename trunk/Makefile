@@ -5,6 +5,7 @@ PUBLISH= ${PROGS} BUILDING CHANGELOG COPYRIGHT README STYLE POSIX lib proto
 spiped-${VERSION}/${D}/Makefile:
 	echo '.POSIX:' > $@
 	( cd ${D} && echo -n 'PROG=' && make -V PROG ) >> $@
+	( cd ${D} && echo -n 'MAN1=' && make -V MAN1 ) >> $@
 	( cd ${D} && echo -n 'SRCS=' && make -V SRCS ) >> $@
 	( cd ${D} && echo -n 'IDIRS=' && make -V IDIRS ) >> $@
 	( cd ${D} && echo -n 'LDADD_REQ=' && make -V LDADD_REQ ) >> $@
