@@ -30,6 +30,6 @@ install: all
 	done
 
 clean:
-	for D in ${PROGS} ${BENCH}; do		\
+	for D in ${PROGS}; do				\
 		( cd $${D} && make clean ) || exit 2;	\
 	done
