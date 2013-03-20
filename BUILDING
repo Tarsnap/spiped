@@ -1,6 +1,9 @@
 To build and install spiped, run:
 # make BINDIR=/path/to/target/directory install
 
+To install man pages, add MAN1DIR=/path/to/man.1/directory to the command
+line (e.g., MAN1DIR=/usr/local/man/man1 on FreeBSD).
+
 Spiped should build and run on any IEEE Std 1003.1 (POSIX) compliant
 system which
 1. Includes the Software Development Utilities option,
