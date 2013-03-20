@@ -14,8 +14,7 @@ all:
 	for D in ${PROGS}; do					\
 		( cd $${D} && 					\
 		    make CFLAGS="$${CFLAGS}"			\
-			LDADD_POSIX="$${LDADD_POSIX}"		\
-			LDADD_EXTRA="${LDADD_EXTRA}" all ) ||	\
+			LDADD_POSIX="$${LDADD_POSIX}" all ) ||	\
 		    exit 2;					\
 	done
 
