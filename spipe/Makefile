@@ -1,5 +1,6 @@
 # Program name.
 PROG	=	spipe
+MAN1	=	${PROG}.1
 
 # Libraries which are sometimes merged into libc
 LDADD	=	-lrt
