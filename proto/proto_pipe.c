@@ -124,7 +124,7 @@ callback_pipe_read(void * cookie, ssize_t len)
 
 fail:
 	/* Record that this connection is broken. */
-	*(P->status) = 0;
+	*(P->status) = -1;
 
 	/* Inform the upstream that our status has changed. */
 	return ((P->callback)(P->cookie));
@@ -172,7 +172,7 @@ callback_pipe_write(void * cookie, ssize_t len)
 
 fail:
 	/* Record that this connection is broken. */
-	*(P->status) = 0;
+	*(P->status) = -1;
 
 	/* Inform the upstream that our status has changed. */
 	return ((P->callback)(P->cookie));
