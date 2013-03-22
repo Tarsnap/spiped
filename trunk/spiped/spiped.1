@@ -30,7 +30,7 @@ spiped \- secure pipe daemon
 \-t <target socket>
 \-k <key file>
 .br
-[\-DfF]
+[\-DfFj]
 [\-n <max # connections>]
 [\-o <connection timeout>]
 [\-p <pidfile>]
@@ -76,6 +76,10 @@ secrecy.
 .TP
 .B \-F
 Run in foreground.  This can be useful with systems like daemontools.
+.TP
+.B \-j
+Disable transport layer keep-alives.
+(By default they are enabled.)
 .TP
 .B \-n <max # connections>
 Limit on the number of simultaneous connections allowed.  Defaults
