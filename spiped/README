@@ -2,7 +2,7 @@ spiped usage
 ============
 
 usage: spiped {-e | -d} -s <source socket> -t <target socket> -k <key file>
-    [-DfF] [-n <max # connections>] [-o <connection timeout>] [-p <pidfile>]
+    [-DfFj] [-n <max # connections>] [-o <connection timeout>] [-p <pidfile>]
 
 Options:
     -e
@@ -38,6 +38,8 @@ Options:
 	secrecy.
     -F
 	Run in foreground.  This can be useful with systems like daemontools.
+    -j
+	Disable transport layer keep-alives. (By default they are enabled.)
     -n <max # connections>
 	Limit on the number of simultaneous connections allowed.  Defaults
 	to 100 connections.

@@ -14,6 +14,7 @@ struct accept_state {
 	struct sock_addr * const * sas;
 	int decr;
 	int nofps;
+	int nokeepalive;
 	const struct proto_secret * K;
 	size_t nconn;
 	size_t nconn_max;
@@ -72,8 +73,8 @@ callback_gotconn(void * cookie, int s)
 	A->nconn += 1;
 
 	/* Create a new connection. */
-	if (proto_conn_create(s, A->sas, A->decr, A->nofps, A->K, A->timeo,
-	    callback_conndied, A)) {
+	if (proto_conn_create(s, A->sas, A->decr, A->nofps, A->nokeepalive,
+	    A->K, A->timeo, callback_conndied, A)) {
 		warnp("Failure setting up new connection");
 		goto err1;
 	}
@@ -94,17 +95,19 @@ err0:
 }
 
 /**
- * dispatch_accept(s, sas, decr, nofps, K, nconn_max, timeo):
+ * dispatch_accept(s, sas, decr, nofps, nokeepalive, K, nconn_max, timeo):
  * Start accepting connections on the socket ${s}.  Connect to the target
  * addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
  * ${decr} is non-zero, decrypt the incoming connections.  Don't accept more
  * than ${nconn_max} connections.  If ${nofps} is non-zero, don't use perfect
- * forward secrecy.  Drop connections if the handshake or connecting to the
- * target takes more than ${timeo} seconds.
+ * forward secrecy.  Enable transport layer keep-alives (if applicable) if and
+ * only if ${nokeepalive} is zero.  Drop connections if the handshake or
+ * connecting to the target takes more than ${timeo} seconds.
  */
 int
 dispatch_accept(int s, struct sock_addr * const * sas, int decr, int nofps,
-    const struct proto_secret * K, size_t nconn_max, double timeo)
+    int nokeepalive, const struct proto_secret * K, size_t nconn_max,
+    double timeo)
 {
 	struct accept_state * A;
 
@@ -115,6 +118,7 @@ dispatch_accept(int s, struct sock_addr * const * sas, int decr, int nofps,
 	A->sas = sas;
 	A->decr = decr;
 	A->nofps = nofps;
+	A->nokeepalive = nokeepalive;
 	A->K = K;
 	A->nconn = 0;
 	A->nconn_max = nconn_max;
