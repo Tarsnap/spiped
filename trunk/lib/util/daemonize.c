@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "noeintr.h"
 #include "warnp.h"
 
 #include "daemonize.h"
@@ -94,9 +95,7 @@ daemonize(const char * spid)
 	}
 
 	/* Tell the parent to suicide. */
-	while (write(fd[1], &dummy, 1) == -1) {
-		if (errno == EINTR)
-			continue;
+	if (noeintr_write(fd[1], &dummy, 1) == -1) {
 		warnp("write");
 		goto die;
 	}
