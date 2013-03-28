@@ -70,7 +70,7 @@ growsocketlist(size_t nrec)
 		socketlist_get(S, i)->writer = NULL;
 	}
 
-	/* Success! */	
+	/* Success! */
 	return (0);
 
 err0:
