@@ -1,6 +1,5 @@
 #include <sys/socket.h>
 
-#include <assert.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -8,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "noeintr.h"
 #include "warnp.h"
 
 #include "pushbits.h"
@@ -24,8 +24,6 @@ workthread(void * cookie)
 {
 	struct push * P = cookie;
 	ssize_t readlen;
-	ssize_t pos;
-	ssize_t writlen;
 
 	/* Infinite loop unless we hit EOF or an error. */
 	do {
@@ -42,20 +40,9 @@ workthread(void * cookie)
 			break;
 
 		/* Write the data back out. */
-		for (pos = 0; pos < readlen; pos += writlen) {
-			/* Write data and die on error. */
-			if ((writlen = write(P->out, &P->buf[pos],
-			    readlen - pos)) == -1) {
-				if (errno == EINTR) {
-					writlen = 0;
-					continue;
-				}
-				warnp("Error writing");
-				exit(1);
-			}
-
-			/* We should have written at least one byte. */
-			assert(writlen >= 1);
+		if (noeintr_write(P->out, &P->buf, readlen) != readlen) {
+			warnp("Error writing");
+			exit(1);
 		}
 	} while (1);
 
