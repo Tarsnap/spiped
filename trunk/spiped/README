@@ -3,6 +3,7 @@ spiped usage
 
 usage: spiped {-e | -d} -s <source socket> -t <target socket> -k <key file>
     [-DfFj] [-n <max # connections>] [-o <connection timeout>] [-p <pidfile>]
+    [{-r <rtime> | -R}]
 
 Options:
     -e
@@ -51,3 +52,8 @@ Options:
 	File to which spiped's process ID should be written.  Defaults to
 	<source socket>.pid (in the current directory if <source socket> is
 	not an absolute path).
+    -r <rtime>
+	Re-resolve the address of <target socket> every <rtime> seconds.
+	Defaults to re-resolution every 60 seconds.
+    -R
+	Do not re-resolve the address of <target socket>.
