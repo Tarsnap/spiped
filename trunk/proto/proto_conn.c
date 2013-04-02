@@ -6,6 +6,7 @@
 
 #include "events.h"
 #include "network.h"
+#include "sock.h"
 
 #include "proto_handshake.h"
 #include "proto_pipe.h"
@@ -16,6 +17,7 @@
 struct conn_state {
 	int (* callback_dead)(void *);
 	void * cookie;
+	struct sock_addr ** sas;
 	int decr;
 	int nofps;
 	int nokeepalive;
@@ -117,6 +119,9 @@ dropconn(struct conn_state * C)
 	if (C->connect_cookie != NULL)
 		network_connect_cancel(C->connect_cookie);
 
+	/* Free the target addresses if we haven't already done so. */
+	sock_addr_freelist(C->sas);
+
 	/* Stop handshaking if a handshake is in progress. */
 	if (C->handshake_cookie != NULL)
 		proto_handshake_cancel(C->handshake_cookie);
@@ -157,10 +162,10 @@ dropconn(struct conn_state * C)
  * applicable) on both sockets if and only if ${nokeepalive} is zero.  Drop the
  * connection if the handshake or connecting to the target takes more than
  * ${timeo} seconds.  When the connection is dropped, invoke
- * ${callback_dead}(${cookie}).
+ * ${callback_dead}(${cookie}).  Free ${sas} once it is no longer needed.
  */
 int
-proto_conn_create(int s, struct sock_addr * const * sas, int decr, int nofps,
+proto_conn_create(int s, struct sock_addr ** sas, int decr, int nofps,
     int nokeepalive, const struct proto_secret * K, double timeo,
     int (* callback_dead)(void *), void * cookie)
 {
@@ -171,6 +176,7 @@ proto_conn_create(int s, struct sock_addr * const * sas, int decr, int nofps,
 		goto err0;
 	C->callback_dead = callback_dead;
 	C->cookie = cookie;
+	C->sas = sas;
 	C->decr = decr;
 	C->nofps = nofps;
 	C->nokeepalive = nokeepalive;
@@ -192,7 +198,7 @@ proto_conn_create(int s, struct sock_addr * const * sas, int decr, int nofps,
 
 	/* Connect to target. */
 	if ((C->connect_cookie =
-	    network_connect(sas, callback_connect_done, C)) == NULL)
+	    network_connect(C->sas, callback_connect_done, C)) == NULL)
 		goto err2;
 
 	/* If we're decrypting, start the handshake. */
@@ -223,6 +229,10 @@ callback_connect_done(void * cookie, int t)
 
 	/* This connection attempt is no longer pending. */
 	C->connect_cookie = NULL;
+
+	/* Don't need the target address any more. */
+	sock_addr_freelist(C->sas);
+	C->sas = NULL;
 
 	/* We beat the clock. */
 	events_timer_cancel(C->connect_timeout_cookie);
@@ -262,6 +272,12 @@ callback_connect_timeout(void * cookie)
 
 	/* This timeout is no longer pending. */
 	C->connect_timeout_cookie = NULL;
+
+	/*
+	 * We could free C->sas here, but from a semantic point of view it
+	 * could still be in use by the not-yet-cancelled connect operation.
+	 * Instead, we free it in dropconn, after cancelling the connect.
+	 */
 
 	/* Drop the connection. */
 	return (dropconn(C));

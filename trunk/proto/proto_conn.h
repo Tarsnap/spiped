@@ -15,9 +15,9 @@ struct sock_addr;
  * applicable) on both sockets if and only if ${nokeepalive} is zero.  Drop the
  * connection if the handshake or connecting to the target takes more than
  * ${timeo} seconds.  When the connection is dropped, invoke
- * ${callback_dead}(${cookie}).
+ * ${callback_dead}(${cookie}).  Free ${sas} once it is no longer needed.
  */
-int proto_conn_create(int, struct sock_addr * const *, int, int, int,
+int proto_conn_create(int, struct sock_addr **, int, int, int,
     const struct proto_secret *, double, int (*)(void *), void *);
 
 #endif /* !_CONN_H_ */
