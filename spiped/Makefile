@@ -33,6 +33,11 @@ SRCS	+=	ptrheap.c
 SRCS	+=	timerqueue.c
 IDIRS	+=	-I ../lib/datastruct
 
+# DNS resolution
+.PATH.c	:	../lib/dnsthread
+SRCS	+=	dnsthread.c
+IDIRS	+=	-I ../lib/dnsthread
+
 # Utility functions
 .PATH.c	:	../lib/util
 SRCS	+=	asprintf.c
@@ -41,6 +46,7 @@ SRCS	+=	entropy.c
 SRCS	+=	monoclock.c
 SRCS	+=	noeintr.c
 SRCS	+=	sock.c
+SRCS	+=	sock_util.c
 SRCS	+=	warnp.c
 IDIRS	+=	-I ../lib/util
 

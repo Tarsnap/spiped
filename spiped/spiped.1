@@ -34,6 +34,7 @@ spiped \- secure pipe daemon
 [\-n <max # connections>]
 [\-o <connection timeout>]
 [\-p <pidfile>]
+[{\-r <rtime> | \-R}]
 .SH OPTIONS
 .TP
 .B \-e
@@ -94,5 +95,12 @@ if not completed.  Defaults to 5s.
 File to which spiped's process ID should be written.  Defaults to
 <source socket>.pid (in the current directory if <source socket> is
 not an absolute path).
+.TP
+.B \-r <rtime>
+Re-resolve the address of <target socket> every <rtime> seconds.
+Defaults to re-resolution every 60 seconds.
+.TP
+.B \-R
+Disable target address re-resolution.
 .SH SEE ALSO
 .BR spipe (1).
