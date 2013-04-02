@@ -8,6 +8,7 @@ LDADD	=	-lrt
 
 # Library code required
 LDADD_REQ	=	-lcrypto
+LDADD_REQ	+=	-lpthread
 
 # spiped code
 SRCS	=	main.c
