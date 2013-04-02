@@ -1,3 +1,11 @@
+spiped-1.3.0
+* Man pages added.
+* Protocol-layer keep-alives are now enabled by default.
+* New option -j (spipe/spiped): Disable protocol-layer keep-alives.
+* In spiped the target address is now re-resolved every 60 seconds by default.
+* New option -R (spiped): Do not re-resolve target address.
+* New option -r <rtime> (spiped): Re-resolve target address every <rtime>
+  seconds.
 spiped-1.2.2
 * Build fixes for some strictly POSIX-conforming platforms.
 * Detect and work around compilers which are POSIX-noncompliant in their
