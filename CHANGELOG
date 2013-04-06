@@ -1,4 +1,7 @@
 spiped-1.3.0
+* Bug fix: spiped now correctly closes connections which have been reset;
+  in earlier versions spiped could erronously hold "dead" connections open
+  as long as they remained idle.
 * Man pages added.
 * Protocol-layer keep-alives are now enabled by default.
 * New option -j (spipe/spiped): Disable protocol-layer keep-alives.
