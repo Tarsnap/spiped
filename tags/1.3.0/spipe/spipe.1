@@ -1,0 +1,55 @@
+.\"-
+.\" Copyright (c) 2012 Andreas Olsson
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.TH SPIPE 1 "April  2, 2013" "spiped 1.3.0" "spipe README"
+.SH NAME
+spipe \- spiped client utility
+.SH SYNOPSIS
+.B spipe
+\-t <target socket>
+\-k <key file>
+[\-fj]
+[\-o <connection timeout>]
+.SH OPTIONS
+.TP
+.B \-t <target socket>
+Address to which spipe should connect.
+.TP
+.B \-k <key file>
+Use the provided key file to authenticate and encrypt.
+.TP
+.B \-f
+Use fast/weak handshaking: This reduces the CPU time spent in the
+initial connection setup, at the expense of losing perfect forward
+secrecy.
+.TP
+.B \-j
+Disable transport layer keep-alives.
+(By default they are enabled.)
+.TP
+.B \-o <connection timeout>
+Timeout, in seconds, after which an attempt to connect to the target
+or a protocol handshake will be aborted (and the connection dropped)
+if not completed.  Defaults to 5s.
+.SH SEE ALSO
+.BR spiped (1).
