@@ -16,8 +16,8 @@ provided by adding e.g., CFLAGS="-I/path/to/openssl/headers" (compiler option)
 or LDADD_EXTRA="-L/usr/sfw/lib -lsocket -lnsl" (linker option) to the make
 command line.
 
-On some platforms (OpenBSD prior to 2013-04-02, and possibly others) you will
-need to add #include <sys/types.h> at the start of
+On some platforms (OpenBSD prior to 5.4, and possibly others) you will need to
+add #include <sys/types.h> at the start of
 	lib/dnsthread/dnsthread.c
 	lib/util/sock_util.c
 	proto/proto_conn.c
