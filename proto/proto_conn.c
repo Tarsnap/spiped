@@ -83,8 +83,8 @@ launchpipes(struct conn_state * C)
 	 * specific.  In particular, it has no sensible meaning for UNIX
 	 * sockets.
 	 */
-	setsockopt(C->s, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
-	setsockopt(C->t, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
+	(void)setsockopt(C->s, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
+	(void)setsockopt(C->t, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
 
 	/* Create two pipes. */
 	if ((C->pipe_f = proto_pipe(C->s, C->t, C->decr, C->k_f,
