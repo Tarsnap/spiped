@@ -1,0 +1,59 @@
+spiped usage
+============
+
+usage: spiped {-e | -d} -s <source socket> -t <target socket> -k <key file>
+    [-DfFj] [-n <max # connections>] [-o <connection timeout>] [-p <pidfile>]
+    [{-r <rtime> | -R}]
+
+Options:
+    -e
+	Take unencrypted connections from the source socket and send
+	encrypted connections to the target socket.
+    -d
+	Take encrypted connections from the source socket and send
+	unencrypted connections to the target socket.
+    -s <source socket>
+	Address on which spiped should listen for incoming connections.
+	Must be in one of the following formats:
+		/absolute/path/to/unix/socket
+		host.name:port
+		[ip.v4.ad.dr]:port
+		[ipv6::addr]:port
+	Note that hostnames are resolved when spiped is launched and are not
+	re-resolved later; thus if DNS entries change spiped will continue to
+	connect to the expired address.
+    -t <target socket>
+	Address to which spiped should connect.
+    -k <key file>
+	Use the provided key file to authenticate and encrypt.
+    -D
+	Wait for DNS.  Normally when spiped is launched it resolves addresses
+	and binds to its source socket before the parent process returns; with
+	this option it will daemonize first and retry failed DNS lookups until
+	they succeed.  This allows spiped to launch even if DNS isn't set up
+	yet, but at the expense of losing the guarantee that once spiped has
+	finished launching it will be ready to create pipes.
+    -f
+	Use fast/weak handshaking: This reduces the CPU time spent in the
+	initial connection setup, at the expense of losing perfect forward
+	secrecy.
+    -F
+	Run in foreground.  This can be useful with systems like daemontools.
+    -j
+	Disable transport layer keep-alives. (By default they are enabled.)
+    -n <max # connections>
+	Limit on the number of simultaneous connections allowed.  Defaults
+	to 100 connections.
+    -o <connection timeout>
+	Timeout, in seconds, after which an attempt to connect to the target
+	or a protocol handshake will be aborted (and the connection dropped)
+	if not completed.  Defaults to 5s.
+    -p <pidfile>
+	File to which spiped's process ID should be written.  Defaults to
+	<source socket>.pid (in the current directory if <source socket> is
+	not an absolute path).
+    -r <rtime>
+	Re-resolve the address of <target socket> every <rtime> seconds.
+	Defaults to re-resolution every 60 seconds.
+    -R
+	Do not re-resolve the address of <target socket>.

@@ -1,0 +1,34 @@
+spiped-1.3.1
+* Fix build by adding missing <stdint.h> #include.
+* Minor code cleanups.
+spiped-1.3.0
+* Bug fix: spiped now correctly closes connections which have been reset;
+  in earlier versions spiped could erronously hold "dead" connections open
+  as long as they remained idle.
+* Man pages added.
+* Protocol-layer keep-alives are now enabled by default.
+* New option -j (spipe/spiped): Disable protocol-layer keep-alives.
+* In spiped the target address is now re-resolved every 60 seconds by default.
+* New option -R (spiped): Do not re-resolve target address.
+* New option -r <rtime> (spiped): Re-resolve target address every <rtime>
+  seconds.
+spiped-1.2.2
+* Build fixes for some strictly POSIX-conforming platforms.
+* Detect and work around compilers which are POSIX-noncompliant in their
+  handling of -rt and -lxnet options.
+* Minor documentation and typo fixes.
+spiped-1.2.1
+* Fix build by adding missing <stdint.h> #include.
+spiped-1.2.0
+* New utility "spipe": A client for the spiped protocol, handling a single
+  connection with standard input/output as one end.
+* Code rearrangement with no functional consequences.
+* Minor bug and documentation fixes.
+spiped-1.1.0
+* New option -D: Wait until DNS lookups succeed.
+* New option -F: Don't daemonize.
+* Use SO_REUSEADDR to avoid 'socket address already in use' error (most
+  importantly, if spiped is killed and restarted).
+* Minor bug and style fixes.
+spiped-1.0.0
+* Initial release
