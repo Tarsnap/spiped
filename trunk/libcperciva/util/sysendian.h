@@ -4,18 +4,18 @@
 #include <stdint.h>
 
 /* Avoid namespace collisions with BSD <sys/endian.h>. */
-#define be16dec compat_be16dec
-#define be16enc compat_be16enc
-#define be32dec compat_be32dec
-#define be32enc compat_be32enc
-#define be64dec compat_be64dec
-#define be64enc compat_be64enc
-#define le16dec compat_le16dec
-#define le16enc compat_le16enc
-#define le32dec compat_le32dec
-#define le32enc compat_le32enc
-#define le64dec compat_le64dec
-#define le64enc compat_le64enc
+#define be16dec libcperciva_be16dec
+#define be16enc libcperciva_be16enc
+#define be32dec libcperciva_be32dec
+#define be32enc libcperciva_be32enc
+#define be64dec libcperciva_be64dec
+#define be64enc libcperciva_be64enc
+#define le16dec libcperciva_le16dec
+#define le16enc libcperciva_le16enc
+#define le32dec libcperciva_le32dec
+#define le32enc libcperciva_le32enc
+#define le64dec libcperciva_le64dec
+#define le64enc libcperciva_le64enc
 
 static inline uint16_t
 be16dec(const void *pp)

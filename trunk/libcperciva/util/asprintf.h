@@ -5,7 +5,7 @@
 #ifdef asprintf
 #undef asprintf
 #endif
-#define asprintf compat_asprintf
+#define asprintf libcperciva_asprintf
 
 /**
  * asprintf(ret, format, ...):

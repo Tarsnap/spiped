@@ -4,8 +4,8 @@
 #include <errno.h>
 
 /* Avoid namespace collisions with BSD <err.h>. */
-#define warn compat_warn
-#define warnx compat_warnx
+#define warn libcperciva_warn
+#define warnx libcperciva_warnx
 
 /**
  * warnp_setprogname(progname):
