@@ -19,7 +19,7 @@ command line.
 On some platforms (OpenBSD prior to 5.4, and possibly others) you will need to
 add #include <sys/types.h> at the start of
 	lib/dnsthread/dnsthread.c
-	lib/util/sock_util.c
+	libcperciva/util/sock_util.c
 	proto/proto_conn.c
 	spipe/main.c
 	spipe/pushbits.c
