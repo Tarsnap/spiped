@@ -1,6 +1,8 @@
 #ifndef _NETWORK_H_
 #define _NETWORK_H_
 
+#include <sys/select.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -35,6 +37,14 @@ void network_accept_cancel(void *);
  * the connection attempt.
  */
 void * network_connect(struct sock_addr * const *,
+    int (*)(void *, int), void *);
+
+/**
+ * network_connect_timeo(sas, timeo, callback, cookie):
+ * Behave as network_connect, but wait a duration of at most ${timeo} for
+ * each address which is being attempted.
+ */
+void * network_connect_timeo(struct sock_addr * const *, const struct timeval *,
     int (*)(void *, int), void *);
 
 /**
