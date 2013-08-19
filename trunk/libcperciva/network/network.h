@@ -5,7 +5,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#include "sock.h"
+/* Opaque address structure. */
+struct sock_addr;
 
 /**
  * network_accept(fd, callback, cookie):
