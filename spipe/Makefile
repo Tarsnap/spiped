@@ -48,6 +48,7 @@ IDIRS	+=	-I ../libcperciva/util
 .PATH.c	:	../libcperciva/events
 SRCS	+=	events_immediate.c
 SRCS	+=	events_network.c
+SRCS	+=	events_network_selectstats.c
 SRCS	+=	events_timer.c
 SRCS	+=	events.c
 IDIRS	+=	-I ../libcperciva/events
