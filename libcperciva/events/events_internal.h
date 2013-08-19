@@ -34,6 +34,25 @@ struct eventrec * events_immediate_get(void);
 int events_network_select(struct timeval *);
 
 /**
+ * events_network_selectstats_startclock(void):
+ * Start the inter-select duration clock: There is a selectable event.
+ */
+void events_network_selectstats_startclock(void);
+
+/**
+ * events_network_selectstats_stopclock(void):
+ * Stop the inter-select duration clock: There are no selectable events.
+ */
+void events_network_selectstats_stopclock(void);
+
+/**
+ * events_network_selectstats_select(void):
+ * Update inter-select duration statistics in relation to an upcoming
+ * select(2) call.
+ */
+void events_network_selectstats_select(void);
+
+/**
  * events_network_get(void):
  * Find a socket readiness event which was identified by a previous call to
  * events_network_select, and return it as an eventrec structure; or return

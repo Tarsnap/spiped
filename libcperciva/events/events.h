@@ -42,6 +42,13 @@ int events_network_register(int (*)(void *), void *, int, int);
 int events_network_cancel(int, int);
 
 /**
+ * events_network_selectstats(N, mu, va, max):
+ * Return statistics on the inter-select durations since the last time this
+ * function was called.
+ */
+void events_network_selectstats(double *, double *, double *, double *);
+
+/**
  * events_timer_register(func, cookie, timeo):
  * Register ${func}(${cookie}) to be run ${timeo} in the future.  Return a
  * cookie which can be passed to events_timer_cancel or events_timer_reset.
