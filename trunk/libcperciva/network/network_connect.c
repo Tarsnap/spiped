@@ -1,8 +1,10 @@
 #include <sys/types.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "events.h"
@@ -14,8 +16,11 @@ struct connect_cookie {
 	int (* callback)(void *, int);
 	void * cookie;
 	struct sock_addr * const * sas;
+	struct timeval timeo;
 	void * cookie_immediate;
 	int s;
+	int timeo_enabled;
+	void * cookie_timeo;
 };
 
 static int tryconnect(struct connect_cookie *);
@@ -37,28 +42,11 @@ docallback(void * cookie)
 	return (rc);
 }
 
-/* Callback when connect(2) succeeds or fails. */
+/* An address failed to connect. */
 static int
-callback_connect(void * cookie)
+dofailed(struct connect_cookie * C)
 {
-	struct connect_cookie * C = cookie;
-	int sockerr;
-	socklen_t sockerrlen = sizeof(int);
 
-	/* Did we succeed? */
-	if (getsockopt(C->s, SOL_SOCKET, SO_ERROR, &sockerr, &sockerrlen))
-		goto err1;
-	if (sockerr != 0)
-		goto failed;
-
-	/*
-	 * Perform the callback (this can be done here rather than being
-	 * scheduled as an immediate callback, as we're already running from
-	 * callback context).
-	 */
-	return (docallback(C));
-
-failed:
 	/* Close the socket which failed to connect. */
 	close(C->s);
 
@@ -70,6 +58,34 @@ failed:
 
 	/* Try other addresses until we run out of options. */
 	return (tryconnect(C));
+}
+
+/* Callback when connect(2) succeeds or fails. */
+static int
+callback_connect(void * cookie)
+{
+	struct connect_cookie * C = cookie;
+	int sockerr;
+	socklen_t sockerrlen = sizeof(int);
+
+	/* Stop waiting for the timer callback. */
+	if (C->cookie_timeo != NULL) {
+		events_timer_cancel(C->cookie_timeo);
+		C->cookie_timeo = NULL;
+	}
+
+	/* Did we succeed? */
+	if (getsockopt(C->s, SOL_SOCKET, SO_ERROR, &sockerr, &sockerrlen))
+		goto err1;
+	if (sockerr != 0)
+		return (dofailed(C));
+
+	/*
+	 * Perform the callback (this can be done here rather than being
+	 * scheduled as an immediate callback, as we're already running from
+	 * callback context).
+	 */
+	return (docallback(C));
 
 err1:
 	close(C->s);
@@ -77,6 +93,19 @@ err1:
 
 	/* Fatal error! */
 	return (-1);
+}
+
+/* Callback when a timer expires. */
+static int
+callback_timeo(void * cookie)
+{
+	struct connect_cookie * C = cookie;
+
+	/* We're not waiting for a timer callback any more. */
+	C->cookie_timeo = NULL;
+
+	/* This connect attempt failed. */
+	return (dofailed(C));
 }
 
 /* Try to launch a connection.  Free the cookie on fatal errors. */
@@ -95,10 +124,19 @@ tryconnect(struct connect_cookie * C)
 	if (C->sas[0] == NULL)
 		goto failed;
 
+	/* If we've been asked to have a timeout, set one. */
+	if (C->timeo_enabled) {
+		if ((C->cookie_timeo = events_timer_register(callback_timeo,
+		    C, &C->timeo)) == NULL)
+			goto err1;
+	} else {
+		C->cookie_timeo = NULL;
+	}
+
 	/* Wait until this socket connects or fails to do so. */
 	if (events_network_register(callback_connect, C, C->s,
 	    EVENTS_NETWORK_OP_WRITE))
-		goto err1;
+		goto err2;
 
 	/* Success! */
 	return (0);
@@ -112,6 +150,9 @@ failed:
 	/* Failure successfully handled. */
 	return (0);
 
+err2:
+	if (C->cookie_timeo != NULL)
+		events_timer_cancel(C->cookie_timeo);
 err1:
 	if (C->s != -1)
 		close(C->s);
@@ -134,6 +175,21 @@ void *
 network_connect(struct sock_addr * const * sas,
     int (* callback)(void *, int), void * cookie)
 {
+
+	/* Let network_connect_timeo handle this. */
+	return (network_connect_timeo(sas, NULL, callback, cookie));
+}
+
+/**
+ * network_connect_timeo(sas, timeo, callback, cookie):
+ * Behave as network_connect, but wait a duration of at most ${timeo} for
+ * each address which is being attempted.
+ */
+void *
+network_connect_timeo(struct sock_addr * const * sas,
+    const struct timeval * timeo,
+    int (* callback)(void *, int), void * cookie)
+{
 	struct connect_cookie * C;
 
 	/* Bake a cookie. */
@@ -143,7 +199,16 @@ network_connect(struct sock_addr * const * sas,
 	C->cookie = cookie;
 	C->sas = sas;
 	C->cookie_immediate = NULL;
+	C->cookie_timeo = NULL;
 	C->s = -1;
+
+	/* Do we have a timeout? */
+	if (timeo != NULL) {
+		memcpy(&C->timeo, timeo, sizeof(struct timeval));
+		C->timeo_enabled = 1;
+	} else {
+		C->timeo_enabled = 0;
+	}
 
 	/* Try to connect to the first address. */
 	if (tryconnect(C))
@@ -170,6 +235,10 @@ network_connect_cancel(void * cookie)
 	/* We should have either an immediate callback or a socket. */
 	assert((C->cookie_immediate != NULL) || (C->s != -1));
 	assert((C->cookie_immediate == NULL) || (C->s == -1));
+
+	/* Cancel any timer. */
+	if (C->cookie_timeo != NULL)
+		events_timer_cancel(C->cookie_timeo);
 
 	/* Cancel any immediate callback. */
 	if (C->cookie_immediate != NULL)
