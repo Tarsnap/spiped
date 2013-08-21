@@ -17,7 +17,7 @@ ${PKG}-${VERSION}/${D}/Makefile:
 	    while read F; do		\
 		S=`make source-$${F}`;	\
 		echo "$${F}: $${S}";	\
-		echo "	\$${CC} \$${CFLAGS} -D_POSIX_C_SOURCE=200809L \$${IDIRS} -c $${S} -o $${F}"; \
+		echo "	\$${CC} \$${CFLAGS} \$${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L \$${IDIRS} -c $${S} -o $${F}"; \
 	    done ) >> $@
 .endfor
 
