@@ -14,22 +14,21 @@
 #include "network.h"
 
 /**
- * We use three methods to prevent SIGPIPE from being sent, in order of
- * preference:
- * 1. The MSG_NOSIGNAL send(2) flag.
- * 2. The SO_NOSIGPIPE socket option.
- * 3. Blocking the SIGPIPE signal.
+ * POSIX.1-2008 requires that MSG_NOSIGNAL be defined as a flag for send(2)
+ * which has the effect of preventing SIGPIPE from being raised when writing
+ * to a descriptor which has been shut down.  Unfortunately there are some
+ * platforms which are not POSIX.1-2008 compliant; we provide a workaround
+ * (-DPOSIXFAIL_MSG_NOSIGNAL) which instead blocks the SIGPIPE signal on such
+ * platforms.
+ *
+ * (This workaround could be used automatically, but requiring that it be
+ * explicitly enabled helps to get platforms fixed.)
  */
-#ifdef MSG_NOSIGNAL
-#define USE_MSG_NOSIGNAL
-#else /* !MSG_NOSIGNAL */
+#ifdef POSIXFAIL_MSG_NOSIGNAL
+#ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
-#ifdef SO_NOSIGPIPE
-#define USE_SO_NOSIGPIPE
-#else /* !MSG_NOSIGNAL, !SO_NOSIGPIPE */
-#define USE_SIGNAL
-#endif /* !MSG_NOSIGNAL, !SO_NOSIGPIPE */
-#endif /* !MSG_NOSIGNAL */
+#endif
+#endif
 
 struct network_write_cookie {
 	int (*callback)(void *, ssize_t);
@@ -64,22 +63,12 @@ callback_buf(void * cookie)
 	struct network_write_cookie * C = cookie;
 	size_t oplen;
 	ssize_t len;
-#ifdef USE_SO_NOSIGPIPE
-	int val;
-#endif
-#ifdef USE_SIGNAL
+#if MSG_NOSIGNAL == 0
 	void (*oldsig)(int);
 #endif
 
-	/* Make sure we don't get a SIGPIPE. */
-#ifdef USE_SO_NOSIGPIPE
-	val = 1;
-	if (setsockopt(C->fd, SOL_SOCKET, SO_NOSIGPIPE, &val, sizeof(int))) {
-		warnp("setsockopt(SO_NOSIGPIPE)");
-		goto failed;
-	}
-#endif
-#ifdef USE_SIGNAL
+	/* If we don't have MSG_NOSIGNAL, catch SIGPIPE. */
+#if MSG_NOSIGNAL == 0
 	if ((oldsig = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
 		warnp("signal(SIGPIPE)");
 		goto failed;
@@ -93,15 +82,8 @@ callback_buf(void * cookie)
 	/* We should never see a send length of zero. */
 	assert(len != 0);
 
-	/* Undo whatever we did to prevent SIGPIPEs. */
-#ifdef USE_SO_NOSIGPIPE
-	val = 0;
-	if (setsockopt(C->fd, SOL_SOCKET, SO_NOSIGPIPE, &val, sizeof(int))) {
-		warnp("setsockopt(SO_NOSIGPIPE)");
-		goto failed;
-	}
-#endif
-#ifdef USE_SIGNAL
+	/* If we set a SIGPIPE handler, restore the old one. */
+#if MSG_NOSIGNAL == 0
 	if (signal(SIGPIPE, oldsig) == SIG_ERR) {
 		warnp("signal(SIGPIPE)");
 		goto failed;
