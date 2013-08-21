@@ -35,7 +35,7 @@ struct network_write_cookie {
 	int (*callback)(void *, ssize_t);
 	void * cookie;
 	int fd;
-	uint8_t * buf;
+	const uint8_t * buf;
 	size_t buflen;
 	size_t minlen;
 	size_t bufpos;
@@ -170,7 +170,7 @@ network_write(int fd, const uint8_t * buf, size_t buflen, size_t minwrite,
 	C->fd = fd;
 	C->buf = buf;
 	C->buflen = buflen;
-	C->minlen = minlen;
+	C->minlen = minwrite;
 	C->bufpos = 0;
 
 	/* Register a callback for network readiness. */

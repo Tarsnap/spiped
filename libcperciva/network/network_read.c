@@ -119,7 +119,7 @@ network_read(int fd, uint8_t * buf, size_t buflen, size_t minread,
 	C->fd = fd;
 	C->buf = buf;
 	C->buflen = buflen;
-	C->minlen = minlen;
+	C->minlen = minread;
 	C->bufpos = 0;
 
 	/* Register a callback for network readiness. */
