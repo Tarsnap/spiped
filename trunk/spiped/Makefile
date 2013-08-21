@@ -63,8 +63,9 @@ IDIRS	+=	-I ../libcperciva/events
 # Event-driven networking
 .PATH.c	:	../libcperciva/network
 SRCS	+=	network_accept.c
-SRCS	+=	network_buf.c
 SRCS	+=	network_connect.c
+SRCS	+=	network_read.c
+SRCS	+=	network_write.c
 IDIRS	+=	-I ../libcperciva/network
 
 # Crypto code
