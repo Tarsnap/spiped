@@ -16,7 +16,7 @@ struct eventrec {
 MPOOL(eventrec, struct eventrec, 4096);
 
 /* Zero timeval, for use with non-blocking event runs. */
-struct timeval tv_zero = {0, 0};
+static const struct timeval tv_zero = {0, 0};
 
 /**
  * events_mkrec(func, cookie):
