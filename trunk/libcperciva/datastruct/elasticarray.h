@@ -101,7 +101,7 @@ void elasticarray_free(struct elasticarray *);
 		struct elasticarray * EA;				\
 									\
 		EA = elasticarray_init(nrec, sizeof(rectype));		\
-		return ((struct  prefix##_struct *)EA);			\
+		return ((struct prefix##_struct *)EA);			\
 	}								\
 	static inline int						\
 	prefix##_resize(struct prefix##_struct * EA, size_t nrec)	\
