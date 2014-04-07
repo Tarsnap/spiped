@@ -104,6 +104,10 @@ main(int argc, char * argv[])
 				warn0("Invalid option: -n %s", optarg);
 				exit(1);
 			}
+			if ((opt_n <= 0) || (opt_n > 500)) {
+				warn0("The parameter to -n must be between 1 and 500\n");
+				exit(1);
+			}
 			break;
 		case 'o':
 			if (opt_o != 0.0)
@@ -163,8 +167,6 @@ main(int argc, char * argv[])
 	if (!opt_d && !opt_e)
 		usage();
 	if (opt_k == NULL)
-		usage();
-	if ((opt_n < 0) || (opt_n > 500))
 		usage();
 	if (!(opt_o > 0.0))
 		usage();
