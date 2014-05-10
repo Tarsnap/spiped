@@ -1,7 +1,8 @@
 spipe usage
 ===========
 
-usage: spipe -t <target socket> -k <key file> [-fj] [-o <connection timeout>]
+usage: spipe -t <target socket> -k <key file> [-f | -g] [-j]
+    [-o <connection timeout>]
 
 Options:
     -t <target socket>
@@ -12,6 +13,9 @@ Options:
 	Use fast/weak handshaking: This reduces the CPU time spent in the
 	initial connection setup, at the expense of losing perfect forward
 	secrecy.
+    -g
+	Require perfect forward secrecy by dropping connections if the other
+	host is using the -f option.
     -j
 	Disable transport layer keep-alives. (By default they are enabled.)
     -o <connection timeout>

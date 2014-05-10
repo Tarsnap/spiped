@@ -30,11 +30,12 @@ spiped \- secure pipe daemon
 \-t <target socket>
 \-k <key file>
 .br
-[\-DfFj]
+[\-DFj]
+[\-f | \-g]
 [\-n <max # connections>]
 [\-o <connection timeout>]
 [\-p <pidfile>]
-[{\-r <rtime> | \-R}]
+[\-r <rtime> | \-R]
 .SH OPTIONS
 .TP
 .B \-e
@@ -74,6 +75,10 @@ finished launching it will be ready to create pipes.
 Use fast/weak handshaking: This reduces the CPU time spent in the
 initial connection setup, at the expense of losing perfect forward
 secrecy.
+.TP
+.B \-g
+Require perfect forward secrecy by dropping connections if the other
+host is using the -f option.
 .TP
 .B \-F
 Run in foreground.  This can be useful with systems like daemontools.

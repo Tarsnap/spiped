@@ -39,13 +39,14 @@ void proto_crypt_dhmac(const struct proto_secret *,
     uint8_t[PCRYPT_DHMAC_LEN], uint8_t[PCRYPT_DHMAC_LEN], int);
 
 /**
- * proto_crypt_dh_validate(yh_r, dhmac_r):
+ * proto_crypt_dh_validate(yh_r, dhmac_r, requirefps):
  * Return non-zero if the value ${yh_r} received from the remote party is not
  * correctly MACed using the diffie-hellman parameter MAC key ${dhmac_r}, or
- * if the included y value is >= the diffie-hellman group modulus.
+ * if the included y value is >= the diffie-hellman group modulus, or if
+ * ${requirefps} is non-zero and the included y value is 1.
  */
 int proto_crypt_dh_validate(const uint8_t[PCRYPT_YH_LEN],
-    const uint8_t[PCRYPT_DHMAC_LEN]);
+    const uint8_t[PCRYPT_DHMAC_LEN], int);
 
 /**
  * proto_crypt_dh_generate(yh_l, x, dhmac_l, nofps):

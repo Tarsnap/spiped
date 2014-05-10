@@ -20,6 +20,7 @@ struct accept_state {
 	double rtime;
 	int decr;
 	int nofps;
+	int requirefps;
 	int nokeepalive;
 	const struct proto_secret * K;
 	size_t nconn;
@@ -124,8 +125,8 @@ callback_gotconn(void * cookie, int s)
 		goto err1;
 
 	/* Create a new connection. */
-	if (proto_conn_create(s, sas, A->decr, A->nofps, A->nokeepalive,
-	    A->K, A->timeo, callback_conndied, A)) {
+	if (proto_conn_create(s, sas, A->decr, A->nofps, A->requirefps,
+	    A->nokeepalive, A->K, A->timeo, callback_conndied, A)) {
 		warnp("Failure setting up new connection");
 		goto err2;
 	}
@@ -148,22 +149,23 @@ err0:
 }
 
 /**
- * dispatch_accept(s, tgt, rtime, sas, decr, nofps, nokeepalive, K, nconn_max,
- *     timeo):
+ * dispatch_accept(s, tgt, rtime, sas, decr, nofps, requirefps, nokeepalive, K,
+ *     nconn_max, timeo):
  * Start accepting connections on the socket ${s}.  Connect to the target
  * ${tgt}, re-resolving it every ${rtime} seconds if ${rtime} > 0; on address
  * resolution failure use the most recent successfully obtained addresses, or
  * the addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
  * ${decr} is non-zero, decrypt the incoming connections.  Don't accept more
  * than ${nconn_max} connections.  If ${nofps} is non-zero, don't use perfect
- * forward secrecy.  Enable transport layer keep-alives (if applicable) if and
- * only if ${nokeepalive} is zero.  Drop connections if the handshake or
+ * forward secrecy.  If {$requirefps} is non-zero, require that both ends use
+ * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
+ * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
  * connecting to the target takes more than ${timeo} seconds.
  */
 int
 dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
-    int decr, int nofps, int nokeepalive, const struct proto_secret * K,
-    size_t nconn_max, double timeo)
+    int decr, int nofps, int requirefps, int nokeepalive,
+    const struct proto_secret * K, size_t nconn_max, double timeo)
 {
 	struct accept_state * A;
 
@@ -176,6 +178,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->rtime = rtime;
 	A->decr = decr;
 	A->nofps = nofps;
+	A->requirefps = requirefps;
 	A->nokeepalive = nokeepalive;
 	A->K = K;
 	A->nconn = 0;

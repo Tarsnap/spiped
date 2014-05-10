@@ -145,14 +145,33 @@ void proto_crypt_dhmac(const struct proto_secret * K,
 }
 
 /**
- * proto_crypt_dh_validate(yh_r, dhmac_r):
+ * is_not_one(x, len):
+ * Returns non-zero if the big-endian value stored at (${x}, ${len}) is not
+ * equal to 1.
+ */
+static int
+is_not_one(const uint8_t * x, size_t len)
+{
+	size_t i;
+	char y;
+
+	for (i = 0, y = 0; i < len - 1; i++) {
+		y |= x[i];
+	}
+
+	return (y | (x[len - 1] - 1));
+}
+
+/**
+ * proto_crypt_dh_validate(yh_r, dhmac_r, requirefps):
  * Return non-zero if the value ${yh_r} received from the remote party is not
  * correctly MACed using the diffie-hellman parameter MAC key ${dhmac_r}, or
- * if the included y value is >= the diffie-hellman group modulus.
+ * if the included y value is >= the diffie-hellman group modulus, or if
+ * ${requirefps} is non-zero and the included y value is 1.
  */
 int
 proto_crypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
-    const uint8_t dhmac_r[PCRYPT_DHMAC_LEN])
+    const uint8_t dhmac_r[PCRYPT_DHMAC_LEN], int requirefps)
 {
 	uint8_t hbuf[32];
 
@@ -165,7 +184,17 @@ proto_crypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
 		return (1);
 
 	/* Sanity-check the diffie-hellman value. */
-	return (crypto_dh_sanitycheck(&yh_r[0]));
+	if (crypto_dh_sanitycheck(&yh_r[0]))
+		return (1);
+
+	/* If necessary, enforce that the diffie-hellman value is != 1. */
+	if (requirefps) {
+		if (! is_not_one(&yh_r[0], CRYPTO_DH_PUBLEN))
+			return (1);
+	}
+
+	/* Everything is good. */
+	return (0);
 }
 
 /**

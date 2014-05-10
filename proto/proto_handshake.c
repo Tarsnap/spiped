@@ -16,6 +16,7 @@ struct handshake_cookie {
 	int s;
 	int decr;
 	int nofps;
+	int requirefps;
 	const struct proto_secret * K;
 	uint8_t nonce_local[PCRYPT_NONCE_LEN];
 	uint8_t nonce_remote[PCRYPT_NONCE_LEN];
@@ -60,18 +61,22 @@ handshakefail(struct handshake_cookie * H)
 }
 
 /**
- * proto_handshake(s, decr, nofps, K, callback, cookie):
+ * proto_handshake(s, decr, nofps, requirefps, K, callback, cookie):
  * Perform a protocol handshake on socket ${s}.  If ${decr} is non-zero we are
  * at the receiving end of the connection; otherwise at the sending end.  If
  * ${nofps} is non-zero, perform a "weak" handshake without forward perfect
- * secrecy.  The shared protocol secret is ${K}.  Upon completion, invoke
- * ${callback}(${cookie}, f, r) where f contains the keys needed for the
- * forward direction and r contains the keys needed for the reverse direction;
- * or w = r = NULL if the handshake failed.  Return a cookie which can be
- * passed to proto_handshake_cancel to cancel the handshake.
+ * secrecy.  If ${requirefps} is non-zero, drop the connection if the other
+ * end attempts to perform a "weak" handshake.  The shared protocol secret is
+ * ${K}.  Upon completion, invoke ${callback}(${cookie}, f, r), where f
+ * contains the keys needed for the forward direction and r contains the keys
+ * needed for the reverse direction; or w = r = NULL if the handshake failed.
+ * Return a cookie which can be passed to proto_handshake_cancel to cancel the
+ * handshake.
+
  */
 void *
-proto_handshake(int s, int decr, int nofps, const struct proto_secret * K,
+proto_handshake(int s, int decr, int nofps, int requirefps,
+    const struct proto_secret * K,
     int (* callback)(void *, struct proto_keys *, struct proto_keys *),
     void * cookie)
 {
@@ -85,6 +90,7 @@ proto_handshake(int s, int decr, int nofps, const struct proto_secret * K,
 	H->s = s;
 	H->decr = decr;
 	H->nofps = nofps;
+	H->requirefps = requirefps;
 	H->K = K;
 
 	/* Generate a 32-byte connection nonce. */
@@ -209,7 +215,8 @@ callback_dh_read(void * cookie, ssize_t len)
 		return (handshakefail(H));
 
 	/* Is the value we read valid? */
-	if (proto_crypt_dh_validate(H->yh_remote, H->dhmac_remote))
+	if (proto_crypt_dh_validate(H->yh_remote, H->dhmac_remote,
+	    H->requirefps))
 		return (handshakefail(H));
 
 	/*
