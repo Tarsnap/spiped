@@ -28,7 +28,8 @@ spipe \- spiped client utility
 .B spipe
 \-t <target socket>
 \-k <key file>
-[\-fj]
+[\-f | \-g]
+[\-j]
 [\-o <connection timeout>]
 .SH OPTIONS
 .TP
@@ -42,6 +43,10 @@ Use the provided key file to authenticate and encrypt.
 Use fast/weak handshaking: This reduces the CPU time spent in the
 initial connection setup, at the expense of losing perfect forward
 secrecy.
+.TP
+.B \-g
+Require perfect forward secrecy by dropping connections if the other
+host is using the -f option.
 .TP
 .B \-j
 Disable transport layer keep-alives.

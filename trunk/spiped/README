@@ -2,8 +2,8 @@ spiped usage
 ============
 
 usage: spiped {-e | -d} -s <source socket> -t <target socket> -k <key file>
-    [-DfFj] [-n <max # connections>] [-o <connection timeout>] [-p <pidfile>]
-    [{-r <rtime> | -R}]
+    [-DFj] [-f | -g] [-n <max # connections>] [-o <connection timeout>]
+    [-p <pidfile>] [-r <rtime> | -R]
 
 Options:
     -e
@@ -37,6 +37,9 @@ Options:
 	Use fast/weak handshaking: This reduces the CPU time spent in the
 	initial connection setup, at the expense of losing perfect forward
 	secrecy.
+    -g
+	Require perfect forward secrecy by dropping connections if the other
+	host is using the -f option.
     -F
 	Run in foreground.  This can be useful with systems like daemontools.
     -j

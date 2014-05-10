@@ -19,9 +19,9 @@ usage(void)
 
 	fprintf(stderr, "usage: spiped {-e | -d} -s <source socket> "
 	    "-t <target socket> -k <key file>\n"
-	    "    [-DfFj] [-n <max # connections>] "
-	    "[-o <connection timeout>] [-p <pidfile>]\n"
-	    "    [{-r <rtime> | -R}]\n");
+	    "    [-DFj] [-f | -g] [-n <max # connections>] "
+	    "[-o <connection timeout>]\n"
+	    "    [-p <pidfile>] [-r <rtime> | -R]\n");
 	exit(1);
 }
 
@@ -39,6 +39,7 @@ main(int argc, char * argv[])
 	int opt_D = 0;
 	int opt_e = 0;
 	int opt_f = 0;
+	int opt_g = 0;
 	int opt_F = 0;
 	int opt_j = 0;
 	const char * opt_k = NULL;
@@ -60,7 +61,7 @@ main(int argc, char * argv[])
 	WARNP_INIT;
 
 	/* Parse the command line. */
-	while ((ch = getopt(argc, argv, "dDefFjk:n:o:r:Rp:s:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "dDefFgjk:n:o:r:Rp:s:t:")) != -1) {
 		switch (ch) {
 		case 'd':
 			if (opt_d || opt_e)
@@ -86,6 +87,11 @@ main(int argc, char * argv[])
 			if (opt_F)
 				usage();
 			opt_F = 1;
+			break;
+		case 'g':
+			if (opt_g)
+				usage();
+			opt_g = 1;
 			break;
 		case 'j':
 			if (opt_j)
@@ -166,6 +172,8 @@ main(int argc, char * argv[])
 	/* Sanity-check options. */
 	if (!opt_d && !opt_e)
 		usage();
+	if (opt_f && opt_g)
+		usage();
 	if (opt_k == NULL)
 		usage();
 	if (!(opt_o > 0.0))
@@ -238,7 +246,7 @@ main(int argc, char * argv[])
 
 	/* Start accepting connections. */
 	if (dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r, sas_t, opt_d,
-	    opt_f, opt_j, K, opt_n, opt_o)) {
+	    opt_f, opt_g, opt_j, K, opt_n, opt_o)) {
 		warnp("Failed to initialize connection acceptor");
 		exit(1);
 	}

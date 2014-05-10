@@ -32,7 +32,7 @@ usage(void)
 {
 
 	fprintf(stderr, "usage: spipe -t <target socket> -k <key file>"
-	    " [-fj] [-o <connection timeout>]\n");
+	    " [-f | -g] [-j] [-o <connection timeout>]\n");
 	exit(1);
 }
 
@@ -47,6 +47,7 @@ main(int argc, char * argv[])
 {
 	/* Command-line parameters. */
 	int opt_f = 0;
+	int opt_g = 0;
 	int opt_j = 0;
 	const char * opt_k = NULL;
 	double opt_o = 0.0;
@@ -61,12 +62,17 @@ main(int argc, char * argv[])
 	WARNP_INIT;
 
 	/* Parse the command line. */
-	while ((ch = getopt(argc, argv, "fjk:o:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "fgjk:o:t:")) != -1) {
 		switch (ch) {
 		case 'f':
 			if (opt_f)
 				usage();
 			opt_f = 1;
+			break;
+		case 'g':
+			if (opt_g)
+				usage();
+			opt_g = 1;
 			break;
 		case 'j':
 			if (opt_j)
@@ -105,6 +111,8 @@ main(int argc, char * argv[])
 		opt_o = 5.0;
 
 	/* Sanity-check options. */
+	if (opt_f && opt_g)
+		usage();
 	if (opt_k == NULL)
 		usage();
 	if (!(opt_o > 0.0))
@@ -142,7 +150,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Set up a connection. */
-	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_j, K, opt_o,
+	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_g, opt_j, K, opt_o,
 	    callback_conndied, NULL)) {
 		warnp("Could not set up connection");
 		exit(1);
