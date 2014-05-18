@@ -28,7 +28,7 @@ static struct eventq * heads[32] = {
 static struct eventq * tails[32];
 
 /* For i < minq, heads[i] == NULL. */
-static int minq = 0;
+static int minq = 32;
 
 /**
  * events_immediate_register(func, cookie, prio):
