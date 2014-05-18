@@ -135,8 +135,8 @@ blinded_modexp(uint8_t r[CRYPTO_DH_PUBLEN], BIGNUM * a,
 	BN_bn2bin(r1, r + CRYPTO_DH_PUBLEN - rlen);
 
 	/* Free space allocated by BN_new. */
-	BN_free(r2);
-	BN_free(r1);
+	BN_clear_free(r2);
+	BN_clear_free(r1);
 
 	/* Free context allocated by BN_CTX_new. */
 	BN_CTX_free(ctx);
@@ -145,30 +145,30 @@ blinded_modexp(uint8_t r[CRYPTO_DH_PUBLEN], BIGNUM * a,
 	BN_free(m_bn);
 
 	/* Free space allocated by BN_new. */
-	BN_free(priv_blinded);
+	BN_clear_free(priv_blinded);
 
 	/* Free space allocated by BN_bin2bn. */
-	BN_free(blinding_bn);
-	BN_free(priv_bn);
+	BN_clear_free(blinding_bn);
+	BN_clear_free(priv_bn);
 	BN_free(two_exp_256_bn);
 
 	/* Success! */
 	return (0);
 
 err8:
-	BN_free(r2);
+	BN_clear_free(r2);
 err7:
-	BN_free(r1);
+	BN_clear_free(r1);
 err6:
 	BN_CTX_free(ctx);
 err5:
 	BN_free(m_bn);
 err4:
-	BN_free(priv_blinded);
+	BN_clear_free(priv_blinded);
 err3:
-	BN_free(blinding_bn);
+	BN_clear_free(blinding_bn);
 err2:
-	BN_free(priv_bn);
+	BN_clear_free(priv_bn);
 err1:
 	BN_free(two_exp_256_bn);
 err0:
