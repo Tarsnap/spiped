@@ -153,7 +153,7 @@ elasticarray_append(struct elasticarray * EA,
 		goto err0;
 
 	/* Copy bytes in. */
-	memcpy((void *)((uintptr_t)(EA->buf) + bufpos), buf, nrec * reclen);
+	memcpy((uint8_t *)(EA->buf) + bufpos, buf, nrec * reclen);
 
 	/* Success! */
 	return (0);
@@ -230,7 +230,7 @@ void *
 elasticarray_get(struct elasticarray * EA, size_t pos, size_t reclen)
 {
 
-	return ((void *)((uintptr_t)(EA->buf) + pos * reclen));
+	return ((uint8_t *)(EA->buf) + pos * reclen);
 }
 
 /**
