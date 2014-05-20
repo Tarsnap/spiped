@@ -404,6 +404,9 @@ PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
 	int k;
 	size_t clen;
 
+	/* Sanity-check. */
+	assert(dkLen <= 32 * (size_t)(UINT32_MAX));
+
 	/* Compute HMAC state after processing P and S. */
 	HMAC_SHA256_Init(&PShctx, passwd, passwdlen);
 	HMAC_SHA256_Update(&PShctx, salt, saltlen);
