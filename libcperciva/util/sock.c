@@ -28,9 +28,8 @@ sock_resolve_unix(const char * addr)
 	struct sockaddr_un * sa_un;
 
 	/* Allocate and populate a sockaddr_un structure. */
-	if ((sa_un = malloc(sizeof(struct sockaddr_un))) == NULL)
+	if ((sa_un = calloc(1, sizeof(struct sockaddr_un))) == NULL)
 		goto err0;
-	memset(sa_un, 0, sizeof(struct sockaddr_un));
 	sa_un->sun_family = AF_UNIX;
 	if (strlen(addr) >= sizeof(sa_un->sun_path)) {
 		warn0("socket path too long: %s", addr);
@@ -145,9 +144,8 @@ sock_resolve_ipv6(const char * addr, in_port_t p)
 	struct sockaddr_in6 * sin6;
 
 	/* Allocate and populate a sockaddr_in6 structure. */
-	if ((sin6 = malloc(sizeof(struct sockaddr_in6))) == NULL)
+	if ((sin6 = calloc(1, sizeof(struct sockaddr_in6))) == NULL)
 		goto err0;
-	memset(sin6, 0, sizeof(struct sockaddr_in6));
 	sin6->sin6_family = AF_INET6;
 	sin6->sin6_port = htons(p);
 	if (inet_pton(AF_INET6, addr, &sin6->sin6_addr) != 1) {
@@ -190,9 +188,8 @@ sock_resolve_ipv4(const char * addr, in_port_t p)
 	struct sockaddr_in * sin;
 
 	/* Allocate and populate a sockaddr_in structure. */
-	if ((sin = malloc(sizeof(struct sockaddr_in))) == NULL)
+	if ((sin = calloc(1, sizeof(struct sockaddr_in))) == NULL)
 		goto err0;
-	memset(sin, 0, sizeof(struct sockaddr_in));
 	sin->sin_family = AF_INET;
 	sin->sin_port = htons(p);
 	if (inet_pton(AF_INET, addr, &sin->sin_addr) != 1) {
