@@ -237,7 +237,7 @@ dhwrite(struct handshake_cookie * H)
 {
 
 	/* Generate a signed diffie-hellman parameter. */
-	if (proto_crypt_dh_generate(H->yh_local, H->x, H->dhmac_local, 
+	if (proto_crypt_dh_generate(H->yh_local, H->x, H->dhmac_local,
 	    H->nofps))
 		goto err0;
 

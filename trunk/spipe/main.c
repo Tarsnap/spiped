@@ -168,7 +168,7 @@ main(int argc, char * argv[])
 			warnp("Error running event loop");
 			exit(1);
 		}
-	} while(1);
+	} while (1);
 
 	/* NOTREACHED */
 	/*
