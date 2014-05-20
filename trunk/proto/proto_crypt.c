@@ -129,20 +129,26 @@ proto_crypt_dhmac(const struct proto_secret * K,
 {
 	uint8_t nonce_CS[PCRYPT_NONCE_LEN * 2];
 	uint8_t dk_1[PCRYPT_DHMAC_LEN * 2];
+	const uint8_t * nonce_c, * nonce_s;
+	uint8_t * dhmac_c, * dhmac_s;
+
+	/* Figure out how {c, s} maps to {l, r}. */
+	nonce_c = decr ? nonce_r : nonce_l;
+	dhmac_c = decr ? dhmac_r : dhmac_l;
+	nonce_s = decr ? nonce_l : nonce_r;
+	dhmac_s = decr ? dhmac_l : dhmac_r;
 
 	/* Copy in nonces (in the right order). */
-	memcpy(&nonce_CS[0], decr ? nonce_r : nonce_l, PCRYPT_NONCE_LEN);
-	memcpy(&nonce_CS[PCRYPT_NONCE_LEN], decr ? nonce_l : nonce_r,
-	    PCRYPT_NONCE_LEN);
+	memcpy(&nonce_CS[0], nonce_c, PCRYPT_NONCE_LEN);
+	memcpy(&nonce_CS[PCRYPT_NONCE_LEN], nonce_s, PCRYPT_NONCE_LEN);
 
 	/* Compute dk_1. */
 	PBKDF2_SHA256(K->K, 32, nonce_CS, PCRYPT_NONCE_LEN * 2, 1,
 	    dk_1, PCRYPT_DHMAC_LEN * 2);
 
 	/* Copy out diffie-hellman parameter MAC keys (in the right order). */
-	memcpy(decr ? dhmac_r : dhmac_l, &dk_1[0], PCRYPT_DHMAC_LEN);
-	memcpy(decr ? dhmac_l : dhmac_r, &dk_1[PCRYPT_DHMAC_LEN],
-	    PCRYPT_DHMAC_LEN);
+	memcpy(dhmac_c, &dk_1[0], PCRYPT_DHMAC_LEN);
+	memcpy(dhmac_s, &dk_1[PCRYPT_DHMAC_LEN], PCRYPT_DHMAC_LEN);
 }
 
 /**
@@ -251,11 +257,13 @@ proto_crypt_mkkeys(const struct proto_secret * K,
 {
 	uint8_t nonce_y[PCRYPT_NONCE_LEN * 2 + CRYPTO_DH_KEYLEN];
 	uint8_t dk_2[128];
+	const uint8_t * nonce_c, * nonce_s;
 
 	/* Copy in nonces (in the right order). */
-	memcpy(&nonce_y[0], decr ? nonce_r : nonce_l, PCRYPT_NONCE_LEN);
-	memcpy(&nonce_y[PCRYPT_NONCE_LEN], decr ? nonce_l : nonce_r,
-	    PCRYPT_NONCE_LEN);
+	nonce_c = decr ? nonce_r : nonce_l;
+	nonce_s = decr ? nonce_l : nonce_r;
+	memcpy(&nonce_y[0], nonce_c, PCRYPT_NONCE_LEN);
+	memcpy(&nonce_y[PCRYPT_NONCE_LEN], nonce_s, PCRYPT_NONCE_LEN);
 
 	/* Are we bypassing the diffie-hellman computation? */
 	if (nofps) {
