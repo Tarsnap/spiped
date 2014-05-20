@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -14,6 +15,10 @@ be32enc_vect(uint8_t * dst, const uint32_t * src, size_t len)
 {
 	size_t i;
 
+	/* Sanity-check. */
+	assert(len % 4 == 0);
+
+	/* Encode vector, one word at a time. */
 	for (i = 0; i < len / 4; i++)
 		be32enc(dst + i * 4, src[i]);
 }
@@ -27,6 +32,10 @@ be32dec_vect(uint32_t * dst, const uint8_t * src, size_t len)
 {
 	size_t i;
 
+	/* Sanity-check. */
+	assert(len % 4 == 0);
+
+	/* Decode vector, one word at a time. */
 	for (i = 0; i < len / 4; i++)
 		dst[i] = be32dec(src + i * 4);
 }
