@@ -10,7 +10,7 @@
  * (uint8_t) in big-endian form.  Assumes len is a multiple of 4.
  */
 static void
-be32enc_vect(uint8_t *dst, const uint32_t *src, size_t len)
+be32enc_vect(uint8_t * dst, const uint32_t * src, size_t len)
 {
 	size_t i;
 
@@ -23,7 +23,7 @@ be32enc_vect(uint8_t *dst, const uint32_t *src, size_t len)
  * len/4 vector of (uint32_t).  Assumes len is a multiple of 4.
  */
 static void
-be32dec_vect(uint32_t *dst, const uint8_t *src, size_t len)
+be32dec_vect(uint32_t * dst, const uint8_t * src, size_t len)
 {
 	size_t i;
 
@@ -208,11 +208,11 @@ SHA256_Init(SHA256_CTX * ctx)
  * Input ${len} bytes from ${in} into the SHA256 context ${ctx}.
  */
 void
-SHA256_Update(SHA256_CTX * ctx, const void *in, size_t len)
+SHA256_Update(SHA256_CTX * ctx, const void * in, size_t len)
 {
 	uint32_t bitlen[2];
 	uint32_t r;
-	const uint8_t *src = in;
+	const uint8_t * src = in;
 
 	/* Return immediately if we have nothing to do. */
 	if (len == 0)
@@ -332,7 +332,7 @@ HMAC_SHA256_Init(HMAC_SHA256_CTX * ctx, const void * _K, size_t Klen)
  * Input ${len} bytes from ${in} into the HMAC-SHA256 context ${ctx}.
  */
 void
-HMAC_SHA256_Update(HMAC_SHA256_CTX * ctx, const void *in, size_t len)
+HMAC_SHA256_Update(HMAC_SHA256_CTX * ctx, const void * in, size_t len)
 {
 
 	/* Feed data to the inner SHA256 operation. */
