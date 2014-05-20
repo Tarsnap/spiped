@@ -189,8 +189,9 @@ proto_conn_create(int s, struct sock_addr ** sas, int decr, int nofps,
 	C->s = s;
 	C->t = -1;
 	C->connect_cookie = NULL;
+	C->connect_timeout_cookie = NULL;
 	C->handshake_cookie = NULL;
-	C->connect_timeout_cookie = C->handshake_timeout_cookie = NULL;
+	C->handshake_timeout_cookie = NULL;
 	C->k_f = C->k_r = NULL;
 	C->pipe_f = C->pipe_r = NULL;
 	C->stat_f = C->stat_r = 1;
