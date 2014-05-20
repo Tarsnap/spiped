@@ -237,7 +237,7 @@ sock_resolve(const char * addr)
 	/* If the address starts with '/', it's a unix socket. */
 	if (addr[0] == '/') {
 		res = sock_resolve_unix(addr);
-		goto done;
+		goto done0;
 	}
 
 	/* Copy the address so that we can mangle it. */
@@ -278,7 +278,7 @@ sock_resolve(const char * addr)
 	}
 
 	/* If the IP address contains ':', it's IPv6; otherwise, IPv4. */
-	if (strrchr(ips, ':') != NULL)
+	if (strchr(ips, ':') != NULL)
 		res = sock_resolve_ipv6(ips, p);
 	else
 		res = sock_resolve_ipv4(ips, p);
@@ -286,7 +286,7 @@ sock_resolve(const char * addr)
 done1:
 	/* Free string allocated by strdup. */
 	free(s);
-done:
+done0:
 	/* Return result from sock_resolve_foo. */
 	return (res);
 
@@ -322,19 +322,19 @@ sock_listener(const struct sock_addr * sa)
 
 	/* Bind the socket. */
 	if (bind(s, sa->name, sa->namelen)) {
-		warnp("error binding socket");
+		warnp("Error binding socket");
 		goto err1;
 	}
 
 	/* Mark the socket as listening. */
 	if (listen(s, 10)) {
-		warnp("error marking socket as listening");
+		warnp("Error marking socket as listening");
 		goto err1;
 	}
 
 	/* Make the socket as non-blocking. */
 	if (fcntl(s, F_SETFL, O_NONBLOCK) == -1) {
-		warnp("error marking socket as non-blocking");
+		warnp("Error marking socket as non-blocking");
 		goto err1;
 	}
 
