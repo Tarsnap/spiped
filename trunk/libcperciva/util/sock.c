@@ -123,10 +123,8 @@ sock_resolve_host(const char * addr, const char * ports)
 err3:
 	free(sas[n]);
 err2:
-	for (; n > 0; n--) {
-		free(sas[n - 1]->name);
-		free(sas[n - 1]);
-	}
+	for (; n > 0; n--)
+		sock_addr_free(sas[n - 1]);
 	free(sas);
 err1:
 	freeaddrinfo(res);
