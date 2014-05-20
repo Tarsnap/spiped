@@ -14,7 +14,7 @@ struct proto_secret;
  * end attempts to perform a "weak" handshake.  The shared protocol secret is
  * ${K}.  Upon completion, invoke ${callback}(${cookie}, f, r), where f
  * contains the keys needed for the forward direction and r contains the keys
- * needed for the reverse direction; or w = r = NULL if the handshake failed.
+ * needed for the reverse direction; or f = r = NULL if the handshake failed.
  * Return a cookie which can be passed to proto_handshake_cancel to cancel the
  * handshake.
  */
