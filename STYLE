@@ -99,6 +99,17 @@ The type 'char' should only be used to represent human-readable characters
 char' and 'unsigned char' should never be used; C99 integer types should
 be used instead.
 
+When a variable is declared to have a pointer type, there should be a space
+between the '*' and the variable name, e.g.,
+	int
+	main(int argc, char * argv[])
+	{
+		char * opt_p = NULL;
+Note that this is inconsistent with FreeBSD style(9).  When used as a unary
+operator, '*' is not separated from its argument, e.g.,
+	while (*p != '\0')
+		p++;
+
 When a struct is referenced, the idiom
 	/* Opaque types. */
 	struct foo;
@@ -136,4 +147,5 @@ the 'u' included in words such as "honour", "colour", and "neighbour",
 and the ending '-ize' in words such as "organize" and "realize".  The
 Oxford (aka. serial) comma should be used in lists.  Quotation marks
 should be placed logically, i.e., not including punctuation marks which
-do not form a logical part of the quoted text.
+do not form a logical part of the quoted text.  Two spaces should be used
+after a period which ends a sentence.
