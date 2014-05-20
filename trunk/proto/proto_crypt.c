@@ -90,7 +90,7 @@ proto_crypt_secret(const char * filename)
 		SHA256_Update(&ctx, buf, lenread);
 
 	/* Did we hit EOF? */
-	if (! feof(f)) {
+	if (!feof(f)) {
 		warnp("Error reading file: %s", filename);
 		goto err2;
 	}
@@ -120,7 +120,8 @@ err0:
  * keys ${dhmac_l} and ${dhmac_r}.  If ${decr} is non-zero, "local" == "S"
  * and "remote" == "C"; otherwise the assignments are opposite.
  */
-void proto_crypt_dhmac(const struct proto_secret * K,
+void
+proto_crypt_dhmac(const struct proto_secret * K,
     const uint8_t nonce_l[PCRYPT_NONCE_LEN],
     const uint8_t nonce_r[PCRYPT_NONCE_LEN],
     uint8_t dhmac_l[PCRYPT_DHMAC_LEN], uint8_t dhmac_r[PCRYPT_DHMAC_LEN],
