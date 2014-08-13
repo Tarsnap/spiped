@@ -332,7 +332,7 @@ sock_listener(const struct sock_addr * sa)
 		goto err1;
 	}
 
-	/* Make the socket as non-blocking. */
+	/* Mark the socket as non-blocking. */
 	if (fcntl(s, F_SETFL, O_NONBLOCK) == -1) {
 		warnp("Error marking socket as non-blocking");
 		goto err1;
