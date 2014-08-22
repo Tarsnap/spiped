@@ -44,6 +44,11 @@ SRCS	+=	sock.c
 SRCS	+=	warnp.c
 IDIRS	+=	-I ../libcperciva/util
 
+# CPU features detection
+.PATH.c	:	../libcperciva/cpusupport
+SRCS	+=	cpusupport_x86_aesni.c
+IDIRS	+=	-I ../libcperciva/cpusupport
+
 # Event loop
 .PATH.c	:	../libcperciva/events
 SRCS	+=	events_immediate.c
@@ -62,6 +67,8 @@ IDIRS	+=	-I ../libcperciva/network
 
 # Crypto code
 .PATH.c	:	../libcperciva/crypto
+SRCS	+=	crypto_aes.c
+SRCS	+=	crypto_aes_aesni.c
 SRCS	+=	crypto_aesctr.c
 SRCS	+=	crypto_dh.c
 SRCS	+=	crypto_dh_group14.c
