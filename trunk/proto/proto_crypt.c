@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/aes.h>
-
+#include "crypto_aes.h"
 #include "crypto_aesctr.h"
 #include "crypto_verify_bytes.h"
 #include "sha256.h"
@@ -19,7 +18,7 @@ struct proto_secret {
 };
 
 struct proto_keys {
-	AES_KEY k_aes;
+	struct crypto_aes_key * k_aes;
 	uint8_t k_hmac[32];
 	uint64_t pnum;
 };
@@ -38,10 +37,8 @@ mkkeypair(uint8_t kbuf[64])
 		goto err0;
 
 	/* Expand the AES key. */
-	if (AES_set_encrypt_key(&kbuf[0], 256, &k->k_aes)) {
-		warn0("Error in AES_set_encrypt_key");
+	if ((k->k_aes = crypto_aes_key_expand(&kbuf[0], 32)) == NULL)
 		goto err1;
-	}
 
 	/* Fill in HMAC key. */
 	memcpy(k->k_hmac, &kbuf[32], 32);
@@ -323,7 +320,7 @@ proto_crypt_enc(uint8_t * ibuf, size_t len, uint8_t obuf[PCRYPT_ESZ],
 	be32enc(&obuf[PCRYPT_MAXDSZ], len);
 
 	/* Encrypt the buffer in-place. */
-	crypto_aesctr_buf(&k->k_aes, k->pnum, obuf, obuf, PCRYPT_MAXDSZ + 4);
+	crypto_aesctr_buf(k->k_aes, k->pnum, obuf, obuf, PCRYPT_MAXDSZ + 4);
 
 	/* Append an HMAC. */
 	be64enc(pnum_exp, k->pnum);
@@ -360,7 +357,7 @@ ssize_t proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
 		return (-1);
 
 	/* Decrypt the buffer in-place. */
-	crypto_aesctr_buf(&k->k_aes, k->pnum, ibuf, ibuf, PCRYPT_MAXDSZ + 4);
+	crypto_aesctr_buf(k->k_aes, k->pnum, ibuf, ibuf, PCRYPT_MAXDSZ + 4);
 
 	/* Increment packet number. */
 	k->pnum += 1;
@@ -386,6 +383,9 @@ ssize_t proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
 void
 proto_crypt_free(struct proto_keys * k)
 {
+
+	/* Free the AES key. */
+	crypto_aes_key_free(k->k_aes);
 
 	/* Free the key structure. */
 	free(k);
