@@ -84,6 +84,10 @@ SRCS	+=	crypto_entropy.c
 SRCS	+=	crypto_verify_bytes.c
 IDIRS	+=	-I ../libcperciva/crypto
 
+crypto_aes_aesni.o: crypto_aes_aesni.c cpusupport-config.h
+	. ./cpusupport-config.h; ${CC} ${CFLAGS} $${CFLAGS_X86_AESNI} -c $< -o $@
+cflags-crypto_aes_aesni.o=$${CFLAGS_X86_AESNI}
+
 # Debugging options
 CFLAGS	+=	-g
 #CFLAGS	+=	-DNDEBUG
