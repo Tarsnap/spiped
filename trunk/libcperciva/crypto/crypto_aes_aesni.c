@@ -156,12 +156,14 @@ crypto_aes_key_expand_aesni(const uint8_t * key, size_t len)
 		crypto_aes_key_expand_256_aesni(key, kexp->rkeys);
 	} else {
 		warn0("Unsupported AES key length: %zu bytes", len);
-		goto err0;
+		goto err1;
 	}
 
 	/* Success! */
 	return (kexp);
 
+err1:
+	free(kexp);
 err0:
 	/* Failure! */
 	return (NULL);
