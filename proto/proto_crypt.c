@@ -384,6 +384,10 @@ void
 proto_crypt_free(struct proto_keys * k)
 {
 
+	/* Be compatible with free(NULL). */
+	if (k == NULL)
+		return;
+
 	/* Free the AES key. */
 	crypto_aes_key_free(k->k_aes);
 
