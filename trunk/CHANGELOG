@@ -1,4 +1,7 @@
 spiped-1.4.0
+* Add automatic detection of compiler support (at compile-time) and CPU
+  support (at run-time) for x86 "AES New Instructions"; and when available,
+  use these to improve cryptographic performance.
 * Add support for -g option, which makes {spiped, spipe} require perfect
   forward secrecy by dropping connections if the peer endpoint is detected to
   be running using the -f option.
