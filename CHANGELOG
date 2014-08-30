@@ -1,3 +1,5 @@
+spiped-1.4.1
+* Fix build on OS X, and improve strict POSIX compliance.
 spiped-1.4.0
 * Add automatic detection of compiler support (at compile-time) and CPU
   support (at run-time) for x86 "AES New Instructions"; and when available,
