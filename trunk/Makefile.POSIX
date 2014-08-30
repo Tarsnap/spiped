@@ -11,17 +11,17 @@ all:
 	( export CC="${CC}"; cd libcperciva/cpusupport/Build && command -p sh cpusupport.sh ) > cpusupport-config.h;	\
 	. ./cpusupport-config.h;			\
 	for D in ${PROGS}; do				\
-		( cd $${D} && make all ) || exit 2;	\
+		( cd $${D} && ${MAKE} all ) || exit 2;	\
 	done
 
 install: all
 	export BINDIR=$${BINDIR:-${BINDIR_DEFAULT}};	\
 	for D in ${PROGS}; do				\
-		( cd $${D} && make install ) || exit 2;	\
+		( cd $${D} && ${MAKE} install ) || exit 2;	\
 	done
 
 clean:
 	rm -f cpusupport-config.h
 	for D in ${PROGS}; do				\
-		( cd $${D} && make clean ) || exit 2;	\
+		( cd $${D} && ${MAKE} clean ) || exit 2;	\
 	done
