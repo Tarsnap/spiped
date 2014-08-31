@@ -16,6 +16,16 @@ provided by adding e.g., CFLAGS="-I/path/to/openssl/headers" (compiler option)
 or LDADD_EXTRA="-L/usr/sfw/lib -lsocket -lnsl" (linker option) to the make
 command line.
 
+On OS X, the version of OpenSSL included with the operating system is outdated
+(0.9.8) and deprecated, and it is recommended that spiped be built with an
+updated version of OpenSSL.  After installing a newer version of OpenSSL, use
+CFLAGS="-I /path/to/openssl/headers" and LDADD_EXTRA="-L /path/to/openssl/lib"
+to build spiped with your newer OpenSSL.  Note that spiped will still build if
+you set these options wrong: If you see
+    warning: 'AES_set_encrypt_key' is deprecated
+during the build then spiped is still using the outdated version of OpenSSL
+from OS X.
+
 On some platforms (OpenBSD prior to 5.4, and possibly others) you will need to
 add #include <sys/types.h> at the start of
 	lib/dnsthread/dnsthread.c
