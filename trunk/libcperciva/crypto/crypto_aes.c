@@ -157,6 +157,9 @@ crypto_aes_key_free(struct crypto_aes_key * key)
 	}
 #endif
 
+	/* Attempt to zero the expanded key. */
+	memset(key, 0, sizeof(AES_KEY));
+
 	/* Free the key. */
 	free(key);
 }
