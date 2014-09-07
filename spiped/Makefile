@@ -44,6 +44,7 @@ IDIRS	+=	-I ../lib/dnsthread
 SRCS	+=	asprintf.c
 SRCS	+=	daemonize.c
 SRCS	+=	entropy.c
+SRCS	+=	insecure_memzero.c
 SRCS	+=	monoclock.c
 SRCS	+=	noeintr.c
 SRCS	+=	sock.c
