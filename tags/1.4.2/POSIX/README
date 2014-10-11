@@ -1,0 +1,10 @@
+POSIX compatibility code
+------------------------
+
+This code exists to work around some common POSIX compatibility issues.
+
+POSIX specifies that if the first line of a Makefile is ".POSIX:" then the
+Makefile should be processed according to POSIX rules, including with CC=c99.
+Further, c99 is required to understand the -lrt and -lxnet options (and ignore
+them if the routines they specify linkage for are already in the standard C
+library).  Unfortunately some systems fail or one or both of these accounts.
