@@ -13,7 +13,8 @@
 
 /* Expanded-key structure. */
 struct crypto_aes_key_aesni {
-	__m128i rkeys[15];
+	uint8_t rkeys_buf[15 * sizeof(__m128i) + (sizeof(__m128i) - 1)];
+	__m128i * rkeys;
 	size_t nr;
 };
 
@@ -143,10 +144,16 @@ void *
 crypto_aes_key_expand_aesni(const uint8_t * key, size_t len)
 {
 	struct crypto_aes_key_aesni * kexp;
+	size_t rkey_offset;
 
 	/* Allocate structure. */
 	if ((kexp = malloc(sizeof(struct crypto_aes_key_aesni))) == NULL)
 		goto err0;
+
+	/* Figure out where to put the round keys. */
+	rkey_offset = (uintptr_t)(&kexp->rkeys_buf[0]) % sizeof(__m128i);
+	rkey_offset = (sizeof(__m128i) - rkey_offset) % sizeof(__m128i);
+	kexp->rkeys = &kexp->rkeys_buf[rkey_offset];
 
 	/* Compute round keys. */
 	if (len == 16) {
