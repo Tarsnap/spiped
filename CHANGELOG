@@ -1,3 +1,7 @@
+spiped-1.4.2
+* Fix crash on platforms which support AESNI (i386, amd64) but do not
+  automatically provide 16-byte alignment to large memory allocations
+  (glibc, possibly others).
 spiped-1.4.1
 * Fix build on OS X, and improve strict POSIX compliance.
 * Improved zeroing of sensitive cryptographic data.
