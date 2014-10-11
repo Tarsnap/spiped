@@ -153,7 +153,7 @@ crypto_aes_key_expand_aesni(const uint8_t * key, size_t len)
 	/* Figure out where to put the round keys. */
 	rkey_offset = (uintptr_t)(&kexp->rkeys_buf[0]) % sizeof(__m128i);
 	rkey_offset = (sizeof(__m128i) - rkey_offset) % sizeof(__m128i);
-	kexp->rkeys = &kexp->rkeys_buf[rkey_offset];
+	kexp->rkeys = (void *)&kexp->rkeys_buf[rkey_offset];
 
 	/* Compute round keys. */
 	if (len == 16) {
