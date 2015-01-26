@@ -1,5 +1,8 @@
 #include <sys/socket.h>
 
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -76,6 +79,7 @@ static int
 launchpipes(struct conn_state * C)
 {
 	int on = C->nokeepalive ? 0 : 1;
+	int one = 1;
 
 	/*
 	 * Attempt to turn keepalives on or off as requested.  We ignore
@@ -86,6 +90,34 @@ launchpipes(struct conn_state * C)
 	 */
 	(void)setsockopt(C->s, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
 	(void)setsockopt(C->t, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
+
+	/**
+	 * Attempt to turn off nagling on both sockets.  If the TCP stack has
+	 * enough window space that it is always able to send packets, then on
+	 * the encrypted end this will result in every 1060-byte spiped packet
+	 * getting its own TCP segment, including 40 bytes of TCP/IP headers;
+	 * this is fine.  On the unencrypted end, we might send a single byte
+	 * of data with 40 bytes of TCP/IP headers; this is not so good.
+	 *
+	 * However, a write over the unencrypted connection will only happen
+	 * after an spiped packet has been read from the encrypted connection,
+	 * so the worst case is 80 bytes of TCP/IP headers per 1061 bytes of
+	 * TCP/IP payload (this may still be only a single byte of spiped
+	 * payload, but that is not relevant to the question of overhead from
+	 * small TCP/IP segments); and while the two sockets might not be on
+	 * the same network, if they are on different networks it is almost
+	 * guaranteed that the network over which the encrypted connection is
+	 * passing would be a wider-area network which is both less secure and
+	 * more expensive.  Consequently, the maximum TCP/IP overhead ratio of
+	 * 80/1061 is almost certain to hold even with weighted byte costs.
+	 *
+	 * We ignore errors since (as with keep-alives) we may be dealing with
+	 * a non-TCP socket; and also because while POSIX requires TCP_NODELAY
+	 * to be defined, it is not required to be implemented as a socket
+	 * option.
+	 */
+	(void)setsockopt(C->s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+	(void)setsockopt(C->t, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 
 	/* Create two pipes. */
 	if ((C->pipe_f = proto_pipe(C->s, C->t, C->decr, C->k_f,
