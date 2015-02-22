@@ -1,3 +1,6 @@
+spiped-1.5.0
+* Attempt to set the TCP_NODELAY socket option on connections, in order
+  to avoid punishing latencies from TCP nagling.
 spiped-1.4.2
 * Fix crash on platforms which support AESNI (i386, amd64) but do not
   automatically provide 16-byte alignment to large memory allocations
