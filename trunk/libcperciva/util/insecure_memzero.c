@@ -3,7 +3,7 @@
 
 #include "insecure_memzero.h"
 
-/* Fucntion which does the zeroing. */
+/* Function which does the zeroing. */
 static void
 insecure_memzero_func(volatile void * buf, size_t len)
 {
