@@ -73,7 +73,7 @@ proto_crypt_secret(const char * filename)
 	if ((K = malloc(sizeof(struct proto_secret))) == NULL)
 		goto err0;
 
-	/* Open the file. */
+	/* Open the file, or use stdin if requested. */
 	if (strcmp(filename, STDIN_FILENAME) == 0) {
 		f = stdin;
 	} else if ((f = fopen(filename, "r")) == NULL) {
@@ -90,7 +90,7 @@ proto_crypt_secret(const char * filename)
 
 	/* Did we hit EOF? */
 	if (!feof(f)) {
-		if (strcmp(filename, STDIN_FILENAME) == 0) {
+		if (f == stdin) {
 			warnp("Error reading from stdin");
 		} else {
 			warnp("Error reading file: %s", filename);
@@ -99,10 +99,9 @@ proto_crypt_secret(const char * filename)
 		goto err2;
 	}
 
-	/* Close the file. */
-	if (strcmp(filename, STDIN_FILENAME) != 0) {
+	/* Close the file if it isn't stdin. */
+	if (f != stdin)
 		fclose(f);
-	}
 
 	/* Compute the final hash. */
 	SHA256_Final(K->K, &ctx);
@@ -111,7 +110,8 @@ proto_crypt_secret(const char * filename)
 	return (K);
 
 err2:
-	fclose(f);
+	if (f != stdin)
+		fclose(f);
 err1:
 	free(K);
 err0:
