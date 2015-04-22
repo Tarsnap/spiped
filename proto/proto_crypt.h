@@ -21,6 +21,9 @@ struct proto_secret;
 /* Size of MACed Diffie-Hellman parameter. */
 #define PCRYPT_YH_LEN (CRYPTO_DH_PUBLEN + 32)
 
+/* Filename for stdin */
+#define STDIN_FILENAME "-"
+
 /**
  * proto_crypt_secret(filename):
  * Read the key file ${filename} and return a protocol secret structure.

@@ -74,7 +74,9 @@ proto_crypt_secret(const char * filename)
 		goto err0;
 
 	/* Open the file. */
-	if ((f = fopen(filename, "r")) == NULL) {
+	if (strcmp(filename, STDIN_FILENAME) == 0) {
+		f = stdin;
+	} else if ((f = fopen(filename, "r")) == NULL) {
 		warnp("Cannot open file: %s", filename);
 		goto err1;
 	}
@@ -88,12 +90,19 @@ proto_crypt_secret(const char * filename)
 
 	/* Did we hit EOF? */
 	if (!feof(f)) {
-		warnp("Error reading file: %s", filename);
+		if (strcmp(filename, STDIN_FILENAME) == 0) {
+			warnp("Error reading from stdin");
+		} else {
+			warnp("Error reading file: %s", filename);
+		}
+
 		goto err2;
 	}
 
 	/* Close the file. */
-	fclose(f);
+	if (strcmp(filename, STDIN_FILENAME) != 0) {
+		fclose(f);
+	}
 
 	/* Compute the final hash. */
 	SHA256_Final(K->K, &ctx);
