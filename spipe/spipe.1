@@ -37,8 +37,12 @@ spipe \- spiped client utility
 Address to which spipe should connect.
 .TP
 .B \-k <key file>
-Use the provided key file to authenticate and encrypt.  Pass "-" to
-read from standard input.
+Use the provided key file to authenticate and encrypt.
+Pass "-" to read from standard input.
+Note that reading the key via standard input will make it impossible
+to read anything else via standard input, thereby limiting
+.B spipe
+to receiving data but not sending any.
 .TP
 .B \-f
 Use fast/weak handshaking: This reduces the CPU time spent in the
