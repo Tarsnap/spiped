@@ -4,7 +4,7 @@ source-${X:.c=.o}: ${X}
 	@echo $>
 .endfor
 
-# Defaults for all kivaloo code
+# Defaults for all of cpercivaware
 NO_MAN	?=	yes
 WARNS	?=	6
 
