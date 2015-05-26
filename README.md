@@ -13,19 +13,23 @@ symmetric key.
 Building
 --------
 
-The Make logic in this tree is for FreeBSD `make`(1).  To create a
-tarball containing portable Makefiles, run 'make publish'.
+This code should build and install on almost any POSIX-compliant operating
+system, using the included Makefiles:
+    make BINDIR=/path/to/target/directory install
 
-**Ubuntu**: install NetBSD make(1):
+See the BUILDING file for more details.
 
-    sudo apt-get install bmake
 
-then run:
+Updating build code and releasing
+---------------------------------
 
-    bmake publish VERSION=my.number
+The POSIX-compatible Makefiles are generated via 'make Makefiles' from the
+included (far more readable) BSD Makefiles.  To run this target, you will
+need to have a BSD make(1) utility; NetBSD's make(1) is available for many
+operating systems as "bmake".
 
-After that, you can untar the resulting `spiped-my.number.tgz` file and
-compile the resulting directory with normal Linux `make`(1).
+Release tarballs are generated via 'make VERSION=x.y.z publish", subject
+to the same caveat of needing a BSD-compatible make.
 
 
 More info
