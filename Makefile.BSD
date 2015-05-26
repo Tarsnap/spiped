@@ -41,7 +41,7 @@ publish: clean Makefiles
 	fi
 	rm -f ${PKG}-${VERSION}.tgz
 	mkdir ${PKG}-${VERSION}
-	tar -cf- --exclude 'Makefile.*' --exclude .svn ${PUBLISH} | \
+	tar -cf- --exclude 'Makefile.*' ${PUBLISH} | \
 	    tar -xf- -C ${PKG}-${VERSION}
 	tar -cvzf ${PKG}-${VERSION}.tgz ${PKG}-${VERSION}
 	rm -r ${PKG}-${VERSION}
