@@ -25,3 +25,10 @@ clean:
 	for D in ${PROGS}; do				\
 		( cd $${D} && ${MAKE} clean ) || exit 2;	\
 	done
+
+# Developer targets: These only work with BSD make
+Makefiles:
+	${MAKE} -f Makefile.BSD Makefiles
+
+publish:
+	${MAKE} -f Makefile.BSD publish
