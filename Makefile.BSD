@@ -1,7 +1,9 @@
 PKG=	spiped
 PROGS=	spiped spipe
+SUBST_VERSION_FILES=    spipe/spipe.1 spiped/spiped.1
 PUBLISH= ${PROGS} BUILDING CHANGELOG COPYRIGHT README STYLE POSIX Makefile lib libcperciva proto
 MAKE:=	${MAKE} -f Makefile.BSD
+RELEASEDATE!=   date "+%B %d, %Y"
 
 .for D in ${PROGS}
 ${D}/Makefile::
@@ -43,6 +45,13 @@ publish: clean Makefiles
 	mkdir ${PKG}-${VERSION}
 	tar -cf- --exclude 'Makefile.*' ${PUBLISH} | \
 	    tar -xf- -C ${PKG}-${VERSION}
+.for F in ${SUBST_VERSION_FILES}
+	# We need to write a temporary file because FreeBSD and GNU behaviour
+	# of sed -i is different.
+	sed -e 's/@VERSION@/${VERSION}/' -e 's/@DATE@/${RELEASEDATE}/' \
+	    < ${PKG}-${VERSION}/${F} > ${PKG}-${VERSION}/${F}.tmp
+	mv ${PKG}-${VERSION}/${F}.tmp ${PKG}-${VERSION}/${F}
+.endfor
 	tar -cvzf ${PKG}-${VERSION}.tgz ${PKG}-${VERSION}
 	rm -r ${PKG}-${VERSION}
 
