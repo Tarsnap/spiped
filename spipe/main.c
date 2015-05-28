@@ -32,7 +32,8 @@ usage(void)
 {
 
 	fprintf(stderr, "usage: spipe -t <target socket> -k <key file>"
-	    " [-f | -g] [-j] [-o <connection timeout>]\n");
+	    " [-f | -g] [-j]\n");
+	fprintf(stderr, "    [-o <connection timeout>] [-v]\n");
 	exit(1);
 }
 
@@ -62,7 +63,7 @@ main(int argc, char * argv[])
 	WARNP_INIT;
 
 	/* Parse the command line. */
-	while ((ch = getopt(argc, argv, "fgjk:o:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "fgjvk:o:t:")) != -1) {
 		switch (ch) {
 		case 'f':
 			if (opt_f)
@@ -97,6 +98,9 @@ main(int argc, char * argv[])
 				usage();
 			opt_t = optarg;
 			break;
+		case 'v':
+			fprintf(stderr, "spipe @VERSION@\n");
+			exit(0);
 		default:
 			usage();
 		}
