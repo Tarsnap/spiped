@@ -31,6 +31,7 @@ spipe \- spiped client utility
 [\-f | \-g]
 [\-j]
 [\-o <connection timeout>]
+[\-v]
 .SH OPTIONS
 .TP
 .B \-t <target socket>
@@ -61,5 +62,8 @@ Disable transport layer keep-alives.
 Timeout, in seconds, after which an attempt to connect to the target
 or a protocol handshake will be aborted (and the connection dropped)
 if not completed.  Defaults to 5s.
+.TP
+.B \-v
+Print version number.
 .SH SEE ALSO
 .BR spiped (1).

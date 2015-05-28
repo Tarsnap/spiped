@@ -21,7 +21,7 @@ usage(void)
 	    "-t <target socket> -k <key file>\n"
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
-	    "    [-p <pidfile>] [-r <rtime> | -R]\n");
+	    "    [-p <pidfile>] [-r <rtime> | -R] [-v]\n");
 	exit(1);
 }
 
@@ -61,7 +61,7 @@ main(int argc, char * argv[])
 	WARNP_INIT;
 
 	/* Parse the command line. */
-	while ((ch = getopt(argc, argv, "dDefFgjk:n:o:r:Rp:s:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "dDefFgjvk:n:o:r:Rp:s:t:")) != -1) {
 		switch (ch) {
 		case 'd':
 			if (opt_d || opt_e)
@@ -152,6 +152,9 @@ main(int argc, char * argv[])
 				usage();
 			opt_t = optarg;
 			break;
+		case 'v':
+			fprintf(stderr, "spiped @VERSION@\n");
+			exit(0);
 		default:
 			usage();
 		}
