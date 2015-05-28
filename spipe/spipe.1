@@ -21,7 +21,7 @@
 .\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
-.TH SPIPE 1 "October 10, 2014" "spiped 1.4.2" "spipe README"
+.TH SPIPE 1 "@DATE@" "spiped @VERSION@" "spipe README"
 .SH NAME
 spipe \- spiped client utility
 .SH SYNOPSIS
@@ -31,6 +31,7 @@ spipe \- spiped client utility
 [\-f | \-g]
 [\-j]
 [\-o <connection timeout>]
+[\-v]
 .SH OPTIONS
 .TP
 .B \-t <target socket>
@@ -61,5 +62,8 @@ Disable transport layer keep-alives.
 Timeout, in seconds, after which an attempt to connect to the target
 or a protocol handshake will be aborted (and the connection dropped)
 if not completed.  Defaults to 5s.
+.TP
+.B \-v
+Print version number.
 .SH SEE ALSO
 .BR spiped (1).
