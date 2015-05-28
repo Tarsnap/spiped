@@ -1,6 +1,6 @@
 # Program name.
 PROG	=	spiped
-MAN1	=	${PROG}.1
+MAN1	:=	${PROG}.1
 
 # Libraries which are sometimes merged into libc
 LDADD	=	-lrt
@@ -87,7 +87,8 @@ IDIRS	+=	-I ../libcperciva/crypto
 
 crypto_aes_aesni.o: crypto_aes_aesni.c cpusupport-config.h
 	. ./cpusupport-config.h; ${CC} ${CFLAGS} $${CFLAGS_X86_AESNI} -c $< -o $@
-cflags-crypto_aes_aesni.o=$${CFLAGS_X86_AESNI}
+cflags-crypto_aes_aesni.o:
+	@echo '$${CFLAGS_X86_AESNI}'
 
 # Debugging options
 CFLAGS	+=	-g

@@ -2,6 +2,7 @@
 .for X in ${SRCS}
 source-${X:.c=.o}: ${X}
 	@echo $>
+cflags-${X:.c=.o}:
 .endfor
 
 # Defaults for all of cpercivaware
