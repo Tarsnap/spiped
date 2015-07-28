@@ -19,4 +19,4 @@ addons:
       description: "spiped secure pipe daemon"
     notification_email: cperciva@tarsnap.com
     build_command: "make"
-    branch_pattern: travis-ci
+    branch_pattern: coverity-scan
