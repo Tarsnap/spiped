@@ -59,6 +59,5 @@
  * from this list so that the associated C files can be omitted.
  */
 CPUSUPPORT_FEATURE(x86, aesni);
-CPUSUPPORT_FEATURE(x86, sse2);
 
 #endif /* !_CPUSUPPORT_H_ */
