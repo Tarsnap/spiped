@@ -1,4 +1,5 @@
 #include <inttypes.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +26,18 @@ usage(void)
 	    "    [-p <pidfile>] [-r <rtime> | -R]\n"
 	    "       spiped -v\n");
 	exit(1);
+}
+
+/*
+ * Signal handler for SIGTERM and SIGINT in case we are running
+ * inside a container as PID 1.
+ */
+static void
+diediedie_handler(int signo)
+{
+
+	(void)signo; /* UNUSED */
+	_exit(0);
 }
 
 /* Simplify error-handling in command-line parse loop. */
@@ -195,6 +208,20 @@ main(int argc, char * argv[])
 		if (asprintf(&opt_p, "%s.pid", opt_s) == -1) {
 			warnp("asprintf");
 			exit(1);
+		}
+	}
+
+	/* Check whether we are running as init (e.g., inside a container). */
+	if (getpid() == 1) {
+		/* https://github.com/docker/docker/issues/7086 */
+		warn0("WARNING: Applying workaround for Docker signal-handling bug");
+
+		/* Bind an explicit signal handler for SIGTERM and SIGINT. */
+		if (signal(SIGTERM, diediedie_handler) == SIG_ERR) {
+			warnp("Failed to bind SIGTERM signal handler");
+		}
+		if (signal(SIGINT, diediedie_handler) == SIG_ERR) {
+			warnp("Failed to bind SIGINT signal handler");
 		}
 	}
 
