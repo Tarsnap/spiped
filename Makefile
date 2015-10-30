@@ -8,7 +8,7 @@ all:
 	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
 	export LDADD_POSIX=`export CC="${CC}"; cd POSIX && command -p sh posix-l.sh`;	\
 	export CFLAGS_POSIX=`export CC="${CC}"; cd POSIX && command -p sh posix-cflags.sh`;	\
-	( export CC="${CC}"; cd libcperciva/cpusupport/Build && command -p sh cpusupport.sh ) > cpusupport-config.h;	\
+	( export CC="${CC}"; command -p sh libcperciva/cpusupport/Build/cpusupport.sh ) > cpusupport-config.h;	\
 	. ./cpusupport-config.h;			\
 	for D in ${PROGS}; do				\
 		( cd $${D} && ${MAKE} all ) || exit 2;	\
