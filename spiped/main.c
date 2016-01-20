@@ -8,6 +8,7 @@
 #include "asprintf.h"
 #include "daemonize.h"
 #include "events.h"
+#include "getopt.h"
 #include "sock.h"
 #include "warnp.h"
 
@@ -70,55 +71,55 @@ main(int argc, char * argv[])
 	struct sock_addr ** sas_s;
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
-	int ch;
+	const char * ch;
 	int s;
 
 	WARNP_INIT;
 
 	/* Parse the command line. */
-	while ((ch = getopt(argc, argv, "dDefFgjk:n:o:r:Rp:s:t:v")) != -1) {
-		switch (ch) {
-		case 'd':
+	while ((ch = GETOPT(argc, argv)) != NULL) {
+		GETOPT_SWITCH(ch) {
+		GETOPT_OPT("-d"):
 			if (opt_d || opt_e)
 				usage();
 			opt_d = 1;
 			break;
-		case 'D':
+		GETOPT_OPT("-D"):
 			if (opt_D)
 				usage();
 			opt_D = 1;
 			break;
-		case 'e':
+		GETOPT_OPT("-e"):
 			if (opt_d || opt_e)
 				usage();
 			opt_e = 1;
 			break;
-		case 'f':
+		GETOPT_OPT("-f"):
 			if (opt_f)
 				usage();
 			opt_f = 1;
 			break;
-		case 'F':
+		GETOPT_OPT("-F"):
 			if (opt_F)
 				usage();
 			opt_F = 1;
 			break;
-		case 'g':
+		GETOPT_OPT("-g"):
 			if (opt_g)
 				usage();
 			opt_g = 1;
 			break;
-		case 'j':
+		GETOPT_OPT("-j"):
 			if (opt_j)
 				usage();
 			opt_j = 1;
 			break;
-		case 'k':
+		GETOPT_OPTARG("-k"):
 			if (opt_k)
 				usage();
 			opt_k = optarg;
 			break;
-		case 'n':
+		GETOPT_OPTARG("-n"):
 			if (opt_n != 0)
 				usage();
 			if ((opt_n = strtoimax(optarg, NULL, 0)) == 0) {
@@ -130,7 +131,7 @@ main(int argc, char * argv[])
 				exit(1);
 			}
 			break;
-		case 'o':
+		GETOPT_OPTARG("-o"):
 			if (opt_o != 0.0)
 				usage();
 			if ((opt_o = strtod(optarg, NULL)) == 0.0) {
@@ -138,13 +139,13 @@ main(int argc, char * argv[])
 				exit(1);
 			}
 			break;
-		case 'p':
+		GETOPT_OPTARG("-p"):
 			if (opt_p)
 				usage();
 			if ((opt_p = strdup(optarg)) == NULL)
 				OPT_EPARSE(ch, optarg);
 			break;
-		case 'r':
+		GETOPT_OPTARG("-r"):
 			if (opt_r != 0.0)
 				usage();
 			if ((opt_r = strtod(optarg, NULL)) == 0.0) {
@@ -152,25 +153,28 @@ main(int argc, char * argv[])
 				exit(1);
 			}
 			break;
-		case 'R':
+		GETOPT_OPT("-R"):
 			if (opt_R)
 				usage();
 			opt_R = 1;
 			break;
-		case 's':
+		GETOPT_OPTARG("-s"):
 			if (opt_s)
 				usage();
 			opt_s = optarg;
 			break;
-		case 't':
+		GETOPT_OPTARG("-t"):
 			if (opt_t)
 				usage();
 			opt_t = optarg;
 			break;
-		case 'v':
+		GETOPT_OPT("-v"):
 			fprintf(stderr, "spiped @VERSION@\n");
 			exit(0);
-		default:
+		GETOPT_MISSING_ARG:
+			warn0("Missing argument to %s\n", ch);
+			/* FALLTHROUGH */
+		GETOPT_DEFAULT:
 			usage();
 		}
 	}
