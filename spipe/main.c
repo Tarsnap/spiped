@@ -111,9 +111,11 @@ main(int argc, char * argv[])
 			usage();
 		}
 	}
+	argc -= optind;
+	argv += optind;
 
 	/* We should have processed all the arguments. */
-	if (argc != optind)
+	if (argc != 0)
 		usage();
 
 	/* Set defaults. */
