@@ -189,24 +189,26 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	/* If address re-resolution is enabled... */
 	if (rtime > 0.0) {
 		/* Launch an address resolution thread. */
-		A->T = dnsthread_spawn();
+		if ((A->T = dnsthread_spawn()) == NULL)
+			goto err1;
 
 		/* Re-resolve the target address after a while. */
 		if (events_timer_register_double(callback_resolveagain,
 		    A, A->rtime) == NULL)
-			goto err1;
+			goto err2;
 	}
 
 	/* Accept a connection. */
 	if (doaccept(A))
-		goto err1;
+		goto err2;
 
 	/* Success! */
 	return (0);
 
-err1:
+err2:
 	if (rtime > 0.0)
 		dnsthread_kill(A->T);
+err1:
 	free(A);
 err0:
 	/* Failure! */
