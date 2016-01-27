@@ -27,6 +27,7 @@ struct accept_state {
 	size_t nconn_max;
 	double timeo;
 	void * accept_cookie;
+	void * dnstimer_cookie;
 	DNSTHREAD T;
 };
 
@@ -160,9 +161,10 @@ err0:
  * forward secrecy.  If {$requirefps} is non-zero, require that both ends use
  * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
  * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
- * connecting to the target takes more than ${timeo} seconds.
+ * connecting to the target takes more than ${timeo} seconds.  Returns a
+ * cookie which can be passed to dispatch_shutdown.
  */
-int
+void *
 dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
     int decr, int nofps, int requirefps, int nokeepalive,
     const struct proto_secret * K, size_t nconn_max, double timeo)
@@ -186,6 +188,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->timeo = timeo;
 	A->T = NULL;
 	A->accept_cookie = NULL;
+	A->dnstimer_cookie = NULL;
 
 	/* If address re-resolution is enabled... */
 	if (rtime > 0.0) {
@@ -194,18 +197,21 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 			goto err1;
 
 		/* Re-resolve the target address after a while. */
-		if (events_timer_register_double(callback_resolveagain,
-		    A, A->rtime) == NULL)
+		if ((A->dnstimer_cookie = events_timer_register_double(
+		    callback_resolveagain, A, A->rtime)) == NULL)
 			goto err2;
 	}
 
 	/* Accept a connection. */
 	if (doaccept(A))
-		goto err2;
+		goto err3;
 
 	/* Success! */
-	return (0);
+	return (A);
 
+err3:
+	if (A->dnstimer_cookie != NULL)
+		events_timer_cancel(A->dnstimer_cookie);
 err2:
 	if (A->T != NULL)
 		dnsthread_kill(A->T);
@@ -213,5 +219,23 @@ err1:
 	free(A);
 err0:
 	/* Failure! */
-	return (-1);
+	return (NULL);
+}
+
+/**
+ * dispatch_shutdown(dispatch_cookie):
+ * Stops and frees memory associated with the ${dispatch_cookie}.
+ */
+void
+dispatch_shutdown(void * dispatch_cookie)
+{
+	struct accept_state * A = dispatch_cookie;
+
+	if (A->accept_cookie != NULL)
+		network_accept_cancel(A->accept_cookie);
+	if (A->dnstimer_cookie != NULL)
+		events_timer_cancel(A->dnstimer_cookie);
+	if (A->T != NULL)
+		dnsthread_kill(A->T);
+	free(A);
 }

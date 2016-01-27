@@ -73,6 +73,7 @@ main(int argc, char * argv[])
 	struct proto_secret * K;
 	const char * ch;
 	int s;
+	void * dispatch_cookie = NULL;
 
 	WARNP_INIT;
 
@@ -279,26 +280,30 @@ main(int argc, char * argv[])
 	/* Daemonize and write pid. */
 	if (!opt_F && daemonize(opt_p)) {
 		warnp("Failed to daemonize");
-		exit(1);
+		goto err4;
 	}
 
 	/* Start accepting connections. */
-	if (dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r, sas_t, opt_d,
-	    opt_f, opt_g, opt_j, K, opt_n, opt_o)) {
+	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		exit(1);
+		goto err5;
 	}
 
 	/* Infinite loop handling events. */
 	do {
 		if (events_run()) {
 			warnp("Error running event loop");
-			exit(1);
+			goto err6;
 		}
 	} while (1);
 
 	/* NOTREACHED */
 
+err6:
+	dispatch_shutdown(dispatch_cookie);
+err5:
+	events_shutdown();
 err4:
 	free(K);
 err3:
