@@ -184,6 +184,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->nconn = 0;
 	A->nconn_max = nconn_max;
 	A->timeo = timeo;
+	A->T = NULL;
 	A->accept_cookie = NULL;
 
 	/* If address re-resolution is enabled... */
@@ -206,7 +207,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	return (0);
 
 err2:
-	if (rtime > 0.0)
+	if (A->T != NULL)
 		dnsthread_kill(A->T);
 err1:
 	free(A);
