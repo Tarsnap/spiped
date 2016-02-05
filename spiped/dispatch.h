@@ -19,9 +19,16 @@ struct sock_addr;
  * forward secrecy.  If {$requirefps} is non-zero, require that both ends use
  * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
  * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
- * connecting to the target takes more than ${timeo} seconds.
+ * connecting to the target takes more than ${timeo} seconds.  Returns a
+ * cookie which can be passed to dispatch_shutdown.
  */
-int dispatch_accept(int, const char *, double, struct sock_addr **, int, int,
+void * dispatch_accept(int, const char *, double, struct sock_addr **, int, int,
     int, int, const struct proto_secret *, size_t, double);
+
+/**
+ * dispatch_shutdown(dispatch_cookie):
+ * Stops and frees memory associated with the ${dispatch_cookie}.
+ */
+void dispatch_shutdown(void *);
 
 #endif /* !_DISPATCH_H_ */

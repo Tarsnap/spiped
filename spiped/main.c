@@ -73,6 +73,7 @@ main(int argc, char * argv[])
 	struct proto_secret * K;
 	const char * ch;
 	int s;
+	void * dispatch_cookie = NULL;
 
 	WARNP_INIT;
 
@@ -213,7 +214,7 @@ main(int argc, char * argv[])
 	if (opt_p == NULL) {
 		if (asprintf(&opt_p, "%s.pid", opt_s) == -1) {
 			warnp("asprintf");
-			exit(1);
+			goto err0;
 		}
 	}
 
@@ -234,39 +235,39 @@ main(int argc, char * argv[])
 	/* Daemonize early if we're going to wait for DNS to be ready. */
 	if (opt_D && !opt_F && daemonize(opt_p)) {
 		warnp("Failed to daemonize");
-		exit(1);
+		goto err1;
 	}
 
 	/* Resolve source address. */
 	while ((sas_s = sock_resolve(opt_s)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_s);
-			exit(1);
+			goto err1;
 		}
 		sleep(1);
 	}
 	if (sas_s[0] == NULL) {
 		warn0("No addresses found for %s", opt_s);
-		exit(1);
+		goto err2;
 	}
 
 	/* Resolve target address. */
 	while ((sas_t = sock_resolve(opt_t)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_t);
-			exit(1);
+			goto err2;
 		}
 		sleep(1);
 	}
 	if (sas_t[0] == NULL) {
 		warn0("No addresses found for %s", opt_t);
-		exit(1);
+		goto err3;
 	}
 
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
-		exit(1);
+		goto err3;
 	}
 
 	/* Create and bind a socket, and mark it as listening. */
@@ -274,32 +275,44 @@ main(int argc, char * argv[])
 		warn0("Listening on first of multiple addresses found for %s",
 		    opt_s);
 	if ((s = sock_listener(sas_s[0])) == -1)
-		exit(1);
+		goto err4;
 
 	/* Daemonize and write pid. */
 	if (!opt_F && daemonize(opt_p)) {
 		warnp("Failed to daemonize");
-		exit(1);
+		goto err4;
 	}
 
 	/* Start accepting connections. */
-	if (dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r, sas_t, opt_d,
-	    opt_f, opt_g, opt_j, K, opt_n, opt_o)) {
+	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		exit(1);
+		goto err5;
 	}
 
 	/* Infinite loop handling events. */
 	do {
 		if (events_run()) {
 			warnp("Error running event loop");
-			exit(1);
+			goto err6;
 		}
 	} while (1);
 
 	/* NOTREACHED */
-	/*
-	 * If we could reach this point, we would free memory, close sockets,
-	 * and otherwise clean up here.
-	 */
+
+err6:
+	dispatch_shutdown(dispatch_cookie);
+err5:
+	events_shutdown();
+err4:
+	free(K);
+err3:
+	sock_addr_freelist(sas_t);
+err2:
+	sock_addr_freelist(sas_s);
+err1:
+	free(opt_p);
+err0:
+	/* Failure! */
+	exit(1);
 }
