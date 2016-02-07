@@ -62,6 +62,7 @@ main(int argc, char * argv[])
 	struct proto_secret * K;
 	const char * ch;
 	int s[2];
+	void * conn_cookie = NULL;
 
 	WARNP_INIT;
 
@@ -135,17 +136,17 @@ main(int argc, char * argv[])
 	/* Resolve target address. */
 	if ((sas_t = sock_resolve(opt_t)) == NULL) {
 		warnp("Error resolving socket address: %s", opt_t);
-		exit(1);
+		goto err0;
 	}
 	if (sas_t[0] == NULL) {
 		warn0("No addresses found for %s", opt_t);
-		exit(1);
+		goto err1;
 	}
 
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
-		exit(1);
+		goto err1;
 	}
 
 	/*
@@ -158,20 +159,20 @@ main(int argc, char * argv[])
 	 */
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, s)) {
 		warnp("socketpair");
-		exit(1);
+		goto err2;
 	}
 
 	/* Set up a connection. */
-	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_g, opt_j, K, opt_o,
-	    callback_conndied, NULL)) {
+	if ((conn_cookie = proto_conn_create(s[1], sas_t, 0, opt_f, opt_g,
+	    opt_j, K, opt_o, callback_conndied, NULL)) == NULL) {
 		warnp("Could not set up connection");
-		exit(1);
+		goto err3;
 	}
 
 	/* Push bits from stdin into the socket. */
 	if (pushbits(STDIN_FILENO, s[0]) || pushbits(s[0], STDOUT_FILENO)) {
 		warnp("Could not push bits");
-		exit(1);
+		goto err4;
 	}
 
 	/* Loop until we die. */
@@ -183,8 +184,16 @@ main(int argc, char * argv[])
 	} while (1);
 
 	/* NOTREACHED */
-	/*
-	 * If we could reach this point, we would free memory, close sockets,
-	 * and otherwise clean up here.
-	 */
+
+err4:
+	proto_conn_shutdown(conn_cookie);
+err3:
+	events_shutdown();
+err2:
+	free(K);
+err1:
+	sock_addr_freelist(sas_t);
+err0:
+	/* Failure! */
+	exit(1);
 }

@@ -28,6 +28,7 @@ struct accept_state {
 	double timeo;
 	void * accept_cookie;
 	void * dnstimer_cookie;
+	void * conn_cookie;
 	DNSTHREAD T;
 };
 
@@ -126,8 +127,9 @@ callback_gotconn(void * cookie, int s)
 		goto err1;
 
 	/* Create a new connection. */
-	if (proto_conn_create(s, sas, A->decr, A->nofps, A->requirefps,
-	    A->nokeepalive, A->K, A->timeo, callback_conndied, A)) {
+	if ((A->conn_cookie = proto_conn_create(s, sas, A->decr,
+	    A->nofps, A->requirefps, A->nokeepalive, A->K, A->timeo,
+	    callback_conndied, A)) == NULL) {
 		warnp("Failure setting up new connection");
 		goto err2;
 	}
@@ -189,6 +191,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->T = NULL;
 	A->accept_cookie = NULL;
 	A->dnstimer_cookie = NULL;
+	A->conn_cookie = NULL;
 
 	/* If address re-resolution is enabled... */
 	if (rtime > 0.0) {
@@ -231,6 +234,8 @@ dispatch_shutdown(void * dispatch_cookie)
 {
 	struct accept_state * A = dispatch_cookie;
 
+	if (A->conn_cookie != NULL)
+		proto_conn_shutdown(A->conn_cookie);
 	if (A->accept_cookie != NULL)
 		network_accept_cancel(A->accept_cookie);
 	if (A->dnstimer_cookie != NULL)
