@@ -195,4 +195,5 @@ proto/*		-- Implements the spiped protocol.
   _handshake.c	-- Performs the handshaking portion of the protocol.
   _pipe.c	-- Performs the data-shuttling portion of the protocol.
   _crypt.c	-- Does the cryptographic bits needed by _handshake and _pipe.
-lib/*		-- Library code (mostly originating from tarsnap and kivaloo).
+lib/dnsthread	-- Spawns a thread for background DNS (re)resolution.
+libcperciva/*	-- Library code from libcperciva

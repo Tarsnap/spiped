@@ -8,6 +8,7 @@
 
 #include "asprintf.h"
 #include "events.h"
+#include "getopt.h"
 #include "sha256.h"
 #include "sock.h"
 #include "warnp.h"
@@ -59,35 +60,35 @@ main(int argc, char * argv[])
 	/* Working variables. */
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
-	int ch;
+	const char * ch;
 	int s[2];
 
 	WARNP_INIT;
 
 	/* Parse the command line. */
-	while ((ch = getopt(argc, argv, "fgjk:o:t:v")) != -1) {
-		switch (ch) {
-		case 'f':
+	while ((ch = GETOPT(argc, argv)) != NULL) {
+		GETOPT_SWITCH(ch) {
+		GETOPT_OPT("-f"):
 			if (opt_f)
 				usage();
 			opt_f = 1;
 			break;
-		case 'g':
+		GETOPT_OPT("-g"):
 			if (opt_g)
 				usage();
 			opt_g = 1;
 			break;
-		case 'j':
+		GETOPT_OPT("-j"):
 			if (opt_j)
 				usage();
 			opt_j = 1;
 			break;
-		case 'k':
+		GETOPT_OPTARG("-k"):
 			if (opt_k)
 				usage();
 			opt_k = optarg;
 			break;
-		case 'o':
+		GETOPT_OPTARG("-o"):
 			if (opt_o != 0.0)
 				usage();
 			if ((opt_o = strtod(optarg, NULL)) == 0.0) {
@@ -95,21 +96,26 @@ main(int argc, char * argv[])
 				exit(1);
 			}
 			break;
-		case 't':
+		GETOPT_OPTARG("-t"):
 			if (opt_t)
 				usage();
 			opt_t = optarg;
 			break;
-		case 'v':
+		GETOPT_OPT("-v"):
 			fprintf(stderr, "spipe @VERSION@\n");
 			exit(0);
-		default:
+		GETOPT_MISSING_ARG:
+			warn0("Missing argument to %s\n", ch);
+			/* FALLTHROUGH */
+		GETOPT_DEFAULT:
 			usage();
 		}
 	}
+	argc -= optind;
+	argv += optind;
 
 	/* We should have processed all the arguments. */
-	if (argc != optind)
+	if (argc != 0)
 		usage();
 
 	/* Set defaults. */

@@ -8,6 +8,7 @@
 #include "asprintf.h"
 #include "daemonize.h"
 #include "events.h"
+#include "getopt.h"
 #include "sock.h"
 #include "warnp.h"
 
@@ -70,55 +71,56 @@ main(int argc, char * argv[])
 	struct sock_addr ** sas_s;
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
-	int ch;
+	const char * ch;
 	int s;
+	void * dispatch_cookie = NULL;
 
 	WARNP_INIT;
 
 	/* Parse the command line. */
-	while ((ch = getopt(argc, argv, "dDefFgjk:n:o:r:Rp:s:t:v")) != -1) {
-		switch (ch) {
-		case 'd':
+	while ((ch = GETOPT(argc, argv)) != NULL) {
+		GETOPT_SWITCH(ch) {
+		GETOPT_OPT("-d"):
 			if (opt_d || opt_e)
 				usage();
 			opt_d = 1;
 			break;
-		case 'D':
+		GETOPT_OPT("-D"):
 			if (opt_D)
 				usage();
 			opt_D = 1;
 			break;
-		case 'e':
+		GETOPT_OPT("-e"):
 			if (opt_d || opt_e)
 				usage();
 			opt_e = 1;
 			break;
-		case 'f':
+		GETOPT_OPT("-f"):
 			if (opt_f)
 				usage();
 			opt_f = 1;
 			break;
-		case 'F':
+		GETOPT_OPT("-F"):
 			if (opt_F)
 				usage();
 			opt_F = 1;
 			break;
-		case 'g':
+		GETOPT_OPT("-g"):
 			if (opt_g)
 				usage();
 			opt_g = 1;
 			break;
-		case 'j':
+		GETOPT_OPT("-j"):
 			if (opt_j)
 				usage();
 			opt_j = 1;
 			break;
-		case 'k':
+		GETOPT_OPTARG("-k"):
 			if (opt_k)
 				usage();
 			opt_k = optarg;
 			break;
-		case 'n':
+		GETOPT_OPTARG("-n"):
 			if (opt_n != 0)
 				usage();
 			if ((opt_n = strtoimax(optarg, NULL, 0)) == 0) {
@@ -130,7 +132,7 @@ main(int argc, char * argv[])
 				exit(1);
 			}
 			break;
-		case 'o':
+		GETOPT_OPTARG("-o"):
 			if (opt_o != 0.0)
 				usage();
 			if ((opt_o = strtod(optarg, NULL)) == 0.0) {
@@ -138,13 +140,13 @@ main(int argc, char * argv[])
 				exit(1);
 			}
 			break;
-		case 'p':
+		GETOPT_OPTARG("-p"):
 			if (opt_p)
 				usage();
 			if ((opt_p = strdup(optarg)) == NULL)
 				OPT_EPARSE(ch, optarg);
 			break;
-		case 'r':
+		GETOPT_OPTARG("-r"):
 			if (opt_r != 0.0)
 				usage();
 			if ((opt_r = strtod(optarg, NULL)) == 0.0) {
@@ -152,31 +154,36 @@ main(int argc, char * argv[])
 				exit(1);
 			}
 			break;
-		case 'R':
+		GETOPT_OPT("-R"):
 			if (opt_R)
 				usage();
 			opt_R = 1;
 			break;
-		case 's':
+		GETOPT_OPTARG("-s"):
 			if (opt_s)
 				usage();
 			opt_s = optarg;
 			break;
-		case 't':
+		GETOPT_OPTARG("-t"):
 			if (opt_t)
 				usage();
 			opt_t = optarg;
 			break;
-		case 'v':
+		GETOPT_OPT("-v"):
 			fprintf(stderr, "spiped @VERSION@\n");
 			exit(0);
-		default:
+		GETOPT_MISSING_ARG:
+			warn0("Missing argument to %s\n", ch);
+			/* FALLTHROUGH */
+		GETOPT_DEFAULT:
 			usage();
 		}
 	}
+	argc -= optind;
+	argv += optind;
 
 	/* We should have processed all the arguments. */
-	if (argc != optind)
+	if (argc != 0)
 		usage();
 
 	/* Set defaults. */
@@ -207,7 +214,7 @@ main(int argc, char * argv[])
 	if (opt_p == NULL) {
 		if (asprintf(&opt_p, "%s.pid", opt_s) == -1) {
 			warnp("asprintf");
-			exit(1);
+			goto err0;
 		}
 	}
 
@@ -228,39 +235,39 @@ main(int argc, char * argv[])
 	/* Daemonize early if we're going to wait for DNS to be ready. */
 	if (opt_D && !opt_F && daemonize(opt_p)) {
 		warnp("Failed to daemonize");
-		exit(1);
+		goto err1;
 	}
 
 	/* Resolve source address. */
 	while ((sas_s = sock_resolve(opt_s)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_s);
-			exit(1);
+			goto err1;
 		}
 		sleep(1);
 	}
 	if (sas_s[0] == NULL) {
 		warn0("No addresses found for %s", opt_s);
-		exit(1);
+		goto err2;
 	}
 
 	/* Resolve target address. */
 	while ((sas_t = sock_resolve(opt_t)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_t);
-			exit(1);
+			goto err2;
 		}
 		sleep(1);
 	}
 	if (sas_t[0] == NULL) {
 		warn0("No addresses found for %s", opt_t);
-		exit(1);
+		goto err3;
 	}
 
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
-		exit(1);
+		goto err3;
 	}
 
 	/* Create and bind a socket, and mark it as listening. */
@@ -268,32 +275,44 @@ main(int argc, char * argv[])
 		warn0("Listening on first of multiple addresses found for %s",
 		    opt_s);
 	if ((s = sock_listener(sas_s[0])) == -1)
-		exit(1);
+		goto err4;
 
 	/* Daemonize and write pid. */
-	if (!opt_F && daemonize(opt_p)) {
+	if (!opt_D && !opt_F && daemonize(opt_p)) {
 		warnp("Failed to daemonize");
-		exit(1);
+		goto err4;
 	}
 
 	/* Start accepting connections. */
-	if (dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r, sas_t, opt_d,
-	    opt_f, opt_g, opt_j, K, opt_n, opt_o)) {
+	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		exit(1);
+		goto err5;
 	}
 
 	/* Infinite loop handling events. */
 	do {
 		if (events_run()) {
 			warnp("Error running event loop");
-			exit(1);
+			goto err6;
 		}
 	} while (1);
 
 	/* NOTREACHED */
-	/*
-	 * If we could reach this point, we would free memory, close sockets,
-	 * and otherwise clean up here.
-	 */
+
+err6:
+	dispatch_shutdown(dispatch_cookie);
+err5:
+	events_shutdown();
+err4:
+	free(K);
+err3:
+	sock_addr_freelist(sas_t);
+err2:
+	sock_addr_freelist(sas_s);
+err1:
+	free(opt_p);
+err0:
+	/* Failure! */
+	exit(1);
 }
