@@ -278,7 +278,7 @@ main(int argc, char * argv[])
 		goto err4;
 
 	/* Daemonize and write pid. */
-	if (!opt_F && daemonize(opt_p)) {
+	if (!opt_D && !opt_F && daemonize(opt_p)) {
 		warnp("Failed to daemonize");
 		goto err4;
 	}
