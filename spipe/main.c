@@ -62,6 +62,7 @@ main(int argc, char * argv[])
 	struct proto_secret * K;
 	const char * ch;
 	int s[2];
+	void * conn_cookie = NULL;
 
 	WARNP_INIT;
 
@@ -162,8 +163,8 @@ main(int argc, char * argv[])
 	}
 
 	/* Set up a connection. */
-	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_g, opt_j, K, opt_o,
-	    callback_conndied, NULL)) {
+	if ((conn_cookie = proto_conn_create(s[1], sas_t, 0, opt_f, opt_g,
+	    opt_j, K, opt_o, callback_conndied, NULL)) == NULL) {
 		warnp("Could not set up connection");
 		goto err3;
 	}
@@ -171,7 +172,7 @@ main(int argc, char * argv[])
 	/* Push bits from stdin into the socket. */
 	if (pushbits(STDIN_FILENO, s[0]) || pushbits(s[0], STDOUT_FILENO)) {
 		warnp("Could not push bits");
-		exit(1);
+		goto err4;
 	}
 
 	/* Loop until we die. */
@@ -184,6 +185,8 @@ main(int argc, char * argv[])
 
 	/* NOTREACHED */
 
+err4:
+	proto_conn_shutdown(conn_cookie);
 err3:
 	events_shutdown();
 err2:
