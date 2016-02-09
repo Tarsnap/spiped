@@ -16,7 +16,7 @@ struct sock_addr;
  * the addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
  * ${decr} is non-zero, decrypt the incoming connections.  Don't accept more
  * than ${nconn_max} connections.  If ${nofps} is non-zero, don't use perfect
- * forward secrecy.  If {$requirefps} is non-zero, require that both ends use
+ * forward secrecy.  If ${requirefps} is non-zero, require that both ends use
  * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
  * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
  * connecting to the target takes more than ${timeo} seconds.  Returns a
