@@ -24,7 +24,7 @@ usage(void)
 	    "-t <target socket> -k <key file>\n"
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
-	    "    [-p <pidfile>] [-r <rtime> | -R]\n"
+	    "    [-p <pidfile>] [-r <rtime> | -R] [-1]\n"
 	    "       spiped -v\n");
 	exit(1);
 }
@@ -66,6 +66,7 @@ main(int argc, char * argv[])
 	int opt_R = 0;
 	const char * opt_s = NULL;
 	const char * opt_t = NULL;
+	int opt_1 = 0;
 
 	/* Working variables. */
 	struct sock_addr ** sas_s;
@@ -74,6 +75,7 @@ main(int argc, char * argv[])
 	const char * ch;
 	int s;
 	void * dispatch_cookie = NULL;
+	int conndone = 0;
 
 	WARNP_INIT;
 
@@ -172,6 +174,11 @@ main(int argc, char * argv[])
 		GETOPT_OPT("-v"):
 			fprintf(stderr, "spiped @VERSION@\n");
 			exit(0);
+		GETOPT_OPT("-1"):
+			if (opt_1 != 0)
+				usage();
+			opt_1 = 1;
+			break;
 		GETOPT_MISSING_ARG:
 			warn0("Missing argument to %s\n", ch);
 			/* FALLTHROUGH */
@@ -285,20 +292,39 @@ main(int argc, char * argv[])
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o)) == NULL) {
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
+	    opt_1 ? &conndone : NULL)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
 		goto err5;
 	}
 
-	/* Infinite loop handling events. */
-	do {
-		if (events_run()) {
-			warnp("Error running event loop");
-			goto err6;
-		}
-	} while (1);
+	/*
+	 * Loop until an error occurs, or a connection closes if the
+	 * command-line argument -1 was given.
+	 */
+	if (events_spin(&conndone)) {
+		warnp("Error running event loop");
+		goto err6;
+	}
 
-	/* NOTREACHED */
+	/* Stop accepting connections and shut down the dispatcher. */
+	dispatch_shutdown(dispatch_cookie);
+
+	/* Shut down the events system. */
+	events_shutdown();
+
+	/* Free the protocol secret structure. */
+	free(K);
+
+	/* Free arrays of resolved addresses. */
+	sock_addr_freelist(sas_t);
+	sock_addr_freelist(sas_s);
+
+	/* Free pid filename. */
+	free(opt_p);
+
+	/* Success! */
+	exit(0);
 
 err6:
 	dispatch_shutdown(dispatch_cookie);

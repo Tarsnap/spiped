@@ -22,6 +22,7 @@ struct accept_state {
 	int nofps;
 	int requirefps;
 	int nokeepalive;
+	int * conndone;
 	const struct proto_secret * K;
 	size_t nconn;
 	size_t nconn_max;
@@ -98,6 +99,10 @@ callback_conndied(void * cookie)
 	/* We've lost a connection. */
 	A->nconn -= 1;
 
+	/* If requested to do so, indicate that a connection closed. */
+	if (A->conndone != NULL)
+		*A->conndone = 1;
+
 	/* Maybe accept more connections. */
 	return (doaccept(A));
 }
@@ -151,23 +156,25 @@ err0:
 
 /**
  * dispatch_accept(s, tgt, rtime, sas, decr, nofps, requirefps, nokeepalive, K,
- *     nconn_max, timeo):
+ *     nconn_max, timeo, conndone):
  * Start accepting connections on the socket ${s}.  Connect to the target
  * ${tgt}, re-resolving it every ${rtime} seconds if ${rtime} > 0; on address
  * resolution failure use the most recent successfully obtained addresses, or
  * the addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
  * ${decr} is non-zero, decrypt the incoming connections.  Don't accept more
  * than ${nconn_max} connections.  If ${nofps} is non-zero, don't use perfect
- * forward secrecy.  If {$requirefps} is non-zero, require that both ends use
+ * forward secrecy.  If ${requirefps} is non-zero, require that both ends use
  * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
  * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
- * connecting to the target takes more than ${timeo} seconds.  Returns a
+ * connecting to the target takes more than ${timeo} seconds.  If ${conndone}
+ * is not NULL, set it to non-zero value when a connection closes.  Returns a
  * cookie which can be passed to dispatch_shutdown.
  */
 void *
 dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
     int decr, int nofps, int requirefps, int nokeepalive,
-    const struct proto_secret * K, size_t nconn_max, double timeo)
+    const struct proto_secret * K, size_t nconn_max, double timeo,
+    int * conndone)
 {
 	struct accept_state * A;
 
@@ -182,6 +189,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->nofps = nofps;
 	A->requirefps = requirefps;
 	A->nokeepalive = nokeepalive;
+	A->conndone = conndone;
 	A->K = K;
 	A->nconn = 0;
 	A->nconn_max = nconn_max;
