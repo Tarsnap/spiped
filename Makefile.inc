@@ -18,4 +18,4 @@ SRCS	+=	cpusupport-config.h
 cpusupport-config.h:
 	( export CFLAGS="${CFLAGS}"; export CC="${CC}"; command -p sh ../libcperciva/cpusupport/Build/cpusupport.sh ) > cpusupport-config.h
 CLEANFILES+=	cpusupport-config.h
-CPPFLAGS+=	-I . -D CPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"
+CPPFLAGS+=	-D CPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"
