@@ -8,8 +8,8 @@ usage: spiped {-e | -d} -s <source socket> -t <target socket> -k <key file>
 
 Options:
     -c <source chmod>
-	The access permissions of the source socket (if it's a Unix socket).
-	For example: -c 777
+    The access permissions of the source socket (if it's a Unix socket).
+    For example: -c 777
     Defaults to the system default of source sockets.
     -e
 	Take unencrypted connections from the source socket and send
