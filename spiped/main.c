@@ -92,8 +92,7 @@ main(int argc, char * argv[])
 			opt_c = (mode_t)strtol(optarg, NULL, 8);
 
 			// handle invalid user input
-			if (opt_c < 0 || opt_c > 0777)
-			{
+			if (opt_c < 0 || opt_c > 0777) {
 				warn0("The parameter to -c must be between 000 and 777\n");
 				exit(1);
 			}
