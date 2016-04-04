@@ -25,7 +25,7 @@ usage(void)
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
 	    "    [-p <pidfile>] [-r <rtime> | -R] [-1]\n"
-		"    [-c <source chmod>]\n"
+	    "    [-c <source chmod>]\n"
 	    "       spiped -v\n");
 	exit(1);
 }
@@ -88,10 +88,10 @@ main(int argc, char * argv[])
 			if (opt_c != -1)
 				usage();
 
-			// read-in the chmod octal for the source socket
+			/* read-in the chmod octal for the source socket */
 			opt_c = (mode_t)strtol(optarg, NULL, 8);
 
-			// handle invalid user input
+			/* handle invalid user input */
 			if (opt_c < 0 || opt_c > 0777) {
 				warn0("The parameter to -c must be between 000 and 777\n");
 				exit(1);
