@@ -21,9 +21,9 @@ struct sock_addr;
 struct sock_addr ** sock_resolve(const char *);
 
 /**
- * sock_listener(sa):
+ * sock_listener(sa, sm):
  * Create a socket, set SO_REUSEADDR, bind it to the socket address ${sa},
- * set the permission (if not -1), mark it for listening,
+ * set the permission to ${sm} (if it's not -1), mark it for listening,
  * and mark it as non-blocking.
  */
 int sock_listener(const struct sock_addr *, mode_t);
