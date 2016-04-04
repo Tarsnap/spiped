@@ -300,10 +300,11 @@ err0:
 /**
  * sock_listener(sa):
  * Create a socket, set SO_REUSEADDR, bind it to the socket address ${sa},
- * mark it for listening, and mark it as non-blocking.
+ * set the permission (if not -1), mark it for listening,
+ * and mark it as non-blocking.
  */
 int
-sock_listener(const struct sock_addr * sa)
+sock_listener(const struct sock_addr * sa, mode_t sm)
 {
 	int s;
 	int val = 1;
@@ -324,6 +325,11 @@ sock_listener(const struct sock_addr * sa)
 	if (bind(s, sa->name, sa->namelen)) {
 		warnp("Error binding socket");
 		goto err1;
+	}
+
+	/* Set the Unix socket's permission */
+	if (sa->ai_family == AF_UNIX && sm != -1) {
+		chmod(((struct sockaddr_un *)sa->name)->sun_path, sm);
 	}
 
 	/* Mark the socket as listening. */

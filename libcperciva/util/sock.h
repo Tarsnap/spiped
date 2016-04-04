@@ -1,6 +1,8 @@
 #ifndef _SOCK_H_
 #define _SOCK_H_
 
+#include <sys/types.h>
+
 /**
  * Address strings are of the following forms:
  * /path/to/unix/socket
@@ -21,9 +23,10 @@ struct sock_addr ** sock_resolve(const char *);
 /**
  * sock_listener(sa):
  * Create a socket, set SO_REUSEADDR, bind it to the socket address ${sa},
- * mark it for listening, and mark it as non-blocking.
+ * set the permission (if not -1), mark it for listening,
+ * and mark it as non-blocking.
  */
-int sock_listener(const struct sock_addr *);
+int sock_listener(const struct sock_addr *, mode_t);
 
 /**
  * sock_connect(sas):

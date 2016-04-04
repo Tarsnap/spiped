@@ -25,6 +25,7 @@ usage(void)
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
 	    "    [-p <pidfile>] [-r <rtime> | -R] [-1]\n"
+		"    [-c <source chmod>]\n"
 	    "       spiped -v\n");
 	exit(1);
 }
@@ -51,6 +52,7 @@ int
 main(int argc, char * argv[])
 {
 	/* Command-line parameters. */
+	mode_t opt_c = -1;
 	int opt_d = 0;
 	int opt_D = 0;
 	int opt_e = 0;
@@ -82,6 +84,20 @@ main(int argc, char * argv[])
 	/* Parse the command line. */
 	while ((ch = GETOPT(argc, argv)) != NULL) {
 		GETOPT_SWITCH(ch) {
+		GETOPT_OPTARG("-c"):
+			if (opt_c != -1)
+				usage();
+
+			// read-in the chmod octal for the source socket
+			opt_c = (mode_t)strtol(optarg, NULL, 8);
+
+			// handle invalid user input
+			if (opt_c < 0 || opt_c > 0777)
+			{
+				warn0("The parameter to -c must be between 000 and 777\n");
+				exit(1);
+			}
+			break;
 		GETOPT_OPT("-d"):
 			if (opt_d || opt_e)
 				usage();
@@ -281,7 +297,7 @@ main(int argc, char * argv[])
 	if (sas_s[1] != NULL)
 		warn0("Listening on first of multiple addresses found for %s",
 		    opt_s);
-	if ((s = sock_listener(sas_s[0])) == -1)
+	if ((s = sock_listener(sas_s[0], opt_c)) == -1)
 		goto err4;
 
 	/* Daemonize and write pid. */
