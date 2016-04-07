@@ -1,5 +1,7 @@
 language: c
-script: make
+sudo: required
+dist: trusty
+script: make && make test
 compiler:
   - clang
   - gcc
@@ -15,5 +17,9 @@ env:
     - COVERITY_SCAN_BUILD_COMMAND="make all clean"
 
 before_install:
+- 'if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get -qq update; fi'
+- 'if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y nmap; fi'
+- 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi'
+- 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install nmap; fi'
 - 'if [[ "${TRAVIS_JOB_NUMBER##*.}" == "1" ]]; then curl -s "https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh" | bash || true ; fi'
 - 'if [[ "$TRAVIS_OS_NAME" == "osx" && "$CC" == "gcc" ]]; then CC=gcc-4.9; $CC --version; fi'
