@@ -328,11 +328,11 @@ sock_listener(const struct sock_addr * sa, mode_t sm)
 	}
 
 	/* Set the Unix socket's permission. */
-	if (sa->ai_family == AF_UNIX && sm != -1) {
-		if (chmod(((struct sockaddr_un *)sa->name)->sun_path, sm)) {
-			warnp("Error calling chmod on Unix socket");
-			goto err1;
-		}
+	if (sa->ai_family == AF_UNIX && sm != -1
+			&& chmod(((struct sockaddr_un *)sa->name)->sun_path, sm)) {
+
+		warnp("Error calling chmod on Unix socket");
+		goto err1;
 	}
 
 	/* Mark the socket as listening. */
