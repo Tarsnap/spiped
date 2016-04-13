@@ -4,18 +4,3 @@ source-${X:.c=.o}: ${X}
 	@echo $>
 cflags-${X:.c=.o}:
 .endfor
-
-# Defaults for all of cpercivaware
-NO_MAN	?=	yes
-WARNS	?=	6
-
-# Make logic (bits which are separated out in individual Makefiles).
-CFLAGS	+=	${IDIRS}
-LDADD	+=	${LDADD_REQ}
-
-# CPU features compiler support detection
-SRCS	+=	cpusupport-config.h
-cpusupport-config.h:
-	( export CFLAGS="${CFLAGS}"; export CC="${CC}"; command -p sh ../libcperciva/cpusupport/Build/cpusupport.sh ) > cpusupport-config.h
-CLEANFILES+=	cpusupport-config.h
-CFLAGS	+=	-I . -D CPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"
