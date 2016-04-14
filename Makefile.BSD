@@ -22,7 +22,9 @@ ${D}/Makefile::
 	    while read F; do		\
 		S=`${MAKE} source-$${F}`;	\
 		CF=`${MAKE} cflags-$${F}`;	\
-		echo "$${F}: $${S}";	\
+		IDIRS=`${MAKE} -V IDIRS`;	\
+		echo `${CPP} $${S} $${IDIRS} -MM -MT $${F}` \
+			| sed -e 's| \\ | |g'; \
 		echo "	\$${CC} \$${CFLAGS} \$${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\\\"cpusupport-config.h\\\" $${CF} -I.. \$${IDIRS} -c $${S} -o $${F}"; \
 	    done ) >> $@
 .endfor
