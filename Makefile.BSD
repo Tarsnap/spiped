@@ -15,6 +15,10 @@ ${D}/Makefile::
 	( cd ${D} && printf 'IDIRS=' && ${MAKE} -V IDIRS ) >> $@
 	( cd ${D} && printf 'LDADD_REQ=' && ${MAKE} -V LDADD_REQ ) >> $@
 	cat Makefile.prog >> $@
+	# Create a fake cpusupport-config.h that is blank (and thus does not
+	# require any special CFLAGS to compile)
+	rm -f cpusupport-config.h
+	touch cpusupport-config.h
 	( cd ${D} && ${MAKE} -V SRCS |	\
 	    sed -e 's| cpusupport-config.h||' |	\
 	    tr ' ' '\n' |		\
@@ -23,10 +27,12 @@ ${D}/Makefile::
 		S=`${MAKE} source-$${F}`;	\
 		CF=`${MAKE} cflags-$${F}`;	\
 		IDIRS=`${MAKE} -V IDIRS`;	\
-		echo `${CPP} $${S} $${IDIRS} -MM -MT $${F}` \
+		echo `${CPP} $${S} -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -I.. $${IDIRS} -MM -MT $${F}` \
 			| sed -e 's| \\ | |g'; \
 		echo "	\$${CC} \$${CFLAGS} \$${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\\\"cpusupport-config.h\\\" $${CF} -I.. \$${IDIRS} -c $${S} -o $${F}"; \
 	    done ) >> $@
+	# Remove fake cpusupport-config.h
+	rm -f cpusupport-config.h
 .endfor
 
 Makefiles:
