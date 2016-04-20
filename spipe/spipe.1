@@ -49,8 +49,8 @@ to receiving data but not sending any.
 .TP
 .B \-f
 Use fast/weak handshaking: This reduces the CPU time spent in the
-initial connection setup, at the expense of losing perfect forward
-secrecy.
+initial connection setup by disabling the Diffie-Hellman handshake, at the
+expense of losing perfect forward secrecy.
 .TP
 .B \-g
 Require perfect forward secrecy by dropping connections if the other
