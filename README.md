@@ -1,5 +1,8 @@
 spiped
-------
+======
+
+Official signed releases are published at:
+> www.tarsnap.com/spiped.html
 
 spiped (pronounced "ess-pipe-dee") is a utility for creating
 symmetrically encrypted and authenticated pipes between socket
@@ -8,19 +11,6 @@ on localhost) and transparently have a connection established to another
 address (e.g., a UNIX socket on a different system).  This is similar to
 `ssh -L` functionality, but does not use SSH and requires a pre-shared
 symmetric key.
-
-
-Download from www.tarsnap.com/spiped.html
------------------------------------------
-
-:exclamation:
-Official releases on www.tarsnap.com/spiped.html have POSIX-compliant
-Makefiles; please use those.
-
-:warning:
-The git repository (including the tag-based "release" snapshots on
-github) uses BSD Makefiles, which may or may not work on your operating
-system.
 
 
 Building
