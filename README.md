@@ -102,18 +102,6 @@ operating system, using the included Makefiles:
 See the BUILDING file for more details.
 
 
-Updating build code and releasing
----------------------------------
-
-The POSIX-compatible Makefiles are generated via `make Makefiles` from the
-included (far more readable) BSD Makefiles.  To run this target, you will
-need to have a BSD `make(1)` utility; NetBSD's `make(1)` is available for many
-operating systems as `bmake`.
-
-Release tarballs are generated via `make VERSION=x.y.z publish`, subject
-to the same caveat of needing a BSD-compatible make.
-
-
 Code layout
 -----------
 
