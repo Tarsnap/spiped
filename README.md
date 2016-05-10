@@ -102,6 +102,14 @@ operating system, using the included Makefiles:
 See the BUILDING file for more details.
 
 
+Testing
+-------
+
+A small test suite can be run with:
+
+    make test
+
+
 Code layout
 -----------
 
