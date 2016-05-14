@@ -37,10 +37,15 @@ spiped \- secure pipe daemon
 [\-p <pidfile>]
 [\-r <rtime> | \-R]
 [-1]
+[\-c <source chmod>]
 .br
 .B spiped
 \-v
 .SH OPTIONS
+.TP
+.B \-c <source chmod>
+The access permissions of the source socket (if it's a Unix socket).
+Defaults to the system default of source sockets.
 .TP
 .B \-e
 Take unencrypted connections from the source socket and send
