@@ -23,7 +23,7 @@
 .\" SUCH DAMAGE.
 .TH SPIPED 1 "@DATE@" "spiped @VERSION@" "spiped README"
 .SH NAME
-spiped \- secure pipe daemon
+spiped - secure pipe daemon
 .SH SYNOPSIS
 .B spiped
 {\-e | \-d} \-s <source socket>
@@ -36,7 +36,7 @@ spiped \- secure pipe daemon
 [\-o <connection timeout>]
 [\-p <pidfile>]
 [\-r <rtime> | \-R]
-[-1]
+[\-1]
 .br
 .B spiped
 \-v
@@ -58,7 +58,7 @@ host.name:port
 [ip.v4.ad.dr]:port
 [ipv6::addr]:port
 Note that hostnames are resolved when spiped is launched and are not
-re\-resolved later; thus if DNS entries change spiped will continue to
+re-resolved later; thus if DNS entries change spiped will continue to
 connect to the expired address.
 .TP
 .B \-t <target socket>
@@ -66,7 +66,7 @@ Address to which spiped should connect.
 .TP
 .B \-k <key file>
 Use the provided key file to authenticate and encrypt.
-Pass "-" to read from standard input.
+Pass "\-" to read from standard input.
 .TP
 .B \-D
 Wait for DNS.  Normally when spiped is launched it resolves addresses
