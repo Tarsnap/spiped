@@ -43,12 +43,16 @@ spiped - secure pipe daemon
 .SH OPTIONS
 .TP
 .B \-e
-Take unencrypted connections from the source socket and send
-encrypted connections to the target socket.
+Take unencrypted connections from the
+.I source socket
+and send encrypted connections to the
+.IR "target socket" .
 .TP
 .B \-d
-Take encrypted connections from the source socket and send
-unencrypted connections to the target socket.
+Take encrypted connections from the
+.I source socket
+and send unencrypted connections to the
+.IR "target socket" .
 .TP
 .B \-s <source socket>
 Address on which spiped should listen for incoming connections.
@@ -62,19 +66,26 @@ re-resolved later; thus if DNS entries change spiped will continue to
 connect to the expired address.
 .TP
 .B \-t <target socket>
-Address to which spiped should connect.
+Address to which
+.B spiped
+should connect.
 .TP
 .B \-k <key file>
 Use the provided key file to authenticate and encrypt.
 Pass "\-" to read from standard input.
 .TP
 .B \-D
-Wait for DNS.  Normally when spiped is launched it resolves addresses
-and binds to its source socket before the parent process returns; with
-this option it will daemonize first and retry failed DNS lookups until
-they succeed.  This allows spiped to launch even if DNS isn't set up
-yet, but at the expense of losing the guarantee that once spiped has
-finished launching it will be ready to create pipes.
+Wait for DNS.  Normally when
+.B spiped
+is launched it resolves addresses and binds to its
+.I source socket
+before the parent process returns; with this option it will daemonize
+first and retry failed DNS lookups until they succeed.  This allows
+.B spiped
+to launch even if DNS isn't set up yet, but at the expense of losing
+the guarantee that once
+.B spiped
+has finished launching it will be ready to create pipes.
 .TP
 .B \-f
 Use fast/weak handshaking: This reduces the CPU time spent in the
@@ -103,12 +114,20 @@ or a protocol handshake will be aborted (and the connection dropped)
 if not completed.  Defaults to 5s.
 .TP
 .B \-p <pidfile>
-File to which spiped's process ID should be written.  Defaults to
-<source socket>.pid (in the current directory if <source socket> is
-not an absolute path).
+File to which
+.BR spiped 's
+process ID should be written.  Defaults to
+.IR "source socket" .pid
+(in the current directory if
+.I source socket
+is not an absolute path).
 .TP
 .B \-r <rtime>
-Re-resolve the address of <target socket> every <rtime> seconds.
+Re-resolve the address of
+.I target socket
+every
+.I rtime
+seconds.
 Defaults to re-resolution every 60 seconds.
 .TP
 .B \-R
