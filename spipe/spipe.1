@@ -1,5 +1,6 @@
 .\"-
 .\" Copyright (c) 2012 Andreas Olsson
+.\" Copyright (c) 2016 Tim Duesterhus
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions
@@ -23,7 +24,7 @@
 .\" SUCH DAMAGE.
 .TH SPIPE 1 "@DATE@" "spiped @VERSION@" "spipe README"
 .SH NAME
-spipe \- spiped client utility
+spipe - spiped client utility
 .SH SYNOPSIS
 .B spipe
 \-t <target socket>
@@ -37,11 +38,22 @@ spipe \- spiped client utility
 .SH OPTIONS
 .TP
 .B \-t <target socket>
-Address to which spipe should connect.
+Address to which
+.B spipe
+should connect.
+Must be in one of the following formats:
+.IP \(bu
+/absolute/path/to/unix/socket
+.IP \(bu
+host.name:port
+.IP \(bu
+[ip.v4.ad.dr]:port
+.IP \(bu
+[ipv6::addr]:port
 .TP
 .B \-k <key file>
 Use the provided key file to authenticate and encrypt.
-Pass "-" to read from standard input.
+Pass "\-" to read from standard input.
 Note that reading the key via standard input will make it impossible
 to read anything else via standard input, thereby limiting
 .B spipe
