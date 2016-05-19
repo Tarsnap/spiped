@@ -15,6 +15,8 @@
 #include "dispatch.h"
 #include "proto_crypt.h"
 
+volatile sig_atomic_t should_shutdown = 0;
+
 static void
 usage(void)
 {
@@ -30,8 +32,18 @@ usage(void)
 }
 
 /*
- * Signal handler for SIGTERM and SIGINT in case we are running
- * inside a container as PID 1.
+ * Signal handler for SIGTERM to perform a graceful shutdown.
+ */
+static void
+graceful_shutdown_handler(int signo)
+{
+
+	(void)signo; /* UNUSED */
+	should_shutdown = 1;
+}
+
+/*
+ * Signal handler for SIGINT to perform a hard shutdown.
  */
 static void
 diediedie_handler(int signo)
@@ -39,6 +51,22 @@ diediedie_handler(int signo)
 
 	(void)signo; /* UNUSED */
 	_exit(0);
+}
+
+/*
+ * Requests a graceful shutdown of the given cookie.
+ */
+int
+graceful_shutdown(void * cookie)
+{
+	struct accept_state * A = cookie;
+
+	if (should_shutdown)
+		dispatch_request_shutdown(A);
+	else
+		events_timer_register_double(graceful_shutdown, A, 1.0);
+
+	return 0;
 }
 
 /* Simplify error-handling in command-line parse loop. */
@@ -225,15 +253,17 @@ main(int argc, char * argv[])
 		}
 	}
 
+	if (signal(SIGTERM, graceful_shutdown_handler) == SIG_ERR) {
+		warnp("Failed to bind SIGTERM signal handler");
+		goto err1;
+	}
+
 	/* Check whether we are running as init (e.g., inside a container). */
 	if (getpid() == 1) {
 		/* https://github.com/docker/docker/issues/7086 */
 		warn0("WARNING: Applying workaround for Docker signal-handling bug");
 
-		/* Bind an explicit signal handler for SIGTERM and SIGINT. */
-		if (signal(SIGTERM, diediedie_handler) == SIG_ERR) {
-			warnp("Failed to bind SIGTERM signal handler");
-		}
+		/* Bind an explicit signal handler for SIGINT. */
 		if (signal(SIGINT, diediedie_handler) == SIG_ERR) {
 			warnp("Failed to bind SIGINT signal handler");
 		}
@@ -292,11 +322,14 @@ main(int argc, char * argv[])
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
-	    opt_1 ? &conndone : NULL)) == NULL) {
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o, opt_1,
+	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
 		goto err5;
 	}
+
+	/* Check periodically whether a signal was received. */
+	events_timer_register_double(graceful_shutdown, dispatch_cookie, 1.0);
 
 	/*
 	 * Loop until an error occurs, or a connection closes if the

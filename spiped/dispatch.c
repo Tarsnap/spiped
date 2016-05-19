@@ -23,6 +23,8 @@ struct accept_state {
 	int requirefps;
 	int nokeepalive;
 	int * conndone;
+	int only_one;
+	int shutdown_requested;
 	const struct proto_secret * K;
 	size_t nconn;
 	size_t nconn_max;
@@ -80,7 +82,7 @@ doaccept(struct accept_state * A)
 	int rc = 0;
 
 	/* If we can, accept a new connection. */
-	if ((A->nconn < A->nconn_max) && (A->accept_cookie == NULL)) {
+	if ((A->nconn < A->nconn_max) && (A->accept_cookie == NULL) && !A->shutdown_requested) {
 		if ((A->accept_cookie =
 		    network_accept(A->s, callback_gotconn, A)) == NULL)
 			rc = -1;
@@ -99,8 +101,12 @@ callback_conndied(void * cookie)
 	/* We've lost a connection. */
 	A->nconn -= 1;
 
+	/* If requested to do so, indicate that all connections are closed. */
+	if (A->shutdown_requested && (A->nconn == 0))
+		*A->conndone = 1;
+
 	/* If requested to do so, indicate that a connection closed. */
-	if (A->conndone != NULL)
+	if (A->only_one)
 		*A->conndone = 1;
 
 	/* Maybe accept more connections. */
@@ -156,7 +162,7 @@ err0:
 
 /**
  * dispatch_accept(s, tgt, rtime, sas, decr, nofps, requirefps, nokeepalive, K,
- *     nconn_max, timeo, conndone):
+ *     nconn_max, timeo, only_one, conndone):
  * Start accepting connections on the socket ${s}.  Connect to the target
  * ${tgt}, re-resolving it every ${rtime} seconds if ${rtime} > 0; on address
  * resolution failure use the most recent successfully obtained addresses, or
@@ -166,15 +172,18 @@ err0:
  * forward secrecy.  If ${requirefps} is non-zero, require that both ends use
  * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
  * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
- * connecting to the target takes more than ${timeo} seconds.  If ${conndone}
- * is not NULL, set it to non-zero value when a connection closes.  Returns a
- * cookie which can be passed to dispatch_shutdown.
+ * connecting to the target takes more than ${timeo} seconds.  If ${only_one}
+ * is a non-zero value, then ${conndone} is set to a non-zero value as soon as
+ * a connection closes.  If dispatch_request_shutdown is called then ${conndone}
+ * is set to a non-zero value as soon as there are no active connections.
+ * Returns a cookie which can be passed to dispatch_shutdown and
+ * dispatch_request_shutdown.
  */
 void *
 dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
     int decr, int nofps, int requirefps, int nokeepalive,
     const struct proto_secret * K, size_t nconn_max, double timeo,
-    int * conndone)
+    int only_one, int * conndone)
 {
 	struct accept_state * A;
 
@@ -190,6 +199,8 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->requirefps = requirefps;
 	A->nokeepalive = nokeepalive;
 	A->conndone = conndone;
+	A->only_one = only_one;
+	A->shutdown_requested = 0;
 	A->K = K;
 	A->nconn = 0;
 	A->nconn_max = nconn_max;
@@ -246,4 +257,29 @@ dispatch_shutdown(void * dispatch_cookie)
 	if (A->T != NULL)
 		dnsthread_kill(A->T);
 	free(A);
+}
+
+/**
+ * dispatch_request_shutdown(dispatch_cookie):
+ * Requests a shutdown: Stop accepting new connections and notify once
+ * every existing connection ended.
+ */
+void
+dispatch_request_shutdown(void * dispatch_cookie)
+{
+	struct accept_state * A = dispatch_cookie;
+
+	A->shutdown_requested = 1;
+
+	/* Cancel any further accepts. */
+	if (A->accept_cookie != NULL) {
+		network_accept_cancel(A->accept_cookie);
+		A->accept_cookie = NULL;
+	}
+
+	/* If no connections are open... */
+	if (A->nconn == 0) {
+		/* Indicate that all connections are closed. */
+		*A->conndone = 1;
+	}
 }
