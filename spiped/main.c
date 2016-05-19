@@ -16,6 +16,7 @@
 #include "proto_crypt.h"
 
 volatile sig_atomic_t should_shutdown = 0;
+static void * graceful_shutdown_timer_cookie = NULL;
 
 static void
 usage(void)
@@ -64,7 +65,8 @@ graceful_shutdown(void * cookie)
 	if (should_shutdown)
 		dispatch_request_shutdown(A);
 	else
-		events_timer_register_double(graceful_shutdown, A, 1.0);
+		graceful_shutdown_timer_cookie = events_timer_register_double(
+		    graceful_shutdown, A, 1.0);
 
 	return 0;
 }
@@ -329,7 +331,8 @@ main(int argc, char * argv[])
 	}
 
 	/* Check periodically whether a signal was received. */
-	events_timer_register_double(graceful_shutdown, dispatch_cookie, 1.0);
+	graceful_shutdown_timer_cookie = events_timer_register_double(
+	    graceful_shutdown, dispatch_cookie, 1.0);
 
 	/*
 	 * Loop until an error occurs, or a connection closes if the
@@ -339,6 +342,9 @@ main(int argc, char * argv[])
 		warnp("Error running event loop");
 		goto err6;
 	}
+
+	/* Deregister the graceful_shutdown timer. */
+	events_timer_cancel(graceful_shutdown_timer_cookie);
 
 	/* Stop accepting connections and shut down the dispatcher. */
 	dispatch_shutdown(dispatch_cookie);
@@ -360,6 +366,7 @@ main(int argc, char * argv[])
 	exit(0);
 
 err6:
+	events_timer_cancel(graceful_shutdown_timer_cookie);
 	dispatch_shutdown(dispatch_cookie);
 err5:
 	events_shutdown();
