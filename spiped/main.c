@@ -62,6 +62,9 @@ graceful_shutdown(void * cookie)
 {
 	struct accept_state * A = cookie;
 
+	/* This timer has expired. */
+	graceful_shutdown_timer_cookie = NULL;
+
 	if (should_shutdown)
 		dispatch_request_shutdown(A);
 	else
@@ -344,7 +347,8 @@ main(int argc, char * argv[])
 	}
 
 	/* Deregister the graceful_shutdown timer. */
-	events_timer_cancel(graceful_shutdown_timer_cookie);
+	if (graceful_shutdown_timer_cookie != NULL)
+		events_timer_cancel(graceful_shutdown_timer_cookie);
 
 	/* Stop accepting connections and shut down the dispatcher. */
 	dispatch_shutdown(dispatch_cookie);
@@ -366,7 +370,8 @@ main(int argc, char * argv[])
 	exit(0);
 
 err6:
-	events_timer_cancel(graceful_shutdown_timer_cookie);
+	if (graceful_shutdown_timer_cookie != NULL)
+		events_timer_cancel(graceful_shutdown_timer_cookie);
 	dispatch_shutdown(dispatch_cookie);
 err5:
 	events_shutdown();
