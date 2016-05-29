@@ -153,5 +153,15 @@ Print version number.
 .TP
 .B \-1
 Exit after a connection closes.  Used for internal testing.
+.SH SIGNALS
+spiped provides special treatment of the following signals:
+.TP
+.B SIGTERM
+On receipt of the
+.I SIGTERM
+signal
+.B spiped
+will stop accepting new connections and exit once there are
+no active connections left.
 .SH SEE ALSO
 .BR spipe (1).
