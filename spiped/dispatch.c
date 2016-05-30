@@ -82,7 +82,8 @@ doaccept(struct accept_state * A)
 	int rc = 0;
 
 	/* If we can, accept a new connection. */
-	if ((A->nconn < A->nconn_max) && (A->accept_cookie == NULL) && !A->shutdown_requested) {
+	if ((A->nconn < A->nconn_max) && (A->accept_cookie == NULL) &&
+	    !A->shutdown_requested) {
 		if ((A->accept_cookie =
 		    network_accept(A->s, callback_gotconn, A)) == NULL)
 			rc = -1;
