@@ -22,4 +22,11 @@ struct sock_addr;
 int proto_conn_create(int, struct sock_addr **, int, int, int, int,
     const struct proto_secret *, double, int (*)(void *), void *);
 
+/**
+ * proto_conn_drop(conn_cookie):
+ * Drop connection and frees memory associated with ${conn_cookie}.  Return
+ * success or failure.
+ */
+int proto_conn_drop(void * conn_cookie);
+
 #endif /* !_CONN_H_ */

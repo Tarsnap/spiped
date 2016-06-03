@@ -135,10 +135,15 @@ err0:
 	return (-1);
 }
 
-/* Drop a connection. */
-static int
-proto_conn_drop(struct conn_state * C)
+/**
+ * proto_conn_drop(conn_cookie):
+ * Drop connection and frees memory associated with ${conn_cookie}.  Return
+ * success or failure.
+ */
+int
+proto_conn_drop(void * conn_cookie)
 {
+	struct conn_state * C = conn_cookie;
 	int rc;
 
 	/* Close the incoming connection. */
