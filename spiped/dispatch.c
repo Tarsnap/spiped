@@ -31,7 +31,16 @@ struct accept_state {
 	double timeo;
 	void * accept_cookie;
 	void * dnstimer_cookie;
+	struct conn_list_node * conn_cookies;
 	DNSTHREAD T;
+};
+
+/* Doubly linked list. */
+struct conn_list_node {
+	void * conn_cookie;
+	struct conn_list_node * prev;
+	struct conn_list_node * next;
+	struct accept_state * A;
 };
 
 static int callback_gotconn(void *, int);
@@ -97,10 +106,14 @@ doaccept(struct accept_state * A)
 static int
 callback_conndied(void * cookie)
 {
-	struct accept_state * A = cookie;
+	struct conn_list_node * node_ptr = cookie;
+	struct accept_state * A = node_ptr->A;
 
 	/* We've lost a connection. */
 	A->nconn -= 1;
+
+	/* Clean up the now-unused node. */
+	free(node_ptr);
 
 	/* If requested to do so, indicate that all connections are closed. */
 	if (A->shutdown_requested && (A->nconn == 0))
@@ -120,6 +133,7 @@ callback_gotconn(void * cookie, int s)
 {
 	struct accept_state * A = cookie;
 	struct sock_addr ** sas;
+	struct conn_list_node * node_new;
 
 	/* This accept is no longer in progress. */
 	A->accept_cookie = NULL;
@@ -137,11 +151,19 @@ callback_gotconn(void * cookie, int s)
 	if ((sas = sock_addr_duplist(A->sas)) == NULL)
 		goto err1;
 
-	/* Create a new connection. */
-	if (proto_conn_create(s, sas, A->decr, A->nofps, A->requirefps,
-	    A->nokeepalive, A->K, A->timeo, callback_conndied, A) == NULL) {
-		warnp("Failure setting up new connection");
+	/* Create new conn_list_node. */
+	if ((node_new = malloc(sizeof(struct conn_list_node))) == NULL)
 		goto err2;
+	node_new->prev = NULL;
+	node_new->next = NULL;
+	node_new->A = A;
+
+	/* Create a new connection. */
+	if ((node_new->conn_cookie = proto_conn_create(s, sas, A->decr,
+	    A->nofps, A->requirefps, A->nokeepalive, A->K, A->timeo,
+	    callback_conndied, node_new)) == NULL) {
+		warnp("Failure setting up new connection");
+		goto err3;
 	}
 
 	/* Accept another connection if we can. */
@@ -151,6 +173,8 @@ callback_gotconn(void * cookie, int s)
 	/* Success! */
 	return (0);
 
+err3:
+	free(node_new);
 err2:
 	sock_addr_freelist(sas);
 err1:
@@ -209,6 +233,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->T = NULL;
 	A->accept_cookie = NULL;
 	A->dnstimer_cookie = NULL;
+	A->conn_cookies = NULL;
 
 	/* If address re-resolution is enabled... */
 	if (rtime > 0.0) {
