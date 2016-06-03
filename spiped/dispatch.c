@@ -139,7 +139,7 @@ callback_gotconn(void * cookie, int s)
 
 	/* Create a new connection. */
 	if (proto_conn_create(s, sas, A->decr, A->nofps, A->requirefps,
-	    A->nokeepalive, A->K, A->timeo, callback_conndied, A)) {
+	    A->nokeepalive, A->K, A->timeo, callback_conndied, A) == NULL) {
 		warnp("Failure setting up new connection");
 		goto err2;
 	}
