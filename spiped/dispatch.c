@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -109,8 +110,25 @@ callback_conndied(void * cookie)
 	struct conn_list_node * node_ptr = cookie;
 	struct accept_state * A = node_ptr->A;
 
+	/* We should always have a non-empty list of conn_cookies. */
+	assert(A->conn_cookies != NULL);
+
 	/* We've lost a connection. */
 	A->nconn -= 1;
+
+	/* Remove the closed connection from the list of conn_cookies. */
+	if (node_ptr == A->conn_cookies) {
+		/* Closed conn_cookie is first in the list. */
+		A->conn_cookies = node_ptr->next;
+		if (node_ptr->next != NULL)
+			node_ptr->next->prev = NULL;
+	} else {
+		/* Closed conn_cookie is in the middle of list. */
+		assert(node_ptr->prev != NULL);
+		node_ptr->prev->next = node_ptr->next;
+		if (node_ptr->next != NULL)
+			node_ptr->next->prev = node_ptr->prev;
+	}
 
 	/* Clean up the now-unused node. */
 	free(node_ptr);
@@ -165,6 +183,15 @@ callback_gotconn(void * cookie, int s)
 		warnp("Failure setting up new connection");
 		goto err3;
 	}
+
+	/* Link node_new to the beginning of the conn_cookies list. */
+	if (A->conn_cookies != NULL) {
+		node_new->next = A->conn_cookies;
+		node_new->next->prev = node_new;
+	}
+
+	/* Insert node_new to the beginning of the conn_cookies list. */
+	A->conn_cookies = node_new;
 
 	/* Accept another connection if we can. */
 	if (doaccept(A))
