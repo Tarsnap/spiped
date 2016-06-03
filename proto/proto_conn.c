@@ -137,7 +137,7 @@ err0:
 
 /* Drop a connection. */
 static int
-dropconn(struct conn_state * C)
+proto_conn_drop(struct conn_state * C)
 {
 	int rc;
 
@@ -277,7 +277,7 @@ callback_connect_done(void * cookie, int t)
 
 	/* Did we manage to connect? */
 	if ((C->t = t) == -1)
-		return (dropconn(C));
+		return (proto_conn_drop(C));
 
 	/* If we're encrypting, start the handshake. */
 	if (!C->decr) {
@@ -295,7 +295,7 @@ callback_connect_done(void * cookie, int t)
 	return (0);
 
 err1:
-	dropconn(C);
+	proto_conn_drop(C);
 
 	/* Failure! */
 	return (-1);
@@ -313,11 +313,12 @@ callback_connect_timeout(void * cookie)
 	/*
 	 * We could free C->sas here, but from a semantic point of view it
 	 * could still be in use by the not-yet-cancelled connect operation.
-	 * Instead, we free it in dropconn, after cancelling the connect.
+	 * Instead, we free it in proto_conn_drop, after cancelling the
+	 * connect.
 	 */
 
 	/* Drop the connection. */
-	return (dropconn(C));
+	return (proto_conn_drop(C));
 }
 
 /* We have performed the protocol handshake. */
@@ -336,7 +337,7 @@ callback_handshake_done(void * cookie, struct proto_keys * f,
 
 	/* If the protocol handshake failed, drop the connection. */
 	if ((f == NULL) && (r == NULL))
-		return (dropconn(C));
+		return (proto_conn_drop(C));
 
 	/* We should have two keys. */
 	assert(f != NULL);
@@ -356,7 +357,7 @@ callback_handshake_done(void * cookie, struct proto_keys * f,
 	return (0);
 
 err1:
-	dropconn(C);
+	proto_conn_drop(C);
 
 	/* Failure! */
 	return (-1);
@@ -372,7 +373,7 @@ callback_handshake_timeout(void * cookie)
 	C->handshake_timeout_cookie = NULL;
 
 	/* Drop the connection. */
-	return (dropconn(C));
+	return (proto_conn_drop(C));
 }
 
 /* The status of one of the directions has changed. */
@@ -383,11 +384,11 @@ callback_pipestatus(void * cookie)
 
 	/* If we have an error in either direction, kill the connection. */
 	if ((C->stat_f == -1) || (C->stat_r == -1))
-		return (dropconn(C));
+		return (proto_conn_drop(C));
 
 	/* If both directions have been shut down, kill the connection. */
 	if ((C->stat_f == 0) && (C->stat_r == 0))
-		return (dropconn(C));
+		return (proto_conn_drop(C));
 
 	/* Nothing to do. */
 	return (0);
