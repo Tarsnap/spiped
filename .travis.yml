@@ -23,3 +23,4 @@ before_install:
 - 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install nmap; fi'
 - 'if [[ "${TRAVIS_JOB_NUMBER##*.}" == "1" ]]; then curl -s "https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh" | bash || true ; fi'
 - 'if [[ "$TRAVIS_OS_NAME" == "osx" && "$CC" == "gcc" ]]; then CC=gcc-4.9; $CC --version; fi'
+- 'if [[ "$CC" == "gcc" ]]; then CC="gcc -std=c99"; $CC --version; fi'
