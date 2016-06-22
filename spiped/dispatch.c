@@ -177,7 +177,7 @@ err0:
  * is a non-zero value, then ${conndone} is set to a non-zero value as soon as
  * a connection closes.  If dispatch_request_shutdown is called then ${conndone}
  * is set to a non-zero value as soon as there are no active connections.
- * Returns a cookie which can be passed to dispatch_shutdown and
+ * Return a cookie which can be passed to dispatch_shutdown and
  * dispatch_request_shutdown.
  */
 void *
