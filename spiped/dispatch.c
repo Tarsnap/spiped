@@ -303,6 +303,14 @@ dispatch_shutdown(void * dispatch_cookie)
 {
 	struct accept_state * A = dispatch_cookie;
 
+	/*
+	 * Shutdown any open connections.  proto_conn_drop() will call
+	 * callback_conndied(), which removes the relevant conn_list_node from
+	 * the list of conn_cookies.
+	 */
+	while (A->conn_cookies != NULL)
+		proto_conn_drop(A->conn_cookies->conn_cookie);
+
 	if (A->accept_cookie != NULL)
 		network_accept_cancel(A->accept_cookie);
 	if (A->dnstimer_cookie != NULL)
