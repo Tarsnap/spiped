@@ -106,8 +106,9 @@ main(int argc, char * argv[])
 			exit(0);
 		GETOPT_MISSING_ARG:
 			warn0("Missing argument to %s\n", ch);
-			/* FALLTHROUGH */
+			usage();
 		GETOPT_DEFAULT:
+			warn0("illegal option -- %s\n", ch);
 			usage();
 		}
 	}
