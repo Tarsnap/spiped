@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,7 +32,16 @@ struct accept_state {
 	double timeo;
 	void * accept_cookie;
 	void * dnstimer_cookie;
+	struct conn_list_node * conn_cookies;
 	DNSTHREAD T;
+};
+
+/* Doubly linked list. */
+struct conn_list_node {
+	void * conn_cookie;
+	struct conn_list_node * prev;
+	struct conn_list_node * next;
+	struct accept_state * A;
 };
 
 static int callback_gotconn(void *, int);
@@ -97,10 +107,31 @@ doaccept(struct accept_state * A)
 static int
 callback_conndied(void * cookie)
 {
-	struct accept_state * A = cookie;
+	struct conn_list_node * node_ptr = cookie;
+	struct accept_state * A = node_ptr->A;
+
+	/* We should always have a non-empty list of conn_cookies. */
+	assert(A->conn_cookies != NULL);
 
 	/* We've lost a connection. */
 	A->nconn -= 1;
+
+	/* Remove the closed connection from the list of conn_cookies. */
+	if (node_ptr == A->conn_cookies) {
+		/* Closed conn_cookie is first in the list. */
+		A->conn_cookies = node_ptr->next;
+		if (node_ptr->next != NULL)
+			node_ptr->next->prev = NULL;
+	} else {
+		/* Closed conn_cookie is in the middle of list. */
+		assert(node_ptr->prev != NULL);
+		node_ptr->prev->next = node_ptr->next;
+		if (node_ptr->next != NULL)
+			node_ptr->next->prev = node_ptr->prev;
+	}
+
+	/* Clean up the now-unused node. */
+	free(node_ptr);
 
 	/* If requested to do so, indicate that all connections are closed. */
 	if (A->shutdown_requested && (A->nconn == 0))
@@ -120,6 +151,7 @@ callback_gotconn(void * cookie, int s)
 {
 	struct accept_state * A = cookie;
 	struct sock_addr ** sas;
+	struct conn_list_node * node_new;
 
 	/* This accept is no longer in progress. */
 	A->accept_cookie = NULL;
@@ -137,12 +169,29 @@ callback_gotconn(void * cookie, int s)
 	if ((sas = sock_addr_duplist(A->sas)) == NULL)
 		goto err1;
 
-	/* Create a new connection. */
-	if (proto_conn_create(s, sas, A->decr, A->nofps, A->requirefps,
-	    A->nokeepalive, A->K, A->timeo, callback_conndied, A)) {
-		warnp("Failure setting up new connection");
+	/* Create new conn_list_node. */
+	if ((node_new = malloc(sizeof(struct conn_list_node))) == NULL)
 		goto err2;
+	node_new->prev = NULL;
+	node_new->next = NULL;
+	node_new->A = A;
+
+	/* Create a new connection. */
+	if ((node_new->conn_cookie = proto_conn_create(s, sas, A->decr,
+	    A->nofps, A->requirefps, A->nokeepalive, A->K, A->timeo,
+	    callback_conndied, node_new)) == NULL) {
+		warnp("Failure setting up new connection");
+		goto err3;
 	}
+
+	/* Link node_new to the beginning of the conn_cookies list. */
+	if (A->conn_cookies != NULL) {
+		node_new->next = A->conn_cookies;
+		node_new->next->prev = node_new;
+	}
+
+	/* Insert node_new to the beginning of the conn_cookies list. */
+	A->conn_cookies = node_new;
 
 	/* Accept another connection if we can. */
 	if (doaccept(A))
@@ -151,6 +200,8 @@ callback_gotconn(void * cookie, int s)
 	/* Success! */
 	return (0);
 
+err3:
+	free(node_new);
 err2:
 	sock_addr_freelist(sas);
 err1:
@@ -209,6 +260,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->T = NULL;
 	A->accept_cookie = NULL;
 	A->dnstimer_cookie = NULL;
+	A->conn_cookies = NULL;
 
 	/* If address re-resolution is enabled... */
 	if (rtime > 0.0) {
@@ -250,6 +302,14 @@ void
 dispatch_shutdown(void * dispatch_cookie)
 {
 	struct accept_state * A = dispatch_cookie;
+
+	/*
+	 * Shutdown any open connections.  proto_conn_drop() will call
+	 * callback_conndied(), which removes the relevant conn_list_node from
+	 * the list of conn_cookies.
+	 */
+	while (A->conn_cookies != NULL)
+		proto_conn_drop(A->conn_cookies->conn_cookie);
 
 	if (A->accept_cookie != NULL)
 		network_accept_cancel(A->accept_cookie);

@@ -163,7 +163,7 @@ main(int argc, char * argv[])
 
 	/* Set up a connection. */
 	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_g, opt_j, K, opt_o,
-	    callback_conndied, NULL)) {
+	    callback_conndied, NULL) == NULL) {
 		warnp("Could not set up connection");
 		exit(1);
 	}
