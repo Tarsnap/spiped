@@ -27,7 +27,7 @@ spipe_binary=$scriptdir/../spipe/spipe
 # Find system spiped if it supports -1.
 system_spiped_binary=`which spiped`
 if [ -n "$system_spiped_binary" ]; then
-	if $system_spiped_binary -1 2>&1 >/dev/null | grep -q "invalid option"; then
+	if $system_spiped_binary -1 2>&1 >/dev/null | grep -qE "(invalid|illegal) option"; then
 		# Disable test.
 		system_spiped_binary=""
 	fi
