@@ -14,6 +14,8 @@ if ! "${CC}" -D_POSIX_C_SOURCE=200809L posix-restrict.c 2>/dev/null; then
 	if "${CC}" -D_POSIX_C_SOURCE=200809L -std=c99 posix-restrict.c ; then
 		[ ${FIRST} = "NO" ] && printf " "; FIRST=NO
 		printf %s "-std=c99"
+	else
+		echo "ERROR: adding -std=c99 does not fix 'restrict'; cannot continue". 1>&2
 	fi
 fi
 rm -f a.out
