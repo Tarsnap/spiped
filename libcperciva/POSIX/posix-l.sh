@@ -1,7 +1,7 @@
 # Should be sourced by `command -p sh posix-l.sh` from within a Makefile.
 FIRST=YES
 for LIB in rt xnet; do
-	if ${CC} -l${LIB} posix-l.c 2>/dev/null; then
+	if "${CC}" -l${LIB} posix-l.c 2>/dev/null; then
 		if [ ${FIRST} = "NO" ]; then
 			printf " ";
 		fi
