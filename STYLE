@@ -26,7 +26,7 @@ useful.  As an exception to this, malloc failures (i.e., errno = ENOMEM) can
 result in failure being passed back up the call chain without being printed
 immediately.  (Naturally, other errors can be passed back where a function
 definition so specifies; e.g., ENOENT in cases where a file not existing is
-not erronous.)
+not erroneous.)
 
 The first statement in main(), after variable declarations, should be
 "WARNP_INIT;" in order to set the program name used for printing warnings.
@@ -149,3 +149,6 @@ Oxford (aka. serial) comma should be used in lists.  Quotation marks
 should be placed logically, i.e., not including punctuation marks which
 do not form a logical part of the quoted text.  Two spaces should be used
 after a period which ends a sentence.
+
+The first local variable declaration in cookie-using functions should be
+	struct foo * bar = cookie;

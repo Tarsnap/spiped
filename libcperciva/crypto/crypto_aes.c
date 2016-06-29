@@ -23,16 +23,19 @@ struct crypto_aes_key;
 #ifdef CPUSUPPORT_X86_AESNI
 /* Test whether OpenSSL and AESNI code produce the same AES ciphertext. */
 static int
-aesnitest(uint8_t ptext[16], uint8_t * key, size_t keylen)
+aesnitest(uint8_t ptext[16], uint8_t * key, size_t len)
 {
 	AES_KEY kexp_openssl;
 	void * kexp_aesni;
 	uint8_t ctext_openssl[16];
 	uint8_t ctext_aesni[16];
 
+	/* Sanity-check. */
+	assert((len == 16) || (len == 32));
+
 	/* Expand the key. */
-	AES_set_encrypt_key(key, keylen * 8, &kexp_openssl);
-	if ((kexp_aesni = crypto_aes_key_expand_aesni(key, keylen)) == NULL)
+	AES_set_encrypt_key(key, (int)(len * 8), &kexp_openssl);
+	if ((kexp_aesni = crypto_aes_key_expand_aesni(key, len)) == NULL)
 		goto err0;
 
 	/* Encrypt the block. */
@@ -70,9 +73,9 @@ useaesni(void)
 
 		/* Test cases: key is 0x00010203..., ptext is 0x00112233... */
 		for (i = 0; i < 16; i++)
-			ptext[i] = 0x11 * i;
+			ptext[i] = (0x11 * i) & 0xff;
 		for (i = 0; i < 32; i++)
-			key[i] = i;
+			key[i] = i & 0xff;
 
 		/* Test that AESNI and OpenSSL produce the same results. */
 		if (aesnitest(ptext, key, 16) || aesnitest(ptext, key, 32)) {
@@ -112,7 +115,7 @@ crypto_aes_key_expand(const uint8_t * key, size_t len)
 		goto err0;
 
 	/* Expand the key. */
-	AES_set_encrypt_key(key, len * 8, kexp);
+	AES_set_encrypt_key(key, (int)(len * 8), kexp);
 
 	/* Success! */
 	return ((void *)kexp);

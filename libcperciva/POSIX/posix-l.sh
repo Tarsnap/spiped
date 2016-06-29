@@ -1,4 +1,8 @@
-# Should be sourced by `command -p sh posix-l.sh` from within a Makefile.
+# Should be sourced by `command -p sh posix-l.sh "$PATH"` from within a Makefile.
+if ! [ ${PATH} = "$1" ]; then
+	echo "WARNING: POSIX violation: $SHELL's command -p resets \$PATH" 1>&2
+	PATH=$1
+fi
 FIRST=YES
 for LIB in rt xnet; do
 	if ${CC} -l${LIB} posix-l.c 2>/dev/null; then

@@ -2,6 +2,7 @@ spiped-1.6.0
 * The -k option now accepts "-" as a synonym for standard input.
 * New option -v (spipe/spiped): Print version number.
 * Add workaround for docker signal-handling bug in spiped.
+* Perform a graceful shutdown on SIGTERM.
 spiped-1.5.0
 * Attempt to set the TCP_NODELAY socket option on connections, in order
   to avoid punishing latencies from TCP nagling.
@@ -24,7 +25,7 @@ spiped-1.3.1
 * Minor code cleanups.
 spiped-1.3.0
 * Bug fix: spiped now correctly closes connections which have been reset;
-  in earlier versions spiped could erronously hold "dead" connections open
+  in earlier versions spiped could erroneously hold "dead" connections open
   as long as they remained idle.
 * Man pages added.
 * Protocol-layer keep-alives are now enabled by default.

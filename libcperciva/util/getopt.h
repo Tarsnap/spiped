@@ -19,6 +19,26 @@
  * a horrible GNU perversion.
  */
 
+/* Work around LLVM bug. */
+#ifdef __clang__
+#warning Working around bug in LLVM optimizer
+#warning For more details see https://llvm.org/bugs/show_bug.cgi?id=27190
+#define DO_SETJMP _DO_SETJMP(__LINE__)
+#define _DO_SETJMP(x) __DO_SETJMP(x)
+#define __DO_SETJMP(x)							\
+	void * getopt_initloop = && getopt_initloop_ ## x;		\
+	getopt_initloop_ ## x:
+#define DO_LONGJMP							\
+	goto *getopt_initloop
+#else
+#define DO_SETJMP							\
+	sigjmp_buf getopt_initloop;					\
+	if (!getopt_initialized)					\
+		sigsetjmp(getopt_initloop, 0)
+#define DO_LONGJMP							\
+	siglongjmp(getopt_initloop, 1)
+#endif
+
 /* Avoid namespace collisions with libc getopt. */
 #define getopt	libcperciva_getopt
 #define optarg	libcperciva_optarg
@@ -47,16 +67,14 @@ extern int optind, opterr, optreset;
  * Jump to the appropriate GETOPT_OPT, GETOPT_OPTARG, GETOPT_MISSING_ARG, or
  * GETOPT_DEFAULT based on the option string ${ch}.  When called for the first
  * time, perform magic to index the options.
- * 
+ *
  * GETOPT_SWITCH(ch) is equivalent to "switch (ch)" in a standard getopt loop.
  */
 #define GETOPT_SWITCH(ch)						\
 	volatile size_t getopt_ln_min = __LINE__;			\
 	volatile size_t getopt_ln = getopt_ln_min - 1;		\
 	volatile int getopt_default_missing = 0;			\
-	sigjmp_buf getopt_initloop;					\
-	if (!getopt_initialized)					\
-		sigsetjmp(getopt_initloop, 0);				\
+	DO_SETJMP;						\
 	switch (getopt_initialized ? getopt_lookup(ch) + getopt_ln_min : getopt_ln++)
 
 /**
@@ -73,7 +91,7 @@ extern int optind, opterr, optreset;
 		if (getopt_initialized)					\
 			goto getopt_skip_ ## ln;			\
 		getopt_register_opt(os, ln - getopt_ln_min, 0);		\
-		siglongjmp(getopt_initloop, 1);				\
+		DO_LONGJMP;						\
 	getopt_skip_ ## ln
 
 /**
@@ -81,7 +99,7 @@ extern int optind, opterr, optreset;
  * Jump to this point when the option string ${os} is passed to GETOPT_SWITCH,
  * unless no argument is available, in which case jump to GETOPT_MISSING_ARG
  * (if present) or GETOPT_DEFAULT (if not).
- * 
+ *
  * GETOPT_OPTARG("-x") is equivalent to "case 'x'" in a standard getopt loop
  * which has an optstring containing "x:".
  */
@@ -92,14 +110,14 @@ extern int optind, opterr, optreset;
 		if (getopt_initialized)					\
 			goto getopt_skip_ ## ln;			\
 		getopt_register_opt(os, ln - getopt_ln_min, 1);		\
-		siglongjmp(getopt_initloop, 1);				\
+		DO_LONGJMP;						\
 	getopt_skip_ ## ln
 
 /**
  * GETOPT_MISSING_ARG:
  * Jump to this point if an option string specified in GETOPT_OPTARG is seen
  * but no argument is available.
- * 
+ *
  * GETOPT_MISSING_ARG is equivalent to "case ':'" in a standard getopt loop
  * which has an optstring starting with ":".  As such, it also has the effect
  * of disabling warnings about invalid options, as if opterr had been zeroed.
@@ -111,7 +129,7 @@ extern int optind, opterr, optreset;
 		if (getopt_initialized)					\
 			goto getopt_skip_ ## ln;			\
 		getopt_register_missing(ln - getopt_ln_min);		\
-		siglongjmp(getopt_initloop, 1);				\
+		DO_LONGJMP;						\
 	getopt_skip_ ## ln
 
 /**
@@ -119,9 +137,9 @@ extern int optind, opterr, optreset;
  * Jump to this point if an unrecognized option is seen or if an option
  * specified in GETOPT_OPTARG is seen, no argument is available, and there is
  * no GETOPT_MISSING_ARG label.
- * 
+ *
  * GETOPT_DEFAULT is equivalent to "case '?'" in a standard getopt loop.
- * 
+ *
  * NOTE: This MUST be present in the GETOPT_SWITCH statement, and MUST occur
  * after all other GETOPT_* labels.
  */
@@ -139,7 +157,7 @@ extern int optind, opterr, optreset;
 			getopt_setrange(ln - getopt_ln_min);		\
 			getopt_default_missing = 1;			\
 		}							\
-		siglongjmp(getopt_initloop, 1);				\
+		DO_LONGJMP;						\
 	getopt_skip_ ## ln
 
 /*

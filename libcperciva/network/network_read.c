@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include "events.h"
-#include "warnp.h"
 
 #include "network.h"
 
@@ -65,8 +64,11 @@ callback_buf(void * cookie)
 		goto eof;
 	}
 
-	/* We processed some data.  Do we need to keep going? */
-	if ((C->bufpos += len) < C->minlen)
+	/* We processed some data. */
+	C->bufpos += (size_t)len;
+
+	/* Do we need to keep going? */
+	if (C->bufpos < C->minlen)
 		goto tryagain;
 
 	/* Invoke the callback and return. */

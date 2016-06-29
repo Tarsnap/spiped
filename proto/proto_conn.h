@@ -17,9 +17,17 @@ struct sock_addr;
  * only if ${nokeepalive} is zero.  Drop the connection if the handshake or
  * connecting to the target takes more than ${timeo} seconds.  When the
  * connection is dropped, invoke ${callback_dead}(${cookie}).  Free ${sas}
- * once it is no longer needed.
+ * once it is no longer needed.  Return a cookie which can be passed to
+ * proto_conn_drop.
  */
-int proto_conn_create(int, struct sock_addr **, int, int, int, int,
+void * proto_conn_create(int, struct sock_addr **, int, int, int, int,
     const struct proto_secret *, double, int (*)(void *), void *);
+
+/**
+ * proto_conn_drop(conn_cookie):
+ * Drop connection and frees memory associated with ${conn_cookie}.  Return
+ * success or failure.
+ */
+int proto_conn_drop(void * conn_cookie);
 
 #endif /* !_CONN_H_ */

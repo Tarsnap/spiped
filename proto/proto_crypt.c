@@ -159,7 +159,7 @@ proto_crypt_dhmac(const struct proto_secret * K,
 
 /**
  * is_not_one(x, len):
- * Returns non-zero if the big-endian value stored at (${x}, ${len}) is not
+ * Return non-zero if the big-endian value stored at (${x}, ${len}) is not
  * equal to 1.
  */
 static int

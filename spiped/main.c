@@ -15,6 +15,9 @@
 #include "dispatch.h"
 #include "proto_crypt.h"
 
+volatile sig_atomic_t should_shutdown = 0;
+static void * graceful_shutdown_timer_cookie = NULL;
+
 static void
 usage(void)
 {
@@ -24,14 +27,24 @@ usage(void)
 	    "-t <target socket> -k <key file>\n"
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
-	    "    [-p <pidfile>] [-r <rtime> | -R]\n"
+	    "    [-p <pidfile>] [-r <rtime> | -R] [-1]\n"
 	    "       spiped -v\n");
 	exit(1);
 }
 
 /*
- * Signal handler for SIGTERM and SIGINT in case we are running
- * inside a container as PID 1.
+ * Signal handler for SIGTERM to perform a graceful shutdown.
+ */
+static void
+graceful_shutdown_handler(int signo)
+{
+
+	(void)signo; /* UNUSED */
+	should_shutdown = 1;
+}
+
+/*
+ * Signal handler for SIGINT to perform a hard shutdown.
  */
 static void
 diediedie_handler(int signo)
@@ -39,6 +52,26 @@ diediedie_handler(int signo)
 
 	(void)signo; /* UNUSED */
 	_exit(0);
+}
+
+/*
+ * Requests a graceful shutdown of the given cookie.
+ */
+int
+graceful_shutdown(void * cookie)
+{
+	struct accept_state * A = cookie;
+
+	/* This timer has expired. */
+	graceful_shutdown_timer_cookie = NULL;
+
+	if (should_shutdown)
+		dispatch_request_shutdown(A);
+	else
+		graceful_shutdown_timer_cookie = events_timer_register_double(
+		    graceful_shutdown, A, 1.0);
+
+	return 0;
 }
 
 /* Simplify error-handling in command-line parse loop. */
@@ -66,6 +99,7 @@ main(int argc, char * argv[])
 	int opt_R = 0;
 	const char * opt_s = NULL;
 	const char * opt_t = NULL;
+	int opt_1 = 0;
 
 	/* Working variables. */
 	struct sock_addr ** sas_s;
@@ -74,6 +108,7 @@ main(int argc, char * argv[])
 	const char * ch;
 	int s;
 	void * dispatch_cookie = NULL;
+	int conndone = 0;
 
 	WARNP_INIT;
 
@@ -172,10 +207,16 @@ main(int argc, char * argv[])
 		GETOPT_OPT("-v"):
 			fprintf(stderr, "spiped @VERSION@\n");
 			exit(0);
+		GETOPT_OPT("-1"):
+			if (opt_1 != 0)
+				usage();
+			opt_1 = 1;
+			break;
 		GETOPT_MISSING_ARG:
 			warn0("Missing argument to %s\n", ch);
-			/* FALLTHROUGH */
+			usage();
 		GETOPT_DEFAULT:
+			warn0("illegal option -- %s\n", ch);
 			usage();
 		}
 	}
@@ -218,15 +259,17 @@ main(int argc, char * argv[])
 		}
 	}
 
+	if (signal(SIGTERM, graceful_shutdown_handler) == SIG_ERR) {
+		warnp("Failed to bind SIGTERM signal handler");
+		goto err1;
+	}
+
 	/* Check whether we are running as init (e.g., inside a container). */
 	if (getpid() == 1) {
 		/* https://github.com/docker/docker/issues/7086 */
 		warn0("WARNING: Applying workaround for Docker signal-handling bug");
 
-		/* Bind an explicit signal handler for SIGTERM and SIGINT. */
-		if (signal(SIGTERM, diediedie_handler) == SIG_ERR) {
-			warnp("Failed to bind SIGTERM signal handler");
-		}
+		/* Bind an explicit signal handler for SIGINT. */
 		if (signal(SIGINT, diediedie_handler) == SIG_ERR) {
 			warnp("Failed to bind SIGINT signal handler");
 		}
@@ -285,22 +328,51 @@ main(int argc, char * argv[])
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o)) == NULL) {
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o, opt_1,
+	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
 		goto err5;
 	}
 
-	/* Infinite loop handling events. */
-	do {
-		if (events_run()) {
-			warnp("Error running event loop");
-			goto err6;
-		}
-	} while (1);
+	/* Check periodically whether a signal was received. */
+	graceful_shutdown_timer_cookie = events_timer_register_double(
+	    graceful_shutdown, dispatch_cookie, 1.0);
 
-	/* NOTREACHED */
+	/*
+	 * Loop until an error occurs, or a connection closes if the
+	 * command-line argument -1 was given.
+	 */
+	if (events_spin(&conndone)) {
+		warnp("Error running event loop");
+		goto err6;
+	}
+
+	/* Deregister the graceful_shutdown timer. */
+	if (graceful_shutdown_timer_cookie != NULL)
+		events_timer_cancel(graceful_shutdown_timer_cookie);
+
+	/* Stop accepting connections and shut down the dispatcher. */
+	dispatch_shutdown(dispatch_cookie);
+
+	/* Shut down the events system. */
+	events_shutdown();
+
+	/* Free the protocol secret structure. */
+	free(K);
+
+	/* Free arrays of resolved addresses. */
+	sock_addr_freelist(sas_t);
+	sock_addr_freelist(sas_s);
+
+	/* Free pid filename. */
+	free(opt_p);
+
+	/* Success! */
+	exit(0);
 
 err6:
+	if (graceful_shutdown_timer_cookie != NULL)
+		events_timer_cancel(graceful_shutdown_timer_cookie);
 	dispatch_shutdown(dispatch_cookie);
 err5:
 	events_shutdown();
