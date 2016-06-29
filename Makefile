@@ -6,8 +6,8 @@ CFLAGS_DEFAULT=	-O2
 
 all: cpusupport-config.h
 	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
-	export LDADD_POSIX=`export CC="${CC}"; cd libcperciva/POSIX && command -p sh posix-l.sh`;	\
-	export CFLAGS_POSIX=`export CC="${CC}"; cd libcperciva/POSIX && command -p sh posix-cflags.sh`;	\
+	export LDADD_POSIX=`export CC="${CC}"; cd libcperciva/POSIX && command -p sh posix-l.sh "$$PATH"`;	\
+	export CFLAGS_POSIX=`export CC="${CC}"; cd libcperciva/POSIX && command -p sh posix-cflags.sh "$$PATH"`;	\
 	. ./cpusupport-config.h;			\
 	for D in ${PROGS}; do				\
 		( cd $${D} && ${MAKE} all ) || exit 2;	\
