@@ -1,4 +1,8 @@
-# Should be sourced by `command -p sh posix-cflags.sh` from within a Makefile
+# Should be sourced by `command -p sh posix-cflags.sh "$PATH"` from within a Makefile
+if ! [ ${PATH} = "$1" ]; then
+	echo "WARNING: POSIX violation: $SHELL's command -p resets \$PATH" 1>&2
+	PATH=$1
+fi
 FIRST=YES
 if ! ${CC} -D_POSIX_C_SOURCE=200809L posix-msg_nosignal.c 2>/dev/null; then
 	[ ${FIRST} = "NO" ] && printf " "; FIRST=NO
