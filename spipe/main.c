@@ -1,15 +1,11 @@
 #include <sys/socket.h>
 
-#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
-#include "asprintf.h"
 #include "events.h"
 #include "getopt.h"
-#include "sha256.h"
 #include "sock.h"
 #include "warnp.h"
 

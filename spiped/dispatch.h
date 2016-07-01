@@ -2,7 +2,6 @@
 #define _DISPATCH_H_
 
 #include <stddef.h>
-#include <stdint.h>
 
 /* Opaque structures. */
 struct proto_secret;
