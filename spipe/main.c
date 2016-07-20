@@ -1,6 +1,7 @@
 #include <sys/socket.h>
 
 #include <inttypes.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,11 +19,21 @@
 
 #include "pushbits.h"
 
+static pthread_t	threads[2];
+
 static int
 callback_conndied(void * cookie)
 {
+	unsigned i;
 
 	(void)cookie; /* UNUSED */
+
+	for (i = 0; i < 2; i++)
+		if (!pthread_equal(threads[i], pthread_self()))
+		{
+			pthread_join(threads[i], NULL);
+			threads[i] = pthread_self();
+		}
 
 	/* We're done! */
 	exit(0);
@@ -62,6 +73,7 @@ main(int argc, char * argv[])
 	struct proto_secret * K;
 	const char * ch;
 	int s[2];
+	unsigned i;
 
 	WARNP_INIT;
 
@@ -162,6 +174,9 @@ main(int argc, char * argv[])
 		exit(1);
 	}
 
+	for (i = 0; i < 2; i++)
+		threads[i] = pthread_self();
+
 	/* Set up a connection. */
 	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_g, opt_j, K, opt_o,
 	    callback_conndied, NULL) == NULL) {
@@ -170,7 +185,8 @@ main(int argc, char * argv[])
 	}
 
 	/* Push bits from stdin into the socket. */
-	if (pushbits(STDIN_FILENO, s[0]) || pushbits(s[0], STDOUT_FILENO)) {
+	if (pushbits(STDIN_FILENO, s[0], &threads[0]) ||
+	    pushbits(s[0], STDOUT_FILENO, &threads[1])) {
 		warnp("Could not push bits");
 		exit(1);
 	}
