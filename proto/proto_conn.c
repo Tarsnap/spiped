@@ -4,8 +4,8 @@
 #include <netinet/tcp.h>
 
 #include <assert.h>
-#include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "events.h"
 #include "network.h"

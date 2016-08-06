@@ -41,12 +41,12 @@ noeintr_write(int d, const void * buf, size_t nbyte)
 		 * We might have done a partial write; advance the buffer
 		 * pointer and adjust the remaining write length.
 		 */
-		p += lenwrit;
-		len -= lenwrit;
+		p += (size_t)lenwrit;
+		len -= (size_t)lenwrit;
 	}
 
 	/* Success! */
-	return (nbyte);
+	return (ssize_t)(nbyte);
 
 err0:
 	/* Failure! */
