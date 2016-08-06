@@ -18,7 +18,7 @@ addons:
     notification_email: cperciva@tarsnap.com
     build_command_prepend: ""
     build_command: "make all clean"
-    branch_pattern: coverity_scan
+    branch_pattern: coverity-scan
 
 before_install:
 - test $TRAVIS_BRANCH != coverity-scan -o ${TRAVIS_JOB_NUMBER##*.} = 1 || exit 0
