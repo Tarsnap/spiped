@@ -21,11 +21,13 @@
 static int
 callback_conndied(void * cookie)
 {
+	int * conndone = cookie;
 
-	(void)cookie; /* UNUSED */
+	/* Quit event loop. */
+	*conndone = 1;
 
-	/* We're done! */
-	exit(0);
+	/* Success! */
+	return 0;
 }
 
 static void
@@ -62,6 +64,7 @@ main(int argc, char * argv[])
 	struct proto_secret * K;
 	const char * ch;
 	int s[2];
+	int conndone = 0;
 
 	WARNP_INIT;
 
@@ -164,7 +167,7 @@ main(int argc, char * argv[])
 
 	/* Set up a connection. */
 	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_g, opt_j, K, opt_o,
-	    callback_conndied, NULL) == NULL) {
+	    callback_conndied, &conndone) == NULL) {
 		warnp("Could not set up connection");
 		goto err2;
 	}
@@ -176,14 +179,17 @@ main(int argc, char * argv[])
 	}
 
 	/* Loop until we die. */
-	do {
-		if (events_run()) {
-			warnp("Error running event loop");
-			exit(1);
-		}
-	} while (1);
+	if (events_spin(&conndone)) {
+		warnp("Error running event loop");
+		exit(1);
+	}
 
-	/* NOTREACHED */
+	/* Clean up. */
+	events_shutdown();
+	free(K);
+
+	/* Success! */
+	exit(0);
 
 err2:
 	free(K);
