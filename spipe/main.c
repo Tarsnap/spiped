@@ -61,6 +61,7 @@ main(int argc, char * argv[])
 	const char * ch;
 	int s[2];
 	int conndone = 0;
+	void * conn_cookie;
 
 	WARNP_INIT;
 
@@ -162,8 +163,8 @@ main(int argc, char * argv[])
 	}
 
 	/* Set up a connection. */
-	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_g, opt_j, K, opt_o,
-	    callback_conndied, &conndone) == NULL) {
+	if ((conn_cookie = proto_conn_create(s[1], sas_t, 0, opt_f, opt_g,
+	    opt_j, K, opt_o, callback_conndied, &conndone)) == NULL) {
 		warnp("Could not set up connection");
 		goto err2;
 	}
@@ -171,7 +172,7 @@ main(int argc, char * argv[])
 	/* Push bits from stdin into the socket. */
 	if (pushbits(STDIN_FILENO, s[0]) || pushbits(s[0], STDOUT_FILENO)) {
 		warnp("Could not push bits");
-		exit(1);
+		goto err3;
 	}
 
 	/* Loop until we die. */
@@ -187,6 +188,10 @@ main(int argc, char * argv[])
 	/* Success! */
 	exit(0);
 
+err3:
+	proto_conn_drop(conn_cookie);
+	sas_t = NULL;
+	events_shutdown();
 err2:
 	free(K);
 err1:
