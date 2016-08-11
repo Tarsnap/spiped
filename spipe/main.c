@@ -17,11 +17,13 @@
 static int
 callback_conndied(void * cookie)
 {
+	int * conndone = cookie;
 
-	(void)cookie; /* UNUSED */
+	/* Quit event loop. */
+	*conndone = 1;
 
-	/* We're done! */
-	exit(0);
+	/* Success! */
+	return 0;
 }
 
 static void
@@ -58,6 +60,7 @@ main(int argc, char * argv[])
 	struct proto_secret * K;
 	const char * ch;
 	int s[2];
+	int conndone = 0;
 
 	WARNP_INIT;
 
@@ -132,17 +135,17 @@ main(int argc, char * argv[])
 	/* Resolve target address. */
 	if ((sas_t = sock_resolve(opt_t)) == NULL) {
 		warnp("Error resolving socket address: %s", opt_t);
-		exit(1);
+		goto err0;
 	}
 	if (sas_t[0] == NULL) {
 		warn0("No addresses found for %s", opt_t);
-		exit(1);
+		goto err1;
 	}
 
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
-		exit(1);
+		goto err1;
 	}
 
 	/*
@@ -155,14 +158,14 @@ main(int argc, char * argv[])
 	 */
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, s)) {
 		warnp("socketpair");
-		exit(1);
+		goto err2;
 	}
 
 	/* Set up a connection. */
 	if (proto_conn_create(s[1], sas_t, 0, opt_f, opt_g, opt_j, K, opt_o,
-	    callback_conndied, NULL) == NULL) {
+	    callback_conndied, &conndone) == NULL) {
 		warnp("Could not set up connection");
-		exit(1);
+		goto err2;
 	}
 
 	/* Push bits from stdin into the socket. */
@@ -172,16 +175,23 @@ main(int argc, char * argv[])
 	}
 
 	/* Loop until we die. */
-	do {
-		if (events_run()) {
-			warnp("Error running event loop");
-			exit(1);
-		}
-	} while (1);
+	if (events_spin(&conndone)) {
+		warnp("Error running event loop");
+		exit(1);
+	}
 
-	/* NOTREACHED */
-	/*
-	 * If we could reach this point, we would free memory, close sockets,
-	 * and otherwise clean up here.
-	 */
+	/* Clean up. */
+	events_shutdown();
+	free(K);
+
+	/* Success! */
+	exit(0);
+
+err2:
+	free(K);
+err1:
+	sock_addr_freelist(sas_t);
+err0:
+	/* Failure! */
+	exit(1);
 }
