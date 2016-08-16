@@ -329,7 +329,7 @@ main(int argc, char * argv[])
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o, opt_1,
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, (size_t)opt_n, opt_o, opt_1,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
 		goto err5;
