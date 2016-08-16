@@ -86,7 +86,7 @@ network_accept.o: ../libcperciva/network/network_accept.c ../libcperciva/events/
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/network/network_accept.c -o network_accept.o
 network_connect.o: ../libcperciva/network/network_connect.c ../libcperciva/events/events.h ../libcperciva/util/sock.h ../libcperciva/network/network.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/network/network_connect.c -o network_connect.o
-network_read.o: ../libcperciva/network/network_read.c ../libcperciva/events/events.h ../libcperciva/util/warnp.h ../libcperciva/network/network.h
+network_read.o: ../libcperciva/network/network_read.c ../libcperciva/events/events.h ../libcperciva/network/network.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/network/network_read.c -o network_read.o
 network_write.o: ../libcperciva/network/network_write.c ../libcperciva/events/events.h ../libcperciva/util/warnp.h ../libcperciva/network/network.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/network/network_write.c -o network_write.o

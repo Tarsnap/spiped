@@ -28,7 +28,7 @@ clean:
 ${PROG}:${SRCS:.c=.o}
 	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDADD_EXTRA} ${LDADD_REQ} ${LDADD_POSIX}
 
-main.o: main.c ../libcperciva/util/asprintf.h ../libcperciva/events/events.h ../libcperciva/util/getopt.h ../libcperciva/alg/sha256.h ../libcperciva/util/sock.h ../libcperciva/util/warnp.h ../proto/proto_conn.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h pushbits.h
+main.o: main.c ../libcperciva/events/events.h ../libcperciva/util/getopt.h ../libcperciva/util/sock.h ../libcperciva/util/warnp.h ../proto/proto_conn.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h pushbits.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c main.c -o main.o
 pushbits.o: pushbits.c ../libcperciva/util/noeintr.h ../libcperciva/util/warnp.h pushbits.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c pushbits.c -o pushbits.o
@@ -78,7 +78,7 @@ events.o: ../libcperciva/events/events.c ../libcperciva/datastruct/mpool.h ../li
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/events/events.c -o events.o
 network_connect.o: ../libcperciva/network/network_connect.c ../libcperciva/events/events.h ../libcperciva/util/sock.h ../libcperciva/network/network.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/network/network_connect.c -o network_connect.o
-network_read.o: ../libcperciva/network/network_read.c ../libcperciva/events/events.h ../libcperciva/util/warnp.h ../libcperciva/network/network.h
+network_read.o: ../libcperciva/network/network_read.c ../libcperciva/events/events.h ../libcperciva/network/network.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/network/network_read.c -o network_read.o
 network_write.o: ../libcperciva/network/network_write.c ../libcperciva/events/events.h ../libcperciva/util/warnp.h ../libcperciva/network/network.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/network/network_write.c -o network_write.o
