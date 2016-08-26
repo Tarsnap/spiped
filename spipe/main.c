@@ -23,7 +23,7 @@ callback_conndied(void * cookie)
 	*conndone = 1;
 
 	/* Success! */
-	return 0;
+	return (0);
 }
 
 static void

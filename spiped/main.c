@@ -72,7 +72,7 @@ graceful_shutdown(void * cookie)
 		graceful_shutdown_timer_cookie = events_timer_register_double(
 		    graceful_shutdown, A, 1.0);
 
-	return 0;
+	return (0);
 }
 
 /* Simplify error-handling in command-line parse loop. */
