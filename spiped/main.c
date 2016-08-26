@@ -58,7 +58,7 @@ diediedie_handler(int signo)
 /*
  * Requests a graceful shutdown of the given cookie.
  */
-int
+static int
 graceful_shutdown(void * cookie)
 {
 	struct accept_state * A = cookie;
