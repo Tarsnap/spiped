@@ -170,7 +170,13 @@ main(int argc, char * argv[])
 	}
 
 	/* Push bits from stdin into the socket. */
-	if (pushbits(STDIN_FILENO, s[0]) || pushbits(s[0], STDOUT_FILENO)) {
+	if (pushbits(STDIN_FILENO, s[0])) {
+		warnp("Could not push bits");
+		goto err3;
+	}
+
+	/* Push bits from the socket to stdout. */
+	if (pushbits(s[0], STDOUT_FILENO)) {
 		warnp("Could not push bits");
 		goto err3;
 	}
