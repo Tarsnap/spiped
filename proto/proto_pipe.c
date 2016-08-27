@@ -109,11 +109,13 @@ callback_pipe_read(void * cookie, ssize_t len)
 	/* Write the encrypted or decrypted data. */
 	if (P->decr) {
 		if ((P->write_cookie = network_write(P->s_out, P->dbuf,
-		    P->wlen, P->wlen, callback_pipe_write, P)) == NULL)
+		    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
+		    P)) == NULL)
 			goto err0;
 	} else {
 		if ((P->write_cookie = network_write(P->s_out, P->ebuf,
-		    P->wlen, P->wlen, callback_pipe_write, P)) == NULL)
+		    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
+		    P)) == NULL)
 			goto err0;
 	}
 
