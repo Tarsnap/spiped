@@ -102,7 +102,7 @@ callback_pipe_read(void * cookie, ssize_t len)
 		if ((P->wlen = proto_crypt_dec(P->ebuf, P->dbuf, P->k)) == -1)
 			goto fail;
 	} else {
-		proto_crypt_enc(P->dbuf, len, P->ebuf, P->k);
+		proto_crypt_enc(P->dbuf, (size_t)len, P->ebuf, P->k);
 		P->wlen = PCRYPT_ESZ;
 	}
 
