@@ -382,7 +382,7 @@ ssize_t proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
 	memcpy(obuf, ibuf, len);
 
 	/* Return the decrypted length. */
-	return (len);
+	return ((ssize_t)len);
 }
 
 /**
