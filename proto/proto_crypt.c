@@ -326,7 +326,7 @@ proto_crypt_enc(uint8_t * ibuf, size_t len, uint8_t obuf[PCRYPT_ESZ],
 	memset(&obuf[len], 0, PCRYPT_MAXDSZ - len);
 
 	/* Add the length. */
-	be32enc(&obuf[PCRYPT_MAXDSZ], len);
+	be32enc(&obuf[PCRYPT_MAXDSZ], (uint32_t)len);
 
 	/* Encrypt the buffer in-place. */
 	crypto_aesctr_buf(k->k_aes, k->pnum, obuf, obuf, PCRYPT_MAXDSZ + 4);
@@ -382,7 +382,7 @@ ssize_t proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
 	memcpy(obuf, ibuf, len);
 
 	/* Return the decrypted length. */
-	return (len);
+	return ((ssize_t)len);
 }
 
 /**
