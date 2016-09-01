@@ -41,7 +41,8 @@ workthread(void * cookie)
 			break;
 
 		/* Write the data back out. */
-		if (noeintr_write(P->out, &P->buf, readlen) != readlen) {
+		if (noeintr_write(P->out, &P->buf, (size_t)readlen)
+		    != readlen) {
 			warnp("Error writing");
 			exit(1);
 		}

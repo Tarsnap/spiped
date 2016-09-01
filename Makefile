@@ -14,7 +14,7 @@ all: cpusupport-config.h
 	done
 
 cpusupport-config.h:
-	( export CC="${CC}"; command -p sh libcperciva/cpusupport/Build/cpusupport.sh ) > cpusupport-config.h
+	( export CC="${CC}"; command -p sh libcperciva/cpusupport/Build/cpusupport.sh "$$PATH" ) > cpusupport-config.h
 
 install: all
 	export BINDIR=$${BINDIR:-${BINDIR_DEFAULT}};	\

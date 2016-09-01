@@ -58,7 +58,7 @@ diediedie_handler(int signo)
 /*
  * Requests a graceful shutdown of the given cookie.
  */
-int
+static int
 graceful_shutdown(void * cookie)
 {
 	struct accept_state * A = cookie;
@@ -72,7 +72,7 @@ graceful_shutdown(void * cookie)
 		graceful_shutdown_timer_cookie = events_timer_register_double(
 		    graceful_shutdown, A, 1.0);
 
-	return 0;
+	return (0);
 }
 
 /* Simplify error-handling in command-line parse loop. */
@@ -329,7 +329,7 @@ main(int argc, char * argv[])
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o, opt_1,
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, (size_t)opt_n, opt_o, opt_1,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
 		goto err5;

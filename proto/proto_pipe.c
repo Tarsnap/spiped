@@ -102,18 +102,20 @@ callback_pipe_read(void * cookie, ssize_t len)
 		if ((P->wlen = proto_crypt_dec(P->ebuf, P->dbuf, P->k)) == -1)
 			goto fail;
 	} else {
-		proto_crypt_enc(P->dbuf, len, P->ebuf, P->k);
+		proto_crypt_enc(P->dbuf, (size_t)len, P->ebuf, P->k);
 		P->wlen = PCRYPT_ESZ;
 	}
 
 	/* Write the encrypted or decrypted data. */
 	if (P->decr) {
 		if ((P->write_cookie = network_write(P->s_out, P->dbuf,
-		    P->wlen, P->wlen, callback_pipe_write, P)) == NULL)
+		    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
+		    P)) == NULL)
 			goto err0;
 	} else {
 		if ((P->write_cookie = network_write(P->s_out, P->ebuf,
-		    P->wlen, P->wlen, callback_pipe_write, P)) == NULL)
+		    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
+		    P)) == NULL)
 			goto err0;
 	}
 

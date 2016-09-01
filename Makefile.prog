@@ -8,6 +8,7 @@ install:${PROG}
 	    chmod 0555 ${BINDIR}/_inst.${PROG}.$$$$_ && \
 	    mv -f ${BINDIR}/_inst.${PROG}.$$$$_ ${BINDIR}/${PROG}
 	if ! [ -z "${MAN1DIR}" ]; then			\
+		mkdir -p ${MAN1DIR};			\
 		for MPAGE in ${MAN1}; do						\
 			cp $$MPAGE ${MAN1DIR}/_inst.$$MPAGE.$$$$_ &&			\
 			    chmod 0444 ${MAN1DIR}/_inst.$$MPAGE.$$$$_ &&		\

@@ -1,1 +1,6 @@
 cpusupport-config.h
+# Other directories
+spipe/*.o
+spipe/spipe
+spiped/*.o
+spiped/spiped

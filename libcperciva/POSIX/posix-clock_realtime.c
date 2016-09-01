@@ -1,3 +1,3 @@
 #include <time.h>
 
-int main() {return CLOCK_REALTIME;}
+int main() {return (CLOCK_REALTIME);}
