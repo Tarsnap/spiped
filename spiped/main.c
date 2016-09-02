@@ -16,7 +16,7 @@
 #include "dispatch.h"
 #include "proto_crypt.h"
 
-volatile sig_atomic_t should_shutdown = 0;
+static volatile sig_atomic_t should_shutdown = 0;
 static void * graceful_shutdown_timer_cookie = NULL;
 
 static void
