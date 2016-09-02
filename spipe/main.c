@@ -38,12 +38,6 @@ usage(void)
 	exit(1);
 }
 
-/* Simplify error-handling in command-line parse loop. */
-#define OPT_EPARSE(opt, arg) do {					\
-	warnp("Error parsing argument: -%c %s", opt, arg);		\
-	exit(1);							\
-} while (0)
-
 int
 main(int argc, char * argv[])
 {
