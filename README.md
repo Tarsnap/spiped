@@ -99,7 +99,7 @@ operating system, using the included Makefiles:
 
     make BINDIR=/path/to/target/directory install
 
-See the BUILDING file for more details.
+See the [BUILDING](BUILDING) file for more details (e.g. how to install man pages).
 
 
 Testing
