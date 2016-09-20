@@ -6,11 +6,11 @@ struct proto_keys;
 struct proto_secret;
 
 /**
- * proto_handshake(s, decr, nofps, requirefps, K, callback, cookie):
+ * proto_handshake(s, decr, nopfs, requirepfs, K, callback, cookie):
  * Perform a protocol handshake on socket ${s}.  If ${decr} is non-zero we are
  * at the receiving end of the connection; otherwise at the sending end.  If
- * ${nofps} is non-zero, perform a "weak" handshake without forward perfect
- * secrecy.  If ${requirefps} is non-zero, drop the connection if the other
+ * ${nopfs} is non-zero, perform a "weak" handshake without perfect forward
+ * secrecy.  If ${requirepfs} is non-zero, drop the connection if the other
  * end attempts to perform a "weak" handshake.  The shared protocol secret is
  * ${K}.  Upon completion, invoke ${callback}(${cookie}, f, r), where f
  * contains the keys needed for the forward direction and r contains the keys

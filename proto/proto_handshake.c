@@ -15,8 +15,8 @@ struct handshake_cookie {
 	void * cookie;
 	int s;
 	int decr;
-	int nofps;
-	int requirefps;
+	int nopfs;
+	int requirepfs;
 	const struct proto_secret * K;
 	uint8_t nonce_local[PCRYPT_NONCE_LEN];
 	uint8_t nonce_remote[PCRYPT_NONCE_LEN];
@@ -61,11 +61,11 @@ handshakefail(struct handshake_cookie * H)
 }
 
 /**
- * proto_handshake(s, decr, nofps, requirefps, K, callback, cookie):
+ * proto_handshake(s, decr, nopfs, requirepfs, K, callback, cookie):
  * Perform a protocol handshake on socket ${s}.  If ${decr} is non-zero we are
  * at the receiving end of the connection; otherwise at the sending end.  If
- * ${nofps} is non-zero, perform a "weak" handshake without forward perfect
- * secrecy.  If ${requirefps} is non-zero, drop the connection if the other
+ * ${nopfs} is non-zero, perform a "weak" handshake without perfect forward
+ * secrecy.  If ${requirepfs} is non-zero, drop the connection if the other
  * end attempts to perform a "weak" handshake.  The shared protocol secret is
  * ${K}.  Upon completion, invoke ${callback}(${cookie}, f, r), where f
  * contains the keys needed for the forward direction and r contains the keys
@@ -75,7 +75,7 @@ handshakefail(struct handshake_cookie * H)
 
  */
 void *
-proto_handshake(int s, int decr, int nofps, int requirefps,
+proto_handshake(int s, int decr, int nopfs, int requirepfs,
     const struct proto_secret * K,
     int (* callback)(void *, struct proto_keys *, struct proto_keys *),
     void * cookie)
@@ -89,8 +89,8 @@ proto_handshake(int s, int decr, int nofps, int requirefps,
 	H->cookie = cookie;
 	H->s = s;
 	H->decr = decr;
-	H->nofps = nofps;
-	H->requirefps = requirefps;
+	H->nopfs = nopfs;
+	H->requirepfs = requirepfs;
 	H->K = K;
 
 	/* Generate a 32-byte connection nonce. */
@@ -216,7 +216,7 @@ callback_dh_read(void * cookie, ssize_t len)
 
 	/* Is the value we read valid? */
 	if (proto_crypt_dh_validate(H->yh_remote, H->dhmac_remote,
-	    H->requirefps))
+	    H->requirepfs))
 		return (handshakefail(H));
 
 	/*
@@ -238,7 +238,7 @@ dhwrite(struct handshake_cookie * H)
 
 	/* Generate a signed diffie-hellman parameter. */
 	if (proto_crypt_dh_generate(H->yh_local, H->x, H->dhmac_local,
-	    H->nofps))
+	    H->nopfs))
 		goto err0;
 
 	/* Write our signed diffie-hellman parameter. */
@@ -293,7 +293,7 @@ handshakedone(struct handshake_cookie * H)
 
 	/* Perform the final computation. */
 	if (proto_crypt_mkkeys(H->K, H->nonce_local, H->nonce_remote,
-	    H->yh_remote, H->x, H->nofps, H->decr, &c, &s))
+	    H->yh_remote, H->x, H->nopfs, H->decr, &c, &s))
 		goto err0;
 
 	/* Perform the callback. */
