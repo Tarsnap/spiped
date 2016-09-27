@@ -291,12 +291,6 @@ callback_connect_done(void * cookie, int t)
 			goto err1;
 	}
 
-	/* If we have connections and keys, start shuttling data. */
-	if ((C->t != -1) && (C->k_f != NULL) && (C->k_r != NULL)) {
-		if (launchpipes(C))
-			goto err1;
-	}
-
 	/* Success! */
 	return (0);
 
