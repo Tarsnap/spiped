@@ -19,8 +19,8 @@ struct accept_state {
 	struct sock_addr ** sas;
 	double rtime;
 	int decr;
-	int nofps;
-	int requirefps;
+	int nopfs;
+	int requirepfs;
 	int nokeepalive;
 	int * conndone;
 	int only_one;
@@ -177,7 +177,7 @@ callback_gotconn(void * cookie, int s)
 
 	/* Create a new connection. */
 	if ((node_new->conn_cookie = proto_conn_create(s, sas, A->decr,
-	    A->nofps, A->requirefps, A->nokeepalive, A->K, A->timeo,
+	    A->nopfs, A->requirepfs, A->nokeepalive, A->K, A->timeo,
 	    callback_conndied, node_new)) == NULL) {
 		warnp("Failure setting up new connection");
 		goto err3;
@@ -212,15 +212,15 @@ err0:
 }
 
 /**
- * dispatch_accept(s, tgt, rtime, sas, decr, nofps, requirefps, nokeepalive, K,
+ * dispatch_accept(s, tgt, rtime, sas, decr, nopfs, requirepfs, nokeepalive, K,
  *     nconn_max, timeo, only_one, conndone):
  * Start accepting connections on the socket ${s}.  Connect to the target
  * ${tgt}, re-resolving it every ${rtime} seconds if ${rtime} > 0; on address
  * resolution failure use the most recent successfully obtained addresses, or
  * the addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
  * ${decr} is non-zero, decrypt the incoming connections.  Don't accept more
- * than ${nconn_max} connections.  If ${nofps} is non-zero, don't use perfect
- * forward secrecy.  If ${requirefps} is non-zero, require that both ends use
+ * than ${nconn_max} connections.  If ${nopfs} is non-zero, don't use perfect
+ * forward secrecy.  If ${requirepfs} is non-zero, require that both ends use
  * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
  * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
  * connecting to the target takes more than ${timeo} seconds.  If ${only_one}
@@ -232,7 +232,7 @@ err0:
  */
 void *
 dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
-    int decr, int nofps, int requirefps, int nokeepalive,
+    int decr, int nopfs, int requirepfs, int nokeepalive,
     const struct proto_secret * K, size_t nconn_max, double timeo,
     int only_one, int * conndone)
 {
@@ -246,8 +246,8 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->sas = sas;
 	A->rtime = rtime;
 	A->decr = decr;
-	A->nofps = nofps;
-	A->requirefps = requirefps;
+	A->nopfs = nopfs;
+	A->requirepfs = requirepfs;
 	A->nokeepalive = nokeepalive;
 	A->conndone = conndone;
 	A->only_one = only_one;

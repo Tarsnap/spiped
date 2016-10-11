@@ -22,8 +22,8 @@ struct conn_state {
 	void * cookie;
 	struct sock_addr ** sas;
 	int decr;
-	int nofps;
-	int requirefps;
+	int nopfs;
+	int requirepfs;
 	int nokeepalive;
 	const struct proto_secret * K;
 	double timeo;
@@ -59,8 +59,8 @@ starthandshake(struct conn_state * C, int s, int decr)
 		goto err0;
 
 	/* Start the handshake. */
-	if ((C->handshake_cookie = proto_handshake(s, decr, C->nofps,
-	    C->requirefps, C->K, callback_handshake_done, C)) == NULL)
+	if ((C->handshake_cookie = proto_handshake(s, decr, C->nopfs,
+	    C->requirepfs, C->K, callback_handshake_done, C)) == NULL)
 		goto err1;
 
 	/* Success! */
@@ -191,12 +191,12 @@ proto_conn_drop(void * conn_cookie)
 }
 
 /**
- * proto_conn_create(s, sas, decr, nofps, requirefps, nokeepalive, K, timeo,
+ * proto_conn_create(s, sas, decr, nopfs, requirepfs, nokeepalive, K, timeo,
  *     callback_dead, cookie):
  * Create a connection with one end at ${s} and the other end connecting to
  * the target addresses ${sas}.  If ${decr} is 0, encrypt the outgoing data;
- * if ${decr} is nonzero, decrypt the incoming data.  If ${nofps} is non-zero,
- * don't use perfect forward secrecy.  If ${requirefps} is non-zero, drop
+ * if ${decr} is nonzero, decrypt the incoming data.  If ${nopfs} is non-zero,
+ * don't use perfect forward secrecy.  If ${requirepfs} is non-zero, drop
  * the connection if the other end tries to disable perfect forward secrecy.
  * Enable transport layer keep-alives (if applicable) on both sockets if and
  * only if ${nokeepalive} is zero.  Drop the connection if the handshake or
@@ -206,8 +206,8 @@ proto_conn_drop(void * conn_cookie)
  * proto_conn_drop.
  */
 void *
-proto_conn_create(int s, struct sock_addr ** sas, int decr, int nofps,
-    int requirefps, int nokeepalive, const struct proto_secret * K,
+proto_conn_create(int s, struct sock_addr ** sas, int decr, int nopfs,
+    int requirepfs, int nokeepalive, const struct proto_secret * K,
     double timeo, int (* callback_dead)(void *), void * cookie)
 {
 	struct conn_state * C;
@@ -219,8 +219,8 @@ proto_conn_create(int s, struct sock_addr ** sas, int decr, int nofps,
 	C->cookie = cookie;
 	C->sas = sas;
 	C->decr = decr;
-	C->nofps = nofps;
-	C->requirefps = requirefps;
+	C->nopfs = nopfs;
+	C->requirepfs = requirepfs;
 	C->nokeepalive = nokeepalive;
 	C->K = K;
 	C->timeo = timeo;

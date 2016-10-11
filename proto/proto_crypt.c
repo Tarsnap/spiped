@@ -176,15 +176,15 @@ is_not_one(const uint8_t * x, size_t len)
 }
 
 /**
- * proto_crypt_dh_validate(yh_r, dhmac_r, requirefps):
+ * proto_crypt_dh_validate(yh_r, dhmac_r, requirepfs):
  * Return non-zero if the value ${yh_r} received from the remote party is not
  * correctly MACed using the diffie-hellman parameter MAC key ${dhmac_r}, or
  * if the included y value is >= the diffie-hellman group modulus, or if
- * ${requirefps} is non-zero and the included y value is 1.
+ * ${requirepfs} is non-zero and the included y value is 1.
  */
 int
 proto_crypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
-    const uint8_t dhmac_r[PCRYPT_DHMAC_LEN], int requirefps)
+    const uint8_t dhmac_r[PCRYPT_DHMAC_LEN], int requirepfs)
 {
 	uint8_t hbuf[32];
 
@@ -201,7 +201,7 @@ proto_crypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
 		return (1);
 
 	/* If necessary, enforce that the diffie-hellman value is != 1. */
-	if (requirefps) {
+	if (requirepfs) {
 		if (! is_not_one(&yh_r[0], CRYPTO_DH_PUBLEN))
 			return (1);
 	}
@@ -211,18 +211,18 @@ proto_crypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
 }
 
 /**
- * proto_crypt_dh_generate(yh_l, x, dhmac_l, nofps):
+ * proto_crypt_dh_generate(yh_l, x, dhmac_l, nopfs):
  * Using the MAC key ${dhmac_l}, generate the MACed diffie-hellman handshake
  * parameter ${yh_l}.  Store the diffie-hellman private value in ${x}.  If
- * ${nofps} is non-zero, skip diffie-hellman generation and use y = 1.
+ * ${nopfs} is non-zero, skip diffie-hellman generation and use y = 1.
  */
 int
 proto_crypt_dh_generate(uint8_t yh_l[PCRYPT_YH_LEN], uint8_t x[PCRYPT_X_LEN],
-    const uint8_t dhmac_l[PCRYPT_DHMAC_LEN], int nofps)
+    const uint8_t dhmac_l[PCRYPT_DHMAC_LEN], int nopfs)
 {
 
 	/* Are we skipping the diffie-hellman generation? */
-	if (nofps) {
+	if (nopfs) {
 		/* Set y_l to a big-endian 1. */
 		memset(yh_l, 0, CRYPTO_DH_PUBLEN - 1);
 		yh_l[CRYPTO_DH_PUBLEN - 1] = 1;
@@ -245,11 +245,11 @@ err0:
 }
 
 /**
- * proto_crypt_mkkeys(K, nonce_l, nonce_r, yh_r, x, nofps, decr, eh_c, eh_s):
+ * proto_crypt_mkkeys(K, nonce_l, nonce_r, yh_r, x, nopfs, decr, eh_c, eh_s):
  * Using the protocol secret ${K}, the local and remote nonces ${nonce_l} and
  * ${nonce_r}, the remote MACed diffie-hellman handshake parameter ${yh_r},
  * and the local diffie-hellman secret ${x}, generate the keys ${eh_c} and
- * ${eh_s}.  If ${nofps} is non-zero, we are performing weak handshaking and
+ * ${eh_s}.  If ${nopfs} is non-zero, we are performing weak handshaking and
  * y_SC is set to 1 rather than being computed.  If ${decr} is non-zero,
  * "local" == "S" and "remote" == "C"; otherwise the assignments are opposite.
  */
@@ -258,7 +258,7 @@ proto_crypt_mkkeys(const struct proto_secret * K,
     const uint8_t nonce_l[PCRYPT_NONCE_LEN],
     const uint8_t nonce_r[PCRYPT_NONCE_LEN],
     const uint8_t yh_r[PCRYPT_YH_LEN], const uint8_t x[PCRYPT_X_LEN],
-    int nofps, int decr,
+    int nopfs, int decr,
     struct proto_keys ** eh_c, struct proto_keys ** eh_s)
 {
 	uint8_t nonce_y[PCRYPT_NONCE_LEN * 2 + CRYPTO_DH_KEYLEN];
@@ -272,7 +272,7 @@ proto_crypt_mkkeys(const struct proto_secret * K,
 	memcpy(&nonce_y[PCRYPT_NONCE_LEN], nonce_s, PCRYPT_NONCE_LEN);
 
 	/* Are we bypassing the diffie-hellman computation? */
-	if (nofps) {
+	if (nopfs) {
 		/* We sent y_l = 1, so y_SC is also 1. */
 		memset(&nonce_y[PCRYPT_NONCE_LEN * 2], 0,
 		    CRYPTO_DH_KEYLEN - 1);

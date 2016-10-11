@@ -69,8 +69,8 @@ is being sent by the client or the server, and AES256-CTR is computed with
 nonce equal to the packet #, which starts at zero and increments for each
 packet sent in the same direction.
 
-\* The values x_C, x_S picked must either be 0 (if forward perfect secrecy is
-not desired) or have 256 bits of entropy (if forward perfect secrecy is
+\* The values x_C, x_S picked must either be 0 (if perfect forward secrecy is
+not desired) or have 256 bits of entropy (if perfect forward secrecy is
 desired).
 
 \*\* The values y_C, y_S, and y_SC are 2048 bits and big-endian.
