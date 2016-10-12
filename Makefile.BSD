@@ -14,7 +14,12 @@ ${D}/Makefile::
 	( cd ${D} && printf 'SRCS=' && ${MAKE} -V SRCS | sed -e 's| cpusupport-config.h||' ) >> $@
 	( cd ${D} && printf 'IDIRS=' && ${MAKE} -V IDIRS ) >> $@
 	( cd ${D} && printf 'LDADD_REQ=' && ${MAKE} -V LDADD_REQ ) >> $@
-	cat Makefile.prog >> $@
+	if [ `cd ${D} && ${MAKE} -V NOINST` -eq "1" ]; then	\
+		cat Makefile.prog |				\
+		    perl -0pe 's/(install:.*?)\n\n//s' >> $@ ;	\
+	else							\
+		cat Makefile.prog >> $@	;			\
+	fi
 	# Create a fake cpusupport-config.h that is blank (and thus does not
 	# require any special CFLAGS to compile)
 	rm -f cpusupport-config.h
