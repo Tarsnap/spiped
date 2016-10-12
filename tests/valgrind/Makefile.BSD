@@ -1,0 +1,10 @@
+# Program name.
+PROG	=	potential-memleaks
+
+# Don't install it.
+NOINST	= 	1
+
+# main test code
+SRCS	=	potential-memleaks.c
+
+.include <bsd.prog.mk>
