@@ -291,7 +291,7 @@ callback_connect_done(void * cookie, int t)
 			goto err1;
 	}
 
-	/* If we have connections and keys, start shuttling data. */
+	/* If the handshake already finished, start shuttling data. */
 	if ((C->t != -1) && (C->k_f != NULL) && (C->k_r != NULL)) {
 		if (launchpipes(C))
 			goto err1;
@@ -353,7 +353,7 @@ callback_handshake_done(void * cookie, struct proto_keys * f,
 	C->k_f = f;
 	C->k_r = r;
 
-	/* If we have connections and keys, start shuttling data. */
+	/* If we already connected to the target, start shuttling data. */
 	if ((C->t != -1) && (C->k_f != NULL) && (C->k_r != NULL)) {
 		if (launchpipes(C))
 			goto err1;
