@@ -6,6 +6,8 @@ PUBLISH= ${PROGS} BUILDING DESIGN.md CHANGELOG COPYRIGHT README.md STYLE POSIX M
 MAKE:=	${MAKE} -f Makefile.BSD
 RELEASEDATE!=   date "+%B %d, %Y"
 
+# This creates (and deletes) a fake cpusupport-config.h that is
+# blank (and thus does not require any special CFLAGS to compile).
 .for D in ${PROGS} ${TESTS}
 ${D}/Makefile::
 	echo '.POSIX:' > $@
@@ -21,8 +23,6 @@ ${D}/Makefile::
 	else							\
 		cat Makefile.prog >> $@	;			\
 	fi
-	# Create a fake cpusupport-config.h that is blank (and thus does not
-	# require any special CFLAGS to compile)
 	rm -f cpusupport-config.h
 	touch cpusupport-config.h
 	( cd ${D} && ${MAKE} -V SRCS |	\
@@ -37,7 +37,6 @@ ${D}/Makefile::
 			| sed -e 's| \\ | |g'; \
 		echo "	\$${CC} \$${CFLAGS} \$${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\\\"cpusupport-config.h\\\" $${CF} -I.. \$${IDIRS} -c $${S} -o $${F}"; \
 	    done ) >> $@
-	# Remove fake cpusupport-config.h
 	rm -f cpusupport-config.h
 .endfor
 
@@ -46,6 +45,8 @@ Makefiles:
 	${MAKE} ${D}/Makefile
 .endfor
 
+# This uses temporary files for sed because the FreeBSD and GNU
+# behaviour of sed -i is different.
 publish: clean Makefiles
 	if [ -z "${VERSION}" ]; then			\
 		echo "VERSION must be specified!";	\
@@ -60,8 +61,6 @@ publish: clean Makefiles
 	tar -cf- --exclude 'Makefile.*' ${PUBLISH} | \
 	    tar -xf- -C ${PKG}-${VERSION}
 .for F in ${SUBST_VERSION_FILES}
-	# We need to write a temporary file because FreeBSD and GNU behaviour
-	# of sed -i is different.
 	sed -e 's/@VERSION@/${VERSION}/' -e 's/@DATE@/${RELEASEDATE}/' \
 	    < ${PKG}-${VERSION}/${F} > ${PKG}-${VERSION}/${F}.tmp
 	mv ${PKG}-${VERSION}/${F}.tmp ${PKG}-${VERSION}/${F}
