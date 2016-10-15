@@ -15,7 +15,7 @@ ${D}/Makefile::
 	( cd ${D} && printf 'SRCS=' && ${MAKE} -V SRCS | sed -e 's| cpusupport-config.h||' ) >> $@
 	( cd ${D} && printf 'IDIRS=' && ${MAKE} -V IDIRS ) >> $@
 	( cd ${D} && printf 'LDADD_REQ=' && ${MAKE} -V LDADD_REQ ) >> $@
-	if [ `cd ${D} && ${MAKE} -V NOINST` -eq "1" ]; then	\
+	if [ `cd ${D} && ${MAKE} -V NOINST` ]; then		\
 		cat Makefile.prog |				\
 		    perl -0pe 's/(install:.*?)\n\n//s' >> $@ ;	\
 	else							\
