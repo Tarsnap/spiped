@@ -15,7 +15,6 @@ out="output-tests-spiped"
 sleep_ncat_start=1
 sleep_spiped_start=2
 sleep_ncat_stop=1
-sleep_ncat_timeout_stop=3
 
 ################################ Setup variables from the command-line
 
@@ -169,8 +168,7 @@ test_connection_open_timeout_single () {
 	# - establish a connection to a spiped server.
 	# - open a connection, but don't send anything.
 	# - wait; the connection should be closed automatically (because we
-	#   gave it -o 1 and $sleep_ncat_timeout_stop is longer than
-	#   that plus $sleep_spiped_start).
+	#   gave it -o 1).
 	# - server should quit (because we gave it -1).
 	basename="02_connection_open_timeout_single"
 	printf "Running test: $basename... "
@@ -181,9 +179,10 @@ test_connection_open_timeout_single () {
 	# Run test.  Awkwardly force nc to keep the connection open; the
 	# simple "nc -q 2 ..." to wait 2 seconds isn't portable.
 	( ( echo ""; sleep 2 ) | nc 127.0.0.1 $mid_port ) >/dev/null &
+	sleep 3
 
 	# Wait for server(s) to quit.
-	sleep $sleep_ncat_timeout_stop
+	sleep $sleep_ncat_stop
 	kill $nc_pid
 	wait
 
