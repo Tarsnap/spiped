@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Build directory (we don't allow out-of-tree builds in spiped).
+bindir=.
+
 # This test script requires three ports.
 src_port=8000
 mid_port=8001
@@ -25,13 +28,7 @@ spiped_binary=$scriptdir/../spiped/spiped
 spipe_binary=$scriptdir/../spipe/spipe
 
 # Find system spiped if it supports -1.
-system_spiped_binary=`which spiped`
-if [ -n "$system_spiped_binary" ]; then
-	if $system_spiped_binary -1 2>&1 >/dev/null | grep -qE "(invalid|illegal) option"; then
-		# Disable test.
-		system_spiped_binary=""
-	fi
-fi
+system_spiped_binary=$( find_system spiped -1 )
 
 # Check for required commands.
 if ! command -v $spiped_binary >/dev/null 2>&1; then
@@ -47,6 +44,9 @@ if ! command -v ncat >/dev/null 2>&1; then
 	echo "	(it is required for multiple sockets on the same port)"
 	exit 1
 fi
+
+# Clean up previous directories, and create new ones.
+prepare_directories
 
 ################################ Helper functions
 
@@ -119,6 +119,14 @@ setup_spiped_encryption_server () {
 		-k $scriptdir/keys-blank.txt -F -1 -o 1 \
 	; echo $? >> $out/$basename-e.exit ) &
 	sleep $sleep_spiped_start
+}
+
+## nc_server_stop():
+# Stops the ncat server.
+nc_server_stop() {
+	sleep ${sleep_ncat_stop}
+	kill ${nc_pid}
+	wait
 }
 
 ################################ Test functions
@@ -351,12 +359,6 @@ test_send_data_system_spiped () {
 
 
 ####################################################
-
-# Ensure clean test directory.
-if [ -d "$out" ]; then
-	rm -rf $out
-fi
-mkdir -p $out
 
 # Run tests.
 test_connection_open_close_single &&		\
