@@ -102,7 +102,7 @@ setup_spiped_decryption_server () {
 	# Start spiped to connect source port to backend.
 	( $spiped_cmd -d \
 	 	-s 127.0.0.1:$mid_port -t 127.0.0.1:$dst_port \
-		-k $scriptdir/keys-blank.txt -F -1 -o 1 \
+		-k /dev/null -F -1 -o 1 \
 	; echo $? >> $out/$basename-d.exit ) &
 	sleep $sleep_spiped_start
 }
@@ -116,7 +116,7 @@ setup_spiped_encryption_server () {
 	# Start spiped to connect source port to backend.
 	( $spiped_binary -e \
 	 	-s 127.0.0.1:$src_port -t 127.0.0.1:$mid_port \
-		-k $scriptdir/keys-blank.txt -F -1 -o 1 \
+		-k /dev/null -F -1 -o 1 \
 	; echo $? >> $out/$basename-e.exit ) &
 	sleep $sleep_spiped_start
 }
@@ -246,7 +246,7 @@ test_send_data_spipe () {
 	# Run test.
 	cat $scriptdir/lorem-send.txt | $spipe_binary \
 		-t 127.0.0.1:$mid_port \
-		-k $scriptdir/keys-blank.txt
+		-k /dev/null
 	cmd_retval=$?
 
 	# Wait for server(s) to quit.
