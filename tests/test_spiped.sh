@@ -74,14 +74,14 @@ check_leftover_ncat_server() {
 
 ################################ Server setup
 
-## setup_spiped_decryption_server(basename, use_system_spiped=0):
-# Set up a spiped decryption server, translating from $mid_port to $dst_port,
-# saving the exit code to $out/basename-d.exit.  Also set up an ncat server
-# listening to $dst_port, saving output to $out/$basename.txt.  Uses the
-# system's spiped (instead of the version in this source tree) if
-# $use_system_spiped is 1.
+## setup_spiped_decryption_server(ncat_output=/dev/null, use_system_spiped=0):
+# Set up a spiped decryption server, translating from ${mid_port}
+# to ${dst_port}, saving the exit code to ${c_exitfile}.  Also set
+# up an ncat server listening to ${dst_port}, saving output to
+# ${ncat_output}.  Uses the system's spiped (instead of the
+# version in this source tree) if ${use_system_spiped} is 1.
 setup_spiped_decryption_server () {
-	basename=$1
+	ncat_output=${1:-/dev/null}
 	use_system_spiped=${2:-0}
 	check_leftover_ncat_server
 
@@ -93,16 +93,18 @@ setup_spiped_decryption_server () {
 	fi
 
 	# Start backend server.
-	nc_pid="$(dst_port=$dst_port outfile=$out/$basename.txt sh -c \
+	nc_pid="$(dst_port=$dst_port outfile=${ncat_output} sh -c \
 		'ncat -k -l -o $outfile $dst_port >/dev/null 2>&1 & \
 		echo ${!}' )"
 	sleep $sleep_ncat_start
 
-	# Start spiped to connect source port to backend.
-	( $spiped_cmd -d \
-	 	-s 127.0.0.1:$mid_port -t 127.0.0.1:$dst_port \
-		-k /dev/null -F -1 -o 1 \
-	; echo $? >> $out/$basename-d.exit ) &
+	# Start spiped to connect middle port to backend.
+	(
+		$spiped_cmd -d						\
+			-s 127.0.0.1:$mid_port -t 127.0.0.1:$dst_port	\
+			-k /dev/null -F -1 -o 1
+		echo $? > ${c_exitfile}
+	) &
 	sleep $sleep_spiped_start
 }
 
@@ -110,13 +112,13 @@ setup_spiped_decryption_server () {
 # Set up a spiped encryption server, translating from $src_port to $mid_port,
 # saving the exit code to $out/basename-e.exit.
 setup_spiped_encryption_server () {
-	basename=$1
-
-	# Start spiped to connect source port to backend.
-	( $spiped_binary -e \
-	 	-s 127.0.0.1:$src_port -t 127.0.0.1:$mid_port \
-		-k /dev/null -F -1 -o 1 \
-	; echo $? >> $out/$basename-e.exit ) &
+	# Start spiped to connect source port to middle.
+	(
+		$spiped_cmd -e						\
+			-s 127.0.0.1:$src_port -t 127.0.0.1:$mid_port	\
+			-k /dev/null -F -1 -o 1
+		echo $? > ${c_exitfile}
+	) &
 	sleep $sleep_spiped_start
 }
 
@@ -128,245 +130,7 @@ nc_server_stop() {
 	wait
 }
 
-################################ Test functions
-
-test_connection_open_close_single () {
-	# Goal of this test:
-	# - establish a connection to a spiped server.
-	# - open a connection, but don't send anything.
-	# - close the connection.
-	# - server should quit (because we gave it -1).
-	basename="01_connection_open_close_single"
-	printf "Running test: $basename... "
-
-	# Set up infrastructure.
-	setup_spiped_decryption_server $basename
-
-	# Run test.
-	echo "" | nc 127.0.0.1 $mid_port >/dev/null
-	cmd_retval=$?
-
-	# Wait for server(s) to quit.
-	sleep $sleep_ncat_stop
-	kill $nc_pid
-	wait
-
-	# Check results.
-	retval=$cmd_retval
-	retval_d=`cat $out/$basename-d.exit`
-	if [ ! "$retval_d" -eq 0 ]; then
-		retval=1
-	fi
-
-	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $out/$basename ""
-	return "$retval"
-}
-
-test_connection_open_timeout_single () {
-	# Goal of this test:
-	# - establish a connection to a spiped server.
-	# - open a connection, but don't send anything.
-	# - wait; the connection should be closed automatically (because we
-	#   gave it -o 1).
-	# - server should quit (because we gave it -1).
-	basename="02_connection_open_timeout_single"
-	printf "Running test: $basename... "
-
-	# Set up infrastructure.
-	setup_spiped_decryption_server $basename
-
-	# Run test.  Awkwardly force nc to keep the connection open; the
-	# simple "nc -q 2 ..." to wait 2 seconds isn't portable.
-	( ( echo ""; sleep 2 ) | nc 127.0.0.1 $mid_port ) >/dev/null &
-	sleep 3
-
-	# Wait for server(s) to quit.
-	sleep $sleep_ncat_stop
-	kill $nc_pid
-	wait
-
-	# Check results.
-	retval=0
-	retval_d=`cat $out/$basename-d.exit`
-	if [ ! "$retval_d" -eq 0 ]; then
-		retval=1
-	fi
-
-	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $out/$basename ""
-	return "$retval"
-}
-
-test_connection_open_close_double () {
-	# Goal of this test:
-	# - create a pair of spiped servers (encryption, decryption).
-	# - open two connections, but don't send anything,
-	# - close one of the connections.
-	# - server should quit (because we gave it -1).
-	basename="03_connection_open_close_double"
-	printf "Running test: $basename... "
-
-	# Set up infrastructure.
-	setup_spiped_decryption_server $basename
-	setup_spiped_encryption_server $basename
-
-	# Run test.  Awkwardly force nc to keep the connection open; the
-	# simple "nc -q 2 ..." to wait 2 seconds isn't portable.
-	( ( echo ""; sleep 2 ) | nc 127.0.0.1 $src_port ) &
-	echo "" | nc 127.0.0.1 $src_port
-
-	# Wait for server(s) to quit.
-	sleep $sleep_ncat_stop
-	kill $nc_pid
-	wait
-
-	# Check results.
-	retval=0
-	retval_d=`cat $out/$basename-d.exit`
-	retval_e=`cat $out/$basename-e.exit`
-	if [ ! "$retval_d" -eq 0 ] || [ ! "$retval_e" -eq 0 ]; then
-		retval=1
-	fi
-
-	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $out/$basename ""
-	return "$retval"
-}
-
-test_send_data_spipe () {
-	# Goal of this test:
-	basename="04_send_data_spipe"
-	printf "Running test: $basename... "
-
-	# Set up infrastructure.
-	setup_spiped_decryption_server $basename
-
-	# Run test.
-	cat $scriptdir/lorem-send.txt | $spipe_binary \
-		-t 127.0.0.1:$mid_port \
-		-k /dev/null
-	cmd_retval=$?
-
-	# Wait for server(s) to quit.
-	sleep $sleep_ncat_stop
-	kill $nc_pid
-	wait
-
-	# Check results.
-	retval=$cmd_retval
-	retval_d=`cat $out/$basename-d.exit`
-	if [ ! "$retval_d" -eq 0 ]; then
-		retval=1
-	fi
-	if ! cmp -s $scriptdir/lorem-send.txt "$out/$basename.txt" ; then
-		retval=1
-	fi
-
-	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $out/$basename ""
-	return "$retval"
-}
-
-
-test_send_data_spiped () {
-	# Goal of this test:
-	# - create a pair of spiped servers (encryption, decryption)
-	# - establish a connection to the encryption spiped server
-	# - open one connection, send lorem-send.txt, close the connection
-	# - server should quit (because we gave it -1)
-	# - the received file should match lorem-send.txt
-	basename="05_send_data_spiped"
-	printf "Running test: $basename... "
-
-	# Set up infrastructure.
-	setup_spiped_decryption_server $basename
-	setup_spiped_encryption_server $basename
-
-	# Run test.
-	cat $scriptdir/lorem-send.txt | nc 127.0.0.1 $src_port
-	cmd_retval=$?
-
-	# Wait for server(s) to quit.
-	sleep $sleep_ncat_stop
-	kill $nc_pid
-	wait
-
-	# Check results.
-	retval=$cmd_retval
-	retval_d=`cat $out/$basename-d.exit`
-	retval_e=`cat $out/$basename-e.exit`
-	if [ ! "$retval_d" -eq 0 ] || [ ! "$retval_e" -eq 0 ]; then
-		retval=1
-	fi
-	if ! cmp -s $scriptdir/lorem-send.txt "$out/$basename.txt" ; then
-		retval=1
-	fi
-
-	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $out/$basename ""
-	return "$retval"
-}
-
-
-test_send_data_system_spiped () {
-	# Goal of this test:
-	# - create a pair of spiped servers (encryption, decryption), where
-	#   the decryption server uses the system-installed spiped binary
-	# - establish a connection to the encryption spiped server
-	# - open one connection, send lorem-send.txt, close the connection
-	# - server should quit (because we gave it -1)
-	# - the received file should match lorem-send.txt
-	basename="06-send-data-system_spiped"
-	printf "Running test: $basename... "
-	if [ ! -n "$system_spiped_binary" ]; then
-		echo "SKIP; no system spiped, or it is too old"
-		return;
-	fi
-
-	# Set up infrastructure.
-	setup_spiped_decryption_server $basename 1
-	setup_spiped_encryption_server $basename
-
-	# Run test.
-	cat $scriptdir/lorem-send.txt | nc 127.0.0.1 $src_port
-	cmd_retval=$?
-
-	# Wait for server(s) to quit.
-	sleep $sleep_ncat_stop
-	kill $nc_pid
-	wait
-
-	# Check results.
-	retval=$cmd_retval
-	retval_d=`cat $out/$basename-d.exit`
-	retval_e=`cat $out/$basename-e.exit`
-	if [ ! "$retval_d" -eq 0 ] || [ ! "$retval_e" -eq 0 ]; then
-		retval=1
-	fi
-	if ! cmp -s $scriptdir/lorem-send.txt "$out/$basename.txt" ; then
-		retval=1
-	fi
-
-	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $out/$basename ""
-	if [ ! "$retval_d" -eq 0 ]; then
-		echo "WARNING: Error found in system spiped"
-	fi
-	return "$retval"
-}
-
-
 ####################################################
 
-# Run tests.
-test_connection_open_close_single &&		\
-	test_connection_open_timeout_single &&	\
-	test_connection_open_close_double &&	\
-	test_send_data_spipe &&			\
-	test_send_data_spiped &&		\
-	test_send_data_system_spiped
-result=$?
-
-# Return value to Makefile.
-exit $result
+# Run the test scenarios; this will exit on the first failure.
+run_scenarios ${scriptdir}/??-*.sh
