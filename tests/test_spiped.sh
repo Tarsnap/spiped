@@ -77,7 +77,7 @@ check_leftover_ncat_server() {
 
 ## setup_spiped_decryption_server(basename, use_system_spiped=0):
 # Set up a spiped decryption server, translating from $mid_port to $dst_port,
-# saving the exit code to $out/basename-d.ret.  Also set up an ncat server
+# saving the exit code to $out/basename-d.exit.  Also set up an ncat server
 # listening to $dst_port, saving output to $out/$basename.txt.  Uses the
 # system's spiped (instead of the version in this source tree) if
 # $use_system_spiped is 1.
@@ -103,13 +103,13 @@ setup_spiped_decryption_server () {
 	( $spiped_cmd -d \
 	 	-s 127.0.0.1:$mid_port -t 127.0.0.1:$dst_port \
 		-k $scriptdir/keys-blank.txt -F -1 -o 1 \
-	; echo $? >> $out/$basename-d.ret ) &
+	; echo $? >> $out/$basename-d.exit ) &
 	sleep $sleep_spiped_start
 }
 
 ## setup_spiped_decryption_server(basename):
 # Set up a spiped encryption server, translating from $src_port to $mid_port,
-# saving the exit code to $out/basename-e.ret.
+# saving the exit code to $out/basename-e.exit.
 setup_spiped_encryption_server () {
 	basename=$1
 
@@ -117,7 +117,7 @@ setup_spiped_encryption_server () {
 	( $spiped_binary -e \
 	 	-s 127.0.0.1:$src_port -t 127.0.0.1:$mid_port \
 		-k $scriptdir/keys-blank.txt -F -1 -o 1 \
-	; echo $? >> $out/$basename-e.ret ) &
+	; echo $? >> $out/$basename-e.exit ) &
 	sleep $sleep_spiped_start
 }
 
@@ -146,13 +146,13 @@ test_connection_open_close_single () {
 
 	# Check results.
 	retval=$cmd_retval
-	retval_d=`cat $out/$basename-d.ret`
+	retval_d=`cat $out/$basename-d.exit`
 	if [ ! "$retval_d" -eq 0 ]; then
 		retval=1
 	fi
 
 	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $retval $retval_d 
+	notify_success_or_fail $out/$basename ""
 	return "$retval"
 }
 
@@ -181,13 +181,13 @@ test_connection_open_timeout_single () {
 
 	# Check results.
 	retval=0
-	retval_d=`cat $out/$basename-d.ret`
+	retval_d=`cat $out/$basename-d.exit`
 	if [ ! "$retval_d" -eq 0 ]; then
 		retval=1
 	fi
 
 	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $retval $retval_d
+	notify_success_or_fail $out/$basename ""
 	return "$retval"
 }
 
@@ -216,14 +216,14 @@ test_connection_open_close_double () {
 
 	# Check results.
 	retval=0
-	retval_d=`cat $out/$basename-d.ret`
-	retval_e=`cat $out/$basename-e.ret`
+	retval_d=`cat $out/$basename-d.exit`
+	retval_e=`cat $out/$basename-e.exit`
 	if [ ! "$retval_d" -eq 0 ] || [ ! "$retval_e" -eq 0 ]; then
 		retval=1
 	fi
 
 	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $retval $retval_d $retval_e
+	notify_success_or_fail $out/$basename ""
 	return "$retval"
 }
 
@@ -248,7 +248,7 @@ test_send_data_spipe () {
 
 	# Check results.
 	retval=$cmd_retval
-	retval_d=`cat $out/$basename-d.ret`
+	retval_d=`cat $out/$basename-d.exit`
 	if [ ! "$retval_d" -eq 0 ]; then
 		retval=1
 	fi
@@ -257,7 +257,7 @@ test_send_data_spipe () {
 	fi
 
 	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $retval $retval_d $retval_e
+	notify_success_or_fail $out/$basename ""
 	return "$retval"
 }
 
@@ -287,8 +287,8 @@ test_send_data_spiped () {
 
 	# Check results.
 	retval=$cmd_retval
-	retval_d=`cat $out/$basename-d.ret`
-	retval_e=`cat $out/$basename-e.ret`
+	retval_d=`cat $out/$basename-d.exit`
+	retval_e=`cat $out/$basename-e.exit`
 	if [ ! "$retval_d" -eq 0 ] || [ ! "$retval_e" -eq 0 ]; then
 		retval=1
 	fi
@@ -297,7 +297,7 @@ test_send_data_spiped () {
 	fi
 
 	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $retval $retval_d $retval_e
+	notify_success_or_fail $out/$basename ""
 	return "$retval"
 }
 
@@ -332,8 +332,8 @@ test_send_data_system_spiped () {
 
 	# Check results.
 	retval=$cmd_retval
-	retval_d=`cat $out/$basename-d.ret`
-	retval_e=`cat $out/$basename-e.ret`
+	retval_d=`cat $out/$basename-d.exit`
+	retval_e=`cat $out/$basename-e.exit`
 	if [ ! "$retval_d" -eq 0 ] || [ ! "$retval_e" -eq 0 ]; then
 		retval=1
 	fi
@@ -342,7 +342,7 @@ test_send_data_system_spiped () {
 	fi
 
 	# Print PASS or FAIL, and return result.
-	notify_success_or_fail $retval $retval_d $retval_e
+	notify_success_or_fail $out/$basename ""
 	if [ ! "$retval_d" -eq 0 ]; then
 		echo "WARNING: Error found in system spiped"
 	fi
