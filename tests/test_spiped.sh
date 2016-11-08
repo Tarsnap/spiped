@@ -101,8 +101,8 @@ setup_spiped_decryption_server () {
 	# Start spiped to connect middle port to backend.
 	(
 		${spiped_cmd} -d			\
-			-s 127.0.0.1:${mid_port}	\
-			-t 127.0.0.1:${dst_port}	\
+			-s [127.0.0.1]:${mid_port}	\
+			-t [127.0.0.1]:${dst_port}	\
 			-k /dev/null -F -1 -o 1
 		echo $? > ${c_exitfile}
 	) &
@@ -116,8 +116,8 @@ setup_spiped_encryption_server () {
 	# Start spiped to connect source port to middle.
 	(
 		${spiped_cmd} -e			\
-			-s 127.0.0.1:${src_port}	\
-			-t 127.0.0.1:${mid_port}	\
+			-s [127.0.0.1]:${src_port}	\
+			-t [127.0.0.1]:${mid_port}	\
 			-k /dev/null -F -1 -o 1
 		echo $? > ${c_exitfile}
 	) &
