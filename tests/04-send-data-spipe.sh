@@ -28,6 +28,7 @@ scenario_cmd() {
 
 	setup_check_variables
 	if ! cmp -s ${ncat_output} ${scriptdir}/lorem-send.txt; then
+		printf "\nTest output does not input\n" 1>&2
 		echo 1
 	else
 		echo 0

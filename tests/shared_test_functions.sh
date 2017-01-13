@@ -203,6 +203,8 @@ notify_success_or_fail() {
 		if [ "${ret}" -gt 0 ]; then
 			echo "FAILED!"
 			retval=${ret}
+			printf "File ${exitfile} contains exit" 1>&2
+			printf " code ${ret}.\n" 1>&2
 			if [ "${ret}" -eq "${valgrind_exit_code}" ]; then
 				val_logfilename=$( get_val_logfile \
 					${val_log_basename} ${exitfile} )

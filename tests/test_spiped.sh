@@ -129,7 +129,7 @@ setup_spiped_encryption_server () {
 nc_server_stop() {
 	sleep ${sleep_ncat_stop}
 	kill ${nc_pid}
-	wait
+	wait ${nc_pid}
 }
 
 ####################################################
