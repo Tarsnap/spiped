@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -o noclobber -o nounset -e
+
 # Build directory (we don't allow out-of-tree builds in spiped).
 bindir=.
 
