@@ -76,9 +76,9 @@ prepare_directories() {
 find_system() {
 	cmd=$1
 	cmd_with_args=$@
-	# Look for ${cmd}.
-	system_binary=`command -v ${cmd}`
-	if [ -z "${system_binary}" ]; then
+	# Look for ${cmd}; the "|| true" and -} make this work with set -e.
+	system_binary=`command -v ${cmd}` || true
+	if [ -z "${system_binary-}" ]; then
 		system_binary=""
 		printf "System ${cmd} not found.\n" 1>&2
 	# If the command exists, check it ensures the ${args}.
