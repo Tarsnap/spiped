@@ -91,6 +91,17 @@ find_system() {
 	echo "${system_binary}"
 }
 
+## has_pid (cmd):
+# Looks for ${cmd} in ps; returns 0 if ${cmd} exists.
+has_pid() {
+	cmd=$1
+	pid=`ps -Aopid,command | grep "${cmd}" | grep -v "grep"`
+	if [ -n "${pid}" ]; then
+		return 0
+	fi
+	return 1
+}
+
 ## check_optional_valgrind ():
 # Return a $USE_VALGRIND variable defined; if it was previously defined and
 # was greater than 0, then check that valgrind is available in the $PATH.
