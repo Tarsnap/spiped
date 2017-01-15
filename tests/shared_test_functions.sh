@@ -42,6 +42,9 @@ out_valgrind="tests-valgrind"
 valgrind_suppressions="${out_valgrind}/suppressions"
 valgrind_suppressions_log="${out_valgrind}/suppressions.pre"
 
+# Print output about test failures.
+VERBOSE=${VERBOSE:-0}
+
 # Keep the user-specified ${USE_VALGRIND}, or initialize to 0.
 USE_VALGRIND=${USE_VALGRIND:-0}
 
@@ -203,6 +206,10 @@ notify_success_or_fail() {
 		if [ "${ret}" -gt 0 ]; then
 			echo "FAILED!"
 			retval=${ret}
+			if [ ${VERBOSE} -ne 0 ]; then
+				printf "File ${exitfile} contains exit" 1>&2
+				printf " code ${ret}.\n" 1>&2
+			fi
 			if [ "${ret}" -eq "${valgrind_exit_code}" ]; then
 				val_logfilename=$( get_val_logfile \
 					${val_log_basename} ${exitfile} )
