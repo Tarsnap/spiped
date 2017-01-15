@@ -31,7 +31,7 @@ clean:
 
 .PHONY: test
 test:
-	tests/test_spiped.sh
+	VERBOSE=1 tests/test_spiped.sh
 
 # Developer targets: These only work with BSD make
 Makefiles:
