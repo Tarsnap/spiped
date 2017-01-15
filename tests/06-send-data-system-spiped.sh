@@ -40,6 +40,12 @@ scenario_cmd() {
 
 	setup_check_variables
 	if ! cmp -s ${ncat_output} ${scriptdir}/lorem-send.txt; then
+		if [ ${VERBOSE} -ne 0 ]; then
+			printf "Test output does not match input;" 1>&2
+			printf -- " output is:\n----\n" 1>&2
+			cat ${ncat_output} 1>&2
+			printf -- "----\n" 1>&2
+		fi
 		echo 1
 	else
 		echo 0
