@@ -227,6 +227,7 @@ main(int argc, char * argv[])
 	/* We should have processed all the arguments. */
 	if (argc != 0)
 		usage();
+	(void)argv; /* argv is not used beyond this point. */
 
 	/* Set defaults. */
 	if (opt_n == 0)
