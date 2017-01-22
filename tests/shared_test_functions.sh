@@ -42,6 +42,9 @@ out_valgrind="tests-valgrind"
 valgrind_suppressions="${out_valgrind}/suppressions"
 valgrind_suppressions_log="${out_valgrind}/suppressions.pre"
 
+# Print output about test failures.
+VERBOSE=${VERBOSE:-0}
+
 # Keep the user-specified ${USE_VALGRIND}, or initialize to 0.
 USE_VALGRIND=${USE_VALGRIND:-0}
 
@@ -73,9 +76,9 @@ prepare_directories() {
 find_system() {
 	cmd=$1
 	cmd_with_args=$@
-	# Look for ${cmd}.
-	system_binary=`command -v ${cmd}`
-	if [ -z "${system_binary}" ]; then
+	# Look for ${cmd}; the "|| true" and -} make this work with set -e.
+	system_binary=`command -v ${cmd}` || true
+	if [ -z "${system_binary-}" ]; then
 		system_binary=""
 		printf "System ${cmd} not found.\n" 1>&2
 	# If the command exists, check it ensures the ${args}.
@@ -86,6 +89,17 @@ find_system() {
 		printf " support necessary arguments.\n" 1>&2
 	fi
 	echo "${system_binary}"
+}
+
+## has_pid (cmd):
+# Looks for ${cmd} in ps; returns 0 if ${cmd} exists.
+has_pid() {
+	cmd=$1
+	pid=`ps -Aopid,command | grep "${cmd}" | grep -v "grep"`
+	if [ -n "${pid}" ]; then
+		return 0
+	fi
+	return 1
 }
 
 ## check_optional_valgrind ():
@@ -203,6 +217,10 @@ notify_success_or_fail() {
 		if [ "${ret}" -gt 0 ]; then
 			echo "FAILED!"
 			retval=${ret}
+			if [ ${VERBOSE} -ne 0 ]; then
+				printf "File ${exitfile} contains exit" 1>&2
+				printf " code ${ret}.\n" 1>&2
+			fi
 			if [ "${ret}" -eq "${valgrind_exit_code}" ]; then
 				val_logfilename=$( get_val_logfile \
 					${val_log_basename} ${exitfile} )
