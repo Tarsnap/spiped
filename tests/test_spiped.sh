@@ -82,26 +82,15 @@ setup_spiped_decryption_server () {
 	fi
 
 	# Start backend server.
-	nc_pid="$(dst_port=${dst_port} outfile=${ncat_output} sh -c \
-		'ncat -k -l -o ${outfile} ${dst_port} >/dev/null 2>&1 & \
-		echo ${!}' )"
+	ncat -k -l -o ${ncat_output} ${dst_port} >/dev/null 2>&1 &
+	nc_pid=${!}
 
 	# Start spiped to connect middle port to backend.
-	(
-		${spiped_cmd} -d			\
-			-s [127.0.0.1]:${mid_port}	\
-			-t [127.0.0.1]:${dst_port}	\
-			-k /dev/null -F -1 -o 1
-		echo $? > ${c_exitfile}
-	) &
-
-	# Wait for spiped to be started.
-	while ! $( has_pid "spiped -d -s \[127.0.0.1\]:${mid_port}" ); do
-		if [ ${VERBOSE} -ne 0 ]; then
-			echo "Waiting to start: spiped -d"
-		fi
-		sleep 1
-	done
+	${spiped_cmd} -d			\
+		-s [127.0.0.1]:${mid_port}	\
+		-t [127.0.0.1]:${dst_port}	\
+		-p ${s_basename}-spiped-d.pid	\
+		-k /dev/null -o 1
 }
 
 ## setup_spiped_decryption_server(basename):
@@ -109,44 +98,39 @@ setup_spiped_decryption_server () {
 # to ${mid_port}, saving the exit code to ${c_exitfile}.
 setup_spiped_encryption_server () {
 	# Start spiped to connect source port to middle.
-	(
-		${spiped_cmd} -e			\
-			-s [127.0.0.1]:${src_port}	\
-			-t [127.0.0.1]:${mid_port}	\
-			-k /dev/null -F -1 -o 1
-		echo $? > ${c_exitfile}
-	) &
-
-	# Wait for spiped to be started.
-	while ! $( has_pid "spiped -e -s \[127.0.0.1\]:${src_port}" ); do
-		if [ ${VERBOSE} -ne 0 ]; then
-			echo "Waiting to start: spiped -e"
-		fi
-		sleep 1
-	done
+	${spiped_cmd} -e			\
+		-s [127.0.0.1]:${src_port}	\
+		-t [127.0.0.1]:${mid_port}	\
+		-p ${s_basename}-spiped-e.pid	\
+		-k /dev/null -o 1
 }
 
-## nc_server_stop():
-# Stops the ncat server.
-nc_server_stop() {
-	# Wait for spiped to be stopped.
-	while $( has_pid "spiped -d -s \[127.0.0.1\]:${mid_port}" ); do
-		if [ ${VERBOSE} -ne 0 ]; then
-			echo "Waiting to stop: spiped -d"
-		fi
-		sleep 1
-	done
+## servers_stop():
+# Stops the various servers.
+servers_stop() {
+	# Signalling servers to stop
+	if [ -e ${s_basename}-spiped-e.pid ]; then
+		kill `cat ${s_basename}-spiped-e.pid`
+	fi
+	if [ -e ${s_basename}-spiped-d.pid ]; then
+		kill `cat ${s_basename}-spiped-d.pid`
+	fi
+	kill ${nc_pid}
+
+	# Waiting for servers to stop
 	while $( has_pid "spiped -e -s \[127.0.0.1\]:${src_port}" ); do
 		if [ ${VERBOSE} -ne 0 ]; then
 			echo "Waiting to stop: spiped -e"
 		fi
 		sleep 1
 	done
-
-	kill ${nc_pid}
-
-	# Wait for nc to be stopped.
-	while $( has_pid "ncat -k -l -o .* ${dst_port}" ) ; do
+	while $( has_pid "spiped -d -s \[127.0.0.1\]:${mid_port}" ); do
+		if [ ${VERBOSE} -ne 0 ]; then
+			echo "Waiting to stop: spiped -d"
+		fi
+		sleep 1
+	done
+	while $( has_pid "ncat -k -l -o .* ${dst_port}" ); do
 		if [ ${VERBOSE} -ne 0 ]; then
 			echo "Waiting to stop: ncat"
 		fi

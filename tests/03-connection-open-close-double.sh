@@ -12,10 +12,7 @@
 ### Actual command
 scenario_cmd() {
 	# Set up infrastructure.
-	setup_check_variables
 	setup_spiped_decryption_server
-
-	setup_check_variables
 	setup_spiped_encryption_server
 
 	# Open and close a connection.  Awkwardly force nc to keep
@@ -35,5 +32,5 @@ scenario_cmd() {
 	sleep 3
 
 	# Wait for server(s) to quit.
-	nc_server_stop
+	servers_stop
 }

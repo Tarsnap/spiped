@@ -12,7 +12,6 @@ ncat_output="${s_basename}-ncat-output.txt"
 ### Actual command
 scenario_cmd() {
 	# Set up infrastructure.
-	setup_check_variables
 	setup_spiped_decryption_server ${ncat_output}
 
 	# Send data.
@@ -24,7 +23,7 @@ scenario_cmd() {
 	)
 
 	# Wait for server(s) to quit.
-	nc_server_stop
+	servers_stop
 
 	setup_check_variables
 	if ! cmp -s ${ncat_output} ${scriptdir}/lorem-send.txt; then

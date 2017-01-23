@@ -12,7 +12,6 @@
 ### Actual command
 scenario_cmd() {
 	# Set up infrastructure.
-	setup_check_variables
 	setup_spiped_decryption_server
 
 	# Open and close a connection.
@@ -23,5 +22,5 @@ scenario_cmd() {
 	)
 
 	# Wait for server(s) to quit.
-	nc_server_stop
+	servers_stop
 }

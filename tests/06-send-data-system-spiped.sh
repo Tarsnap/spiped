@@ -22,10 +22,7 @@ scenario_cmd() {
 	fi
 
 	# Set up infrastructure.
-	setup_check_variables
 	setup_spiped_decryption_server ${ncat_output} 1
-
-	setup_check_variables
 	setup_spiped_encryption_server
 
 	# Open and close a connection.
@@ -36,7 +33,7 @@ scenario_cmd() {
 	)
 
 	# Wait for server(s) to quit.
-	nc_server_stop
+	servers_stop
 
 	setup_check_variables
 	if ! cmp -s ${ncat_output} ${scriptdir}/lorem-send.txt; then
