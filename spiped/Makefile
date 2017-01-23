@@ -75,7 +75,7 @@ cpusupport_x86_aesni.o: ../libcperciva/cpusupport/cpusupport_x86_aesni.c ../libc
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/cpusupport/cpusupport_x86_aesni.c -o cpusupport_x86_aesni.o
 events_immediate.o: ../libcperciva/events/events_immediate.c ../libcperciva/datastruct/mpool.h ../libcperciva/events/events.h ../libcperciva/events/events_internal.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/events/events_immediate.c -o events_immediate.o
-events_network.o: ../libcperciva/events/events_network.c ../libcperciva/datastruct/elasticarray.h ../libcperciva/util/warnp.h ../libcperciva/events/events.h ../libcperciva/events/events_internal.h
+events_network.o: ../libcperciva/events/events_network.c ../libcperciva/util/ctassert.h ../libcperciva/datastruct/elasticarray.h ../libcperciva/util/warnp.h ../libcperciva/events/events.h ../libcperciva/events/events_internal.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/events/events_network.c -o events_network.o
 events_network_selectstats.o: ../libcperciva/events/events_network_selectstats.c ../libcperciva/util/monoclock.h ../libcperciva/events/events.h ../libcperciva/events/events_internal.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../libcperciva/events/events_network_selectstats.c -o events_network_selectstats.o
