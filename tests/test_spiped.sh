@@ -82,9 +82,8 @@ setup_spiped_decryption_server () {
 	fi
 
 	# Start backend server.
-	nc_pid="$(dst_port=${dst_port} outfile=${ncat_output} sh -c \
-		'ncat -k -l -o ${outfile} ${dst_port} >/dev/null 2>&1 & \
-		echo ${!}' )"
+	ncat -k -l -o ${ncat_output} ${dst_port} >/dev/null 2>&1 &
+	nc_pid=${!}
 
 	# Start spiped to connect middle port to backend.
 	(
