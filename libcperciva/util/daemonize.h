@@ -5,6 +5,6 @@
  * daemonize(spid):
  * Daemonize and write the process ID in decimal to a file named ${spid}.
  */
-int daemonize(const char *);
+int daemonize(const char *, void (* parent_cleanup)(void));
 
 #endif /* !_DAEMONIZE_H_ */
