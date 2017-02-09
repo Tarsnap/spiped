@@ -52,12 +52,6 @@ diediedie_handler(int signo)
 	_exit(0);
 }
 
-/* Simplify error-handling in command-line parse loop. */
-#define OPT_EPARSE(opt, arg) do {					\
-	warnp("Error parsing argument: -%c %s", opt, arg);		\
-	exit(1);							\
-} while (0)
-
 int
 main(int argc, char * argv[])
 {
@@ -72,7 +66,7 @@ main(int argc, char * argv[])
 	const char * opt_k = NULL;
 	intmax_t opt_n = 0;
 	double opt_o = 0.0;
-	char * opt_p = NULL;
+	const char * opt_p = NULL;
 	double opt_r = 0.0;
 	int opt_R = 0;
 	const char * opt_s = NULL;
@@ -84,6 +78,7 @@ main(int argc, char * argv[])
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
 	const char * ch;
+	char * pidfilename = NULL;
 	int s;
 	void * dispatch_cookie = NULL;
 	int conndone = 0;
@@ -156,8 +151,7 @@ main(int argc, char * argv[])
 		GETOPT_OPTARG("-p"):
 			if (opt_p)
 				usage();
-			if ((opt_p = strdup(optarg)) == NULL)
-				OPT_EPARSE(ch, optarg);
+			opt_p = optarg;
 			break;
 		GETOPT_OPTARG("-r"):
 			if (opt_r != 0.0)
@@ -232,8 +226,13 @@ main(int argc, char * argv[])
 
 	/* Figure out where our pid should be written. */
 	if (opt_p == NULL) {
-		if (asprintf(&opt_p, "%s.pid", opt_s) == -1) {
+		if (asprintf(&pidfilename, "%s.pid", opt_s) == -1) {
 			warnp("asprintf");
+			goto err0;
+		}
+	} else {
+		if ((pidfilename = strdup(opt_p)) == NULL) {
+			warnp("Out of memory");
 			goto err0;
 		}
 	}
@@ -250,7 +249,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Daemonize early if we're going to wait for DNS to be ready. */
-	if (opt_D && !opt_F && daemonize(opt_p)) {
+	if (opt_D && !opt_F && daemonize(pidfilename)) {
 		warnp("Failed to daemonize");
 		goto err1;
 	}
@@ -295,7 +294,7 @@ main(int argc, char * argv[])
 		goto err4;
 
 	/* Daemonize and write pid. */
-	if (!opt_D && !opt_F && daemonize(opt_p)) {
+	if (!opt_D && !opt_F && daemonize(pidfilename)) {
 		warnp("Failed to daemonize");
 		goto err4;
 	}
@@ -338,7 +337,7 @@ main(int argc, char * argv[])
 	sock_addr_freelist(sas_s);
 
 	/* Free pid filename. */
-	free(opt_p);
+	free(pidfilename);
 
 	/* Success! */
 	exit(0);
@@ -354,7 +353,7 @@ err3:
 err2:
 	sock_addr_freelist(sas_s);
 err1:
-	free(opt_p);
+	free(pidfilename);
 err0:
 	/* Failure! */
 	exit(1);
