@@ -25,6 +25,26 @@ static struct spiped_cookie {
 } spiped_cookie_allocated;
 
 static void
+cleanup_parent()
+{
+	struct spiped_cookie * S = &spiped_cookie_allocated;
+
+	/* Free the protocol secret structure. */
+	free(S->K);
+
+	/* Free arrays of resolved addresses. */
+	sock_addr_freelist(S->sas_t);
+	sock_addr_freelist(S->sas_s);
+
+	/* Free pid filename. */
+	free(S->pidfilename);
+
+	/* Free libcperciva-allocated memory. */
+	warnp_done();
+	getopt_done();
+}
+
+static void
 usage(void)
 {
 
@@ -259,7 +279,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Daemonize early if we're going to wait for DNS to be ready. */
-	if (opt_D && !opt_F && daemonize(S->pidfilename)) {
+	if (opt_D && !opt_F && daemonize(S->pidfilename, cleanup_parent)) {
 		warnp("Failed to daemonize");
 		goto err1;
 	}
@@ -304,7 +324,7 @@ main(int argc, char * argv[])
 		goto err4;
 
 	/* Daemonize and write pid. */
-	if (!opt_D && !opt_F && daemonize(S->pidfilename)) {
+	if (!opt_D && !opt_F && daemonize(S->pidfilename, cleanup_parent)) {
 		warnp("Failed to daemonize");
 		goto err4;
 	}
