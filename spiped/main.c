@@ -17,6 +17,13 @@
 #include "dispatch.h"
 #include "proto_crypt.h"
 
+static struct spiped_cookie {
+	struct sock_addr ** sas_s;
+	struct sock_addr ** sas_t;
+	struct proto_secret * K;
+	char * pidfilename;
+} spiped_cookie_allocated;
+
 static void
 usage(void)
 {
@@ -74,16 +81,19 @@ main(int argc, char * argv[])
 	int opt_1 = 0;
 
 	/* Working variables. */
-	struct sock_addr ** sas_s;
-	struct sock_addr ** sas_t;
-	struct proto_secret * K;
 	const char * ch;
-	char * pidfilename = NULL;
 	int s;
 	void * dispatch_cookie = NULL;
 	int conndone = 0;
+	struct spiped_cookie * S = &spiped_cookie_allocated;
 
 	WARNP_INIT;
+
+	/* Initialize the working cookie. */
+	S->sas_s = NULL;
+	S->sas_t = NULL;
+	S->K = NULL;
+	S->pidfilename = NULL;
 
 	/* Parse the command line. */
 	while ((ch = GETOPT(argc, argv)) != NULL) {
@@ -226,12 +236,12 @@ main(int argc, char * argv[])
 
 	/* Figure out where our pid should be written. */
 	if (opt_p == NULL) {
-		if (asprintf(&pidfilename, "%s.pid", opt_s) == -1) {
+		if (asprintf(&S->pidfilename, "%s.pid", opt_s) == -1) {
 			warnp("asprintf");
 			goto err0;
 		}
 	} else {
-		if ((pidfilename = strdup(opt_p)) == NULL) {
+		if ((S->pidfilename = strdup(opt_p)) == NULL) {
 			warnp("Out of memory");
 			goto err0;
 		}
@@ -249,60 +259,60 @@ main(int argc, char * argv[])
 	}
 
 	/* Daemonize early if we're going to wait for DNS to be ready. */
-	if (opt_D && !opt_F && daemonize(pidfilename)) {
+	if (opt_D && !opt_F && daemonize(S->pidfilename)) {
 		warnp("Failed to daemonize");
 		goto err1;
 	}
 
 	/* Resolve source address. */
-	while ((sas_s = sock_resolve(opt_s)) == NULL) {
+	while ((S->sas_s = sock_resolve(opt_s)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_s);
 			goto err1;
 		}
 		sleep(1);
 	}
-	if (sas_s[0] == NULL) {
+	if (S->sas_s[0] == NULL) {
 		warn0("No addresses found for %s", opt_s);
 		goto err2;
 	}
 
 	/* Resolve target address. */
-	while ((sas_t = sock_resolve(opt_t)) == NULL) {
+	while ((S->sas_t = sock_resolve(opt_t)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_t);
 			goto err2;
 		}
 		sleep(1);
 	}
-	if (sas_t[0] == NULL) {
+	if (S->sas_t[0] == NULL) {
 		warn0("No addresses found for %s", opt_t);
 		goto err3;
 	}
 
 	/* Load the keying data. */
-	if ((K = proto_crypt_secret(opt_k)) == NULL) {
+	if ((S->K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
 		goto err3;
 	}
 
 	/* Create and bind a socket, and mark it as listening. */
-	if (sas_s[1] != NULL)
+	if (S->sas_s[1] != NULL)
 		warn0("Listening on first of multiple addresses found for %s",
 		    opt_s);
-	if ((s = sock_listener(sas_s[0])) == -1)
+	if ((s = sock_listener(S->sas_s[0])) == -1)
 		goto err4;
 
 	/* Daemonize and write pid. */
-	if (!opt_D && !opt_F && daemonize(pidfilename)) {
+	if (!opt_D && !opt_F && daemonize(S->pidfilename)) {
 		warnp("Failed to daemonize");
 		goto err4;
 	}
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, (size_t)opt_n, opt_o, opt_1,
-	    &conndone)) == NULL) {
+	    S->sas_t, opt_d, opt_f, opt_g, opt_j, S->K, (size_t)opt_n, opt_o,
+	    opt_1, &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
 		goto err5;
 	}
@@ -330,14 +340,14 @@ main(int argc, char * argv[])
 	events_shutdown();
 
 	/* Free the protocol secret structure. */
-	free(K);
+	free(S->K);
 
 	/* Free arrays of resolved addresses. */
-	sock_addr_freelist(sas_t);
-	sock_addr_freelist(sas_s);
+	sock_addr_freelist(S->sas_t);
+	sock_addr_freelist(S->sas_s);
 
 	/* Free pid filename. */
-	free(pidfilename);
+	free(S->pidfilename);
 
 	/* Success! */
 	exit(0);
@@ -347,13 +357,13 @@ err6:
 err5:
 	events_shutdown();
 err4:
-	free(K);
+	free(S->K);
 err3:
-	sock_addr_freelist(sas_t);
+	sock_addr_freelist(S->sas_t);
 err2:
-	sock_addr_freelist(sas_s);
+	sock_addr_freelist(S->sas_s);
 err1:
-	free(pidfilename);
+	free(S->pidfilename);
 err0:
 	/* Failure! */
 	exit(1);
