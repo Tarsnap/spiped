@@ -1,4 +1,6 @@
 spiped-1.6.0
+* The -n option (spiped) is no longer limited to a maximum limit of
+  500 simultaneous connections.
 * The -k option now accepts "-" as a synonym for standard input.
 * New option -v (spipe/spiped): Print version number.
 * Add workaround for docker signal-handling bug in spiped.
