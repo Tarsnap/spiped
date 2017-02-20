@@ -39,6 +39,11 @@ IDIRS	+=	-I../libcperciva/datastruct
 SRCS	+=	dnsthread.c
 IDIRS	+=	-I../lib/dnsthread
 
+# spiped utility functions
+.PATH.c	:	../lib/util
+SRCS	+=	graceful_shutdown.c
+IDIRS	+=	-I../lib/util
+
 # Utility functions
 .PATH.c	:	../libcperciva/util
 SRCS	+=	asprintf.c
