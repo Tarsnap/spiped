@@ -22,6 +22,7 @@ scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 # Find relative spiped binary paths.
 spiped_binary=${scriptdir}/../spiped/spiped
 spipe_binary=${scriptdir}/../spipe/spipe
+nc_client_binary=${scriptdir}/../tests/nc-client/nc-client
 
 # Find system spiped if it supports -1.
 system_spiped_binary=$( find_system spiped -1 )
@@ -116,6 +117,9 @@ servers_stop() {
 		kill `cat ${s_basename}-spiped-d.pid`
 	fi
 	kill ${nc_pid}
+
+	# Give servers a chance to stop without fuss.
+	sleep 1
 
 	# Waiting for servers to stop
 	while $( has_pid "spiped -e -s \[127.0.0.1\]:${src_port}" ); do

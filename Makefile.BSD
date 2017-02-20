@@ -1,6 +1,6 @@
 PKG=	spiped
 PROGS=	spiped spipe
-TESTS=	tests/valgrind
+TESTS=	tests/nc-client tests/valgrind
 SUBST_VERSION_FILES=    spipe/spipe.1 spiped/spiped.1 spipe/main.c spiped/main.c
 PUBLISH= ${PROGS} BUILDING DESIGN.md CHANGELOG COPYRIGHT README.md STYLE POSIX Makefile lib libcperciva proto
 MAKE:=	${MAKE} -f Makefile.BSD

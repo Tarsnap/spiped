@@ -1,7 +1,7 @@
 .POSIX:
 
 PROGS=		spiped spipe
-TESTS=		tests/valgrind
+TESTS=		tests/nc-client tests/valgrind
 BINDIR_DEFAULT=	/usr/local/bin
 CFLAGS_DEFAULT=	-O2
 
