@@ -12,12 +12,8 @@ static void (* sighandler_sigterm_orig)(int);
 static void * caller_cookie;
 static void * timer_cookie;
 
-/* Flag to show that SIGTERM was given. */
+/* Flag to show that SIGTERM was received. */
 static volatile sig_atomic_t should_shutdown = 0;
-
-/* Forward definitions. */
-static void graceful_shutdown_handler(int);
-static int graceful_shutdown(void *);
 
 /* Signal handler for SIGTERM to perform a graceful shutdown. */
 static void
@@ -44,10 +40,6 @@ graceful_shutdown(void * cookie)
 			warn0("Failed to begin shutdown");
 			goto err0;
 		}
-
-		/* Cancel timer. */
-		if (timer_cookie != NULL)
-			events_timer_cancel(timer_cookie);
 
 		/* Restore original SIGTERM handler. */
 		if (signal(SIGTERM, sighandler_sigterm_orig) == SIG_ERR)
@@ -93,7 +85,7 @@ graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
 	/* Periodically check whether a signal was received. */
 	if ((timer_cookie = events_timer_register_double(
 	    graceful_shutdown, NULL, 1.0)) == NULL) {
-		warnp("Failed to register graceful shutdown timer");
+		warnp("Failed to register the graceful shutdown timer");
 		goto err0;
 	}
 

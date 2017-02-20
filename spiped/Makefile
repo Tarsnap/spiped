@@ -29,7 +29,7 @@ clean:
 ${PROG}:${SRCS:.c=.o}
 	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDADD_EXTRA} ${LDADD_REQ} ${LDADD_POSIX}
 
-main.o: main.c ../libcperciva/util/asprintf.h ../libcperciva/util/daemonize.h ../libcperciva/events/events.h ../libcperciva/util/getopt.h ../libcperciva/util/sock.h ../libcperciva/util/warnp.h dispatch.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h
+main.o: main.c ../libcperciva/util/asprintf.h ../libcperciva/util/daemonize.h ../libcperciva/events/events.h ../libcperciva/util/getopt.h ../lib/util/graceful_shutdown.h ../libcperciva/util/sock.h ../libcperciva/util/warnp.h dispatch.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c main.c -o main.o
 dispatch.o: dispatch.c ../lib/dnsthread/dnsthread.h ../libcperciva/events/events.h ../libcperciva/network/network.h ../libcperciva/util/sock.h ../libcperciva/util/sock_util.h ../libcperciva/util/warnp.h ../proto/proto_conn.h dispatch.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c dispatch.c -o dispatch.o

@@ -10,14 +10,12 @@
 #include "daemonize.h"
 #include "events.h"
 #include "getopt.h"
+#include "graceful_shutdown.h"
 #include "sock.h"
 #include "warnp.h"
 
 #include "dispatch.h"
 #include "proto_crypt.h"
-
-static volatile sig_atomic_t should_shutdown = 0;
-static void * graceful_shutdown_timer_cookie = NULL;
 
 static void
 usage(void)
@@ -33,15 +31,14 @@ usage(void)
 	exit(1);
 }
 
-/*
- * Signal handler for SIGTERM to perform a graceful shutdown.
- */
-static void
-graceful_shutdown_handler(int signo)
+static int
+callback_graceful_shutdown(void * dispatch_cookie)
 {
 
-	(void)signo; /* UNUSED */
-	should_shutdown = 1;
+	dispatch_request_shutdown(dispatch_cookie);
+
+	/* Success! */
+	return(0);
 }
 
 /*
@@ -53,26 +50,6 @@ diediedie_handler(int signo)
 
 	(void)signo; /* UNUSED */
 	_exit(0);
-}
-
-/*
- * Requests a graceful shutdown of the given cookie.
- */
-static int
-graceful_shutdown(void * cookie)
-{
-	struct accept_state * A = cookie;
-
-	/* This timer has expired. */
-	graceful_shutdown_timer_cookie = NULL;
-
-	if (should_shutdown)
-		dispatch_request_shutdown(A);
-	else
-		graceful_shutdown_timer_cookie = events_timer_register_double(
-		    graceful_shutdown, A, 1.0);
-
-	return (0);
 }
 
 /* Simplify error-handling in command-line parse loop. */
@@ -261,11 +238,6 @@ main(int argc, char * argv[])
 		}
 	}
 
-	if (signal(SIGTERM, graceful_shutdown_handler) == SIG_ERR) {
-		warnp("Failed to bind SIGTERM signal handler");
-		goto err1;
-	}
-
 	/* Check whether we are running as init (e.g., inside a container). */
 	if (getpid() == 1) {
 		/* https://github.com/docker/docker/issues/7086 */
@@ -336,9 +308,12 @@ main(int argc, char * argv[])
 		goto err5;
 	}
 
-	/* Check periodically whether a signal was received. */
-	graceful_shutdown_timer_cookie = events_timer_register_double(
-	    graceful_shutdown, dispatch_cookie, 1.0);
+	/* Register a handler for SIGTERM. */
+	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
+	    dispatch_cookie)) {
+		warn0("Failed to start graceful_shutdown timer");
+		goto err6;
+	}
 
 	/*
 	 * Loop until an error occurs, or a connection closes if the
@@ -348,10 +323,6 @@ main(int argc, char * argv[])
 		warnp("Error running event loop");
 		goto err6;
 	}
-
-	/* Deregister the graceful_shutdown timer. */
-	if (graceful_shutdown_timer_cookie != NULL)
-		events_timer_cancel(graceful_shutdown_timer_cookie);
 
 	/* Stop accepting connections and shut down the dispatcher. */
 	dispatch_shutdown(dispatch_cookie);
@@ -373,8 +344,6 @@ main(int argc, char * argv[])
 	exit(0);
 
 err6:
-	if (graceful_shutdown_timer_cookie != NULL)
-		events_timer_cancel(graceful_shutdown_timer_cookie);
 	dispatch_shutdown(dispatch_cookie);
 err5:
 	events_shutdown();
