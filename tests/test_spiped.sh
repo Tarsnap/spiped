@@ -118,6 +118,9 @@ servers_stop() {
 	fi
 	kill ${nc_pid}
 
+	# Give servers a chance to stop without fuss.
+	sleep 1
+
 	# Waiting for servers to stop
 	while $( has_pid "spiped -e -s \[127.0.0.1\]:${src_port}" ); do
 		if [ ${VERBOSE} -ne 0 ]; then
