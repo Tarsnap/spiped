@@ -1,0 +1,39 @@
+# Program name.
+PROG	=	nc-client
+
+# Don't install it.
+NOINST	= 	1
+
+# main test code
+SRCS	=	main.c
+
+# Data structures
+.PATH.c	:	../../libcperciva/datastruct
+SRCS	+=	elasticarray.c
+SRCS	+=	ptrheap.c
+SRCS	+=	timerqueue.c
+IDIRS	+=	-I../../libcperciva/datastruct
+
+# Event loop
+.PATH.c	:	../../libcperciva/events
+SRCS	+=	events_immediate.c
+SRCS	+=	events_network.c
+SRCS	+=	events_network_selectstats.c
+SRCS	+=	events_timer.c
+SRCS	+=	events.c
+IDIRS	+=	-I../../libcperciva/events
+
+# Event-driven networking
+.PATH.c	:	../../libcperciva/network
+SRCS	+=	network_connect.c
+SRCS	+=	network_write.c
+IDIRS	+=	-I../../libcperciva/network
+
+# Utility functions
+.PATH.c	:	../../libcperciva/util
+SRCS	+=	monoclock.c
+SRCS	+=	sock.c
+SRCS	+=	warnp.c
+IDIRS	+=	-I../../libcperciva/util
+
+.include <bsd.prog.mk>
