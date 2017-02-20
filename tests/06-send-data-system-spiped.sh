@@ -28,7 +28,8 @@ scenario_cmd() {
 	# Open and close a connection.
 	setup_check_variables
 	(
-		cat ${scriptdir}/lorem-send.txt | nc 127.0.0.1 ${src_port}
+		cat ${scriptdir}/lorem-send.txt |	\
+			${nc_client_binary} [127.0.0.1]:${src_port}
 		echo $? > ${c_exitfile}
 	)
 

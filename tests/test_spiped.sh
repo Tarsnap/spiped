@@ -22,6 +22,7 @@ scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 # Find relative spiped binary paths.
 spiped_binary=${scriptdir}/../spiped/spiped
 spipe_binary=${scriptdir}/../spipe/spipe
+nc_client_binary=${scriptdir}/../tests/nc-client/nc-client
 
 # Find system spiped if it supports -1.
 system_spiped_binary=$( find_system spiped -1 )
