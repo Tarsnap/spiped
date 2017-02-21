@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,10 +65,13 @@ callback_wrote(void * cookie, ssize_t lenwrit)
 	/* We are no longer writing. */
 	send->write_cookie = NULL;
 
-	/* Check that we wrote all our data. */
-	if (lenwrit != send->nchars) {
-		warn0("Mismatch between data sent and data requested to send");
+	/* Check results. */
+	if (lenwrit == -1) {
+		warnp("network_write send");
 		goto err0;
+	} else {
+		/* We should have sent everything. */
+		assert(lenwrit == send->nchars);
 	}
 
 	/* Clear the buffer that was used. */
