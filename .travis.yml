@@ -1,5 +1,5 @@
 language: c
-sudo: required
+sudo: false
 dist: trusty
 compiler:
   - clang
@@ -11,9 +11,6 @@ env:
   global:
     - secure: "iR9Rnj7Jze4wIVk6lLk/473SfhQ6EYDP9po6ZLflPg40wSkV+pR6HhYFkxXPfIl4LA3yEnvHL2x5uDAvyXKMStT/YbzgiwC4R//4m4iyKUzJuO88kLozn3AYHVXs5Lcge1/k/ET8zmXyoZTauXicPkxeCSziJh//IwAxFu1cXLv0IyMGo8k37yG2on5T79L8P/8RBkNpodmxm+PC5wzc9KObT6op7MIxIm4VHN8yGA0B1Hk9LyAT0y2nw9SAgNx8loG/+rCBGe7j6ViRe4Fhyqk1oeT1m4wEeULM6oTJmm4LLkrbnljMhwMmBG6cMbtlwG0LRtpzbk+VjqhkwSEFMWr50qepdjd2BsF+Oz/uQJ1C0u5uRS/uLqZmfr2t7kBg5j7FsBKCqEbBoALj+qPgJxiawfHv7VpRnzOeKagMetit1YcVNCrywOweYbh89KGxJD28KjGOTHVHJ6ZxuIWWvfFkHq2m9DRzAurSj2VN+oQW6f/53YkxCAPTAaBR4UUBTYy4pt8xMdNhEQTcRE00yUAfbBkgKsThaAs34Gm0RGxzYkW0zzYIh0DkK6utjUu5bwq1pB5qC4Qr3BYgzlCOp0wS0rH3S3UurlcP4PWuKIxQzxxylWBIZEqIAe6xs4hfUeuBkPmRk5fIwNTA7m3g+K2skB/adMnYnyD1Rb1hWLM="
 addons:
-  apt:
-    packages:
-    - nmap
   coverity_scan:
     project:
       name: "Tarsnap/spiped"
@@ -25,8 +22,6 @@ addons:
 
 before_install:
 - test $TRAVIS_BRANCH != coverity-scan -o ${TRAVIS_JOB_NUMBER##*.} = 1 || exit 0
-- 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi'
-- 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install nmap; fi'
 - 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CFLAGS="-I/usr/local/opt/openssl/include $CFLAGS" LDFLAGS="-L/usr/local/opt/openssl/lib $LDFLAGS"; fi'
 - 'if [[ "$TRAVIS_OS_NAME" == "osx" && "$CC" == "gcc" ]]; then CC=gcc-4.9; $CC --version; fi'
 script:

@@ -23,6 +23,7 @@ scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 spiped_binary=${scriptdir}/../spiped/spiped
 spipe_binary=${scriptdir}/../spipe/spipe
 nc_client_binary=${scriptdir}/../tests/nc-client/nc-client
+nc_server_binary=${scriptdir}/../tests/nc-server/nc-server
 
 # Find system spiped if it supports -1.
 system_spiped_binary=$( find_system spiped -1 )
@@ -36,44 +37,39 @@ if ! command -v ${spipe_binary} >/dev/null 2>&1; then
 	echo "spiped not detected; did you forget to run 'make all'?"
 	exit 1
 fi
-if ! command -v ncat >/dev/null 2>&1; then
-	echo "ncat not detected; it is part of the nmap suite"
-	echo "	(it is required for multiple sockets on the same port)"
-	exit 1
-fi
 
 # Clean up previous directories, and create new ones.
 prepare_directories
 
 ################################ Helper functions
 
-check_leftover_ncat_server() {
+check_leftover_nc_server() {
 	# Repeated testing, especially when doing ctrl-c to break out of
-	# (suspected) hanging, can leave a ncat server floating around, which
+	# (suspected) hanging, can leave a nc_server floating around, which
 	# is problematic for the next testing run.  Checking for this
 	# shouldn't be necessary for normal testing (as opposed to test-script
 	# development), but there's no harm in checking anyway.
 	leftover=""
 
-	# Find old ncat server on ${dst_port}.
-	if $( has_pid "ncat -k -l -o .* ${dst_port}" ); then
-		echo "Error: Left-over ncat server from previous run."
+	# Find old nc-server on ${dst_port}.
+	if $( has_pid "${nc_server_binary} ${dst_port}" ); then
+		echo "Error: Left-over nc-server from previous run."
 		exit 1
 	fi
 }
 
 ################################ Server setup
 
-## setup_spiped_decryption_server(ncat_output=/dev/null, use_system_spiped=0):
+## setup_spiped_decryption_server(nc_output=/dev/null, use_system_spiped=0):
 # Set up a spiped decryption server, translating from ${mid_port}
 # to ${dst_port}, saving the exit code to ${c_exitfile}.  Also set
-# up an ncat server listening to ${dst_port}, saving output to
-# ${ncat_output}.  Uses the system's spiped (instead of the
+# up a nc-server listening to ${dst_port}, saving output to
+# ${nc_output}.  Uses the system's spiped (instead of the
 # version in this source tree) if ${use_system_spiped} is 1.
 setup_spiped_decryption_server () {
-	ncat_output=${1:-/dev/null}
+	nc_output=${1:-/dev/null}
 	use_system_spiped=${2:-0}
-	check_leftover_ncat_server
+	check_leftover_nc_server
 
 	# Select system or compiled spiped.
 	if [ "${use_system_spiped}" -gt 0 ]; then
@@ -83,7 +79,7 @@ setup_spiped_decryption_server () {
 	fi
 
 	# Start backend server.
-	ncat -k -l -o ${ncat_output} ${dst_port} >/dev/null 2>&1 &
+	${nc_server_binary} ${dst_port} ${nc_output} &
 	nc_pid=${!}
 
 	# Start spiped to connect middle port to backend.
@@ -109,14 +105,13 @@ setup_spiped_encryption_server () {
 ## servers_stop():
 # Stops the various servers.
 servers_stop() {
-	# Signalling servers to stop
+	# Signal spiped servers to stop
 	if [ -e ${s_basename}-spiped-e.pid ]; then
 		kill `cat ${s_basename}-spiped-e.pid`
 	fi
 	if [ -e ${s_basename}-spiped-d.pid ]; then
 		kill `cat ${s_basename}-spiped-d.pid`
 	fi
-	kill ${nc_pid}
 
 	# Give servers a chance to stop without fuss.
 	sleep 1
@@ -134,7 +129,7 @@ servers_stop() {
 		fi
 		sleep 1
 	done
-	while $( has_pid "ncat -k -l -o .* ${dst_port}" ); do
+	while $( has_pid "${nc_server_binary} ${dst_port}" ); do
 		if [ ${VERBOSE} -ne 0 ]; then
 			echo "Waiting to stop: ncat"
 		fi
