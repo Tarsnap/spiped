@@ -374,7 +374,7 @@ events_network_select(struct timeval * tv)
 	events_network_selectstats_select();
 
 	/* Poll. */
-	while (poll(fds, nfds, timeout) == -1) {
+	while (poll(fds, (nfds_t)nfds, timeout) == -1) {
 		/* EINTR is harmless. */
 		if (errno == EINTR)
 			continue;
