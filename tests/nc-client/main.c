@@ -1,3 +1,5 @@
+#include <sys/socket.h>
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -16,10 +18,42 @@ struct senddata {
 	int conndone;
 	void * connect_cookie;
 	void * write_cookie;
+	void * read_cookie;
+	uint8_t dummybuf[1];
 };
 
 /* Forward declaration. */
 static int callback_wrote(void *, ssize_t);
+
+static int callback_stopping(void * cookie, ssize_t lenread)
+{
+	struct senddata * send = (struct senddata *)cookie;
+
+	/* We are no longer reading. */
+	send->read_cookie = NULL;
+
+	/* Check results. */
+	if (lenread == -1) {
+		warnp("network_read received");
+		goto err0;
+	} else {
+		/* We should have received nothing. */
+		if (lenread != 0) {
+			warn0("network_read received non-zero data");
+			goto err0;
+		}
+	}
+
+	/* Close connection. */
+	send->conndone = 1;
+
+	/* Success! */
+	return (0);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
 
 /* Send data from stdin to a socket, or close the connection. */
 static int
@@ -38,14 +72,29 @@ send_input(void * cookie)
 			goto err0;
 		}
 	} else {
-		/* Close connection without sending anything. */
-		send->conndone = 1;
-
 		/* If we didn't get an EOF, then there was an error. */
 		if (!feof(stdin)) {
 			warn0("getline(..., ..., stdin)");
 			goto err0;
 		}
+
+		/* We're not going to send anything else. */
+		if (shutdown(send->socket, SHUT_WR)) {
+			warnp("shutdown");
+			goto err0;
+		}
+
+		/*
+		 * The server should not send any data back, but attempting to
+		 * read will detect when the other end of the socket is closed.
+		 */
+		if ((send->read_cookie = network_read(send->socket,
+		    send->dummybuf, 1, 1, callback_stopping, cookie))
+		    == NULL) {
+			warn0("network_read initialize");
+			goto err0;
+		}
+
 	}
 
 	/* Success! */
@@ -135,6 +184,7 @@ main(int argc, char ** argv)
 	send->conndone = 0;
 	send->connect_cookie = NULL;
 	send->write_cookie = NULL;
+	send->read_cookie = NULL;
 
 	/* Resolve target address. */
 	if ((sas_t = sock_resolve(addr)) == NULL) {
@@ -172,6 +222,8 @@ err3:
 		network_connect_cancel(send->connect_cookie);
 	if (send->write_cookie != NULL)
 		network_write_cancel(send->write_cookie);
+	if (send->read_cookie != NULL)
+		network_read_cancel(send->read_cookie);
 	events_shutdown();
 err2:
 	sock_addr_freelist(sas_t);
