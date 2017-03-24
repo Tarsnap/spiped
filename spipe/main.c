@@ -176,7 +176,7 @@ main(int argc, char * argv[])
 		goto err3;
 	}
 
-	/* Loop until we die. */
+	/* Loop until we're done with the connection. */
 	if (events_spin(&conndone)) {
 		warnp("Error running event loop");
 		exit(1);
