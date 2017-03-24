@@ -207,8 +207,17 @@ notify_success_or_fail() {
 	log_basename=$1
 	val_log_basename=$2
 
+	# Bail if there's no exitfiles.
+	exitfiles=`ls ${log_basename}-*.exit` || true
+	if [ -z "$exitfiles" ]; then
+		echo "FAILED"
+		s_retval=1
+		return
+	fi
+
 	# Check each exitfile.
-	for exitfile in `ls ${log_basename}-*.exit | sort`; do
+	for exitfile in `echo $exitfiles | sort`; do
+		echo $exitfile
 		ret=`cat ${exitfile}`
 		if [ "${ret}" -lt 0 ]; then
 			echo "SKIP!"
