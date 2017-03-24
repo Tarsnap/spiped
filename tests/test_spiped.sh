@@ -25,8 +25,8 @@ spipe_binary=${scriptdir}/../spipe/spipe
 nc_client_binary=${scriptdir}/../tests/nc-client/nc-client
 nc_server_binary=${scriptdir}/../tests/nc-server/nc-server
 
-# Find system spiped if it supports -1.
-system_spiped_binary=$( find_system spiped -1 )
+# Find system spiped
+system_spiped_binary=$( find_system spiped )
 
 # Check for required commands.
 if ! command -v ${spiped_binary} >/dev/null 2>&1; then
