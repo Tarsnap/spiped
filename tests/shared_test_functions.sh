@@ -217,7 +217,6 @@ notify_success_or_fail() {
 
 	# Check each exitfile.
 	for exitfile in `echo $exitfiles | sort`; do
-		echo $exitfile
 		ret=`cat ${exitfile}`
 		if [ "${ret}" -lt 0 ]; then
 			echo "SKIP!"
