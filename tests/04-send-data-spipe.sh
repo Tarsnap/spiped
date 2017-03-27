@@ -3,7 +3,6 @@
 # Goal of this test:
 # - establish a connection to a spiped server.
 # - send data via spipe
-# - server should quit (because we gave it -1).
 # - the received file should match lorem-send.txt
 
 ### Constants

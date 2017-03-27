@@ -4,7 +4,6 @@
 # - create a pair of spiped servers (encryption, decryption)
 # - establish a connection to the encryption spiped server
 # - open one connection, send lorem-send.txt, close the connection
-# - server should quit (because we gave it -1)
 # - the received file should match lorem-send.txt
 
 ### Constants

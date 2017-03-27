@@ -5,7 +5,6 @@
 # - open a connection, but don't send anything.
 # - wait; the connection should be closed automatically (because we
 #   gave it -o 1).
-# - server should quit (because we gave it -1).
 
 ### Constants
 
