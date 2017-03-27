@@ -22,7 +22,6 @@ scenario_cmd() {
 			${nc_client_binary} [127.0.0.1]:${src_port}
 		echo $? > ${c_exitfile}
 	)
-	sleep 1
 
 	# Wait for server(s) to quit.
 	servers_stop
