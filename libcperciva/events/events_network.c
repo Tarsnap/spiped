@@ -82,7 +82,7 @@ init(void)
 	if ((S = socketlist_init(0)) == NULL)
 		goto err0;
 
-	/* We have no poll structures allocated or initialzed. */
+	/* We have no poll structures allocated or initialized. */
 	fds = NULL;
 	fds_alloc = nfds = fdscanpos = 0;
 
