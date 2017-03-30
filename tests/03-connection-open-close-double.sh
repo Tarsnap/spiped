@@ -4,7 +4,6 @@
 # - create a pair of spiped servers (encryption, decryption).
 # - open two connections, but don't send anything,
 # - close one of the connections.
-# - server should quit (because we gave it -1).
 
 ### Constants
 

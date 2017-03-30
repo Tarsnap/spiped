@@ -4,7 +4,6 @@
 # - establish a connection to a spiped server.
 # - open a connection, but don't send anything.
 # - close the connection.
-# - server should quit (because we gave it -1).
 
 ### Constants
 
