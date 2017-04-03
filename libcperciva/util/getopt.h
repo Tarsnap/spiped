@@ -163,6 +163,13 @@ extern int optind, opterr, optreset;
 		DO_LONGJMP;						\
 	getopt_skip_ ## ln
 
+/**
+ * getopt_done():
+ * Explicitly free memory; use only in the child of a daemonized process.
+ * If you are not daemonizing, do not call this.
+ */
+void getopt_done(void);
+
 /*
  * The back-end implementation.  These should be considered internal
  * interfaces and not used directly.

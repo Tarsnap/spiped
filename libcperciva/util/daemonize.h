@@ -8,6 +8,6 @@
  * On success, the child will return 0; on failure, the parent will return
  * -1.
  */
-int daemonize(const char *);
+int daemonize(const char *, void (* parent_cleanup)(void));
 
 #endif /* !_DAEMONIZE_H_ */

@@ -9,9 +9,13 @@
 static int initialized = 0;
 static char * name = NULL;
 
-/* Free the name string. */
-static void
-done(void)
+/**
+ * warnp_done():
+ * Explicitly free memory; use only in the child of a daemonized process.
+ * If you are not daemonizing, do not call this.
+ */
+void
+warnp_done(void)
 {
 
 	free(name);
@@ -40,7 +44,7 @@ warnp_setprogname(const char * progname)
 
 	/* If we haven't already done so, register our exit handler. */
 	if (initialized == 0) {
-		atexit(done);
+		atexit(warnp_done);
 		initialized = 1;
 	}
 }

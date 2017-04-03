@@ -18,6 +18,13 @@ void warnp_setprogname(const char *);
 		warnp_setprogname(argv[0]);	\
 } while (0)
 
+/**
+ * warnp_done():
+ * Explicitly free memory; use only in the child of a daemonized process.
+ * If you are not daemonizing, do not call this.
+ */
+void warnp_done(void);
+
 /* As in BSD <err.h>. */
 void warn(const char *, ...);
 void warnx(const char *, ...);

@@ -60,9 +60,13 @@ static int atexit_registered = 0;
 	PRINTMSG(__VA_ARGS__);						\
 } while (0)
 
-/* Free allocated options array. */
-static void
-atexit_handler(void)
+/**
+ * getopt_done():
+ * Explicitly free memory; use only in the child of a daemonized process.
+ * If you are not daemonizing, do not call this.
+ */
+void
+getopt_done(void)
 {
 
 	free(opts);
@@ -90,7 +94,7 @@ reset(int argc, char * const argv[])
 
 	/* Register atexit handler if we haven't done so already. */
 	if (!atexit_registered) {
-		atexit(atexit_handler);
+		atexit(getopt_done);
 		atexit_registered = 1;
 	}
 

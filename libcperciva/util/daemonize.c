@@ -15,7 +15,7 @@
  * -1.
  */
 int
-daemonize(const char * spid)
+daemonize(const char * spid, void (* parent_cleanup)(void))
 {
 	FILE * f;
 	int fd[2];
@@ -63,6 +63,8 @@ daemonize(const char * spid)
 				goto err1;
 			case 1:
 				/* We have been poked by the child.  Exit. */
+				if (parent_cleanup != NULL)
+					parent_cleanup();
 				_exit(0);
 			}
 
