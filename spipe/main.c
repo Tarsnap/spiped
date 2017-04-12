@@ -1,11 +1,13 @@
 #include <sys/socket.h>
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 #include "events.h"
 #include "getopt.h"
+#include "parsenum.h"
 #include "sock.h"
 #include "warnp.h"
 
@@ -85,7 +87,7 @@ main(int argc, char * argv[])
 		GETOPT_OPTARG("-o"):
 			if (opt_o != 0.0)
 				usage();
-			if ((opt_o = strtod(optarg, NULL)) == 0.0) {
+			if (PARSENUM(&opt_o, optarg, 0, INFINITY)) {
 				warn0("Invalid option: -o %s", optarg);
 				exit(1);
 			}

@@ -29,7 +29,7 @@ clean:
 ${PROG}:${SRCS:.c=.o}
 	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDADD_EXTRA} ${LDADD_REQ} ${LDADD_POSIX}
 
-main.o: main.c ../libcperciva/events/events.h ../libcperciva/util/getopt.h ../libcperciva/util/sock.h ../libcperciva/util/warnp.h ../proto/proto_conn.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h pushbits.h
+main.o: main.c ../libcperciva/events/events.h ../libcperciva/util/getopt.h ../libcperciva/util/parsenum.h ../libcperciva/util/sock.h ../libcperciva/util/warnp.h ../proto/proto_conn.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h pushbits.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c main.c -o main.o
 pushbits.o: pushbits.c ../libcperciva/util/noeintr.h ../libcperciva/util/warnp.h pushbits.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c pushbits.c -o pushbits.o
