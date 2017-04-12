@@ -1,4 +1,4 @@
-#include <inttypes.h>
+#include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -11,6 +11,7 @@
 #include "events.h"
 #include "getopt.h"
 #include "graceful_shutdown.h"
+#include "parsenum.h"
 #include "sock.h"
 #include "warnp.h"
 
@@ -136,11 +137,7 @@ main(int argc, char * argv[])
 		GETOPT_OPTARG("-n"):
 			if (opt_n != 0)
 				usage();
-			if ((opt_n = strtoimax(optarg, NULL, 0)) == 0) {
-				warn0("Invalid option: -n %s", optarg);
-				exit(1);
-			}
-			if ((opt_n <= 0) || (opt_n > 500)) {
+			if (PARSENUM(&opt_n, optarg, 1, 500)) {
 				warn0("The parameter to -n must be between 1 and 500\n");
 				exit(1);
 			}
@@ -148,7 +145,7 @@ main(int argc, char * argv[])
 		GETOPT_OPTARG("-o"):
 			if (opt_o != 0.0)
 				usage();
-			if ((opt_o = strtod(optarg, NULL)) == 0.0) {
+			if (PARSENUM(&opt_o, optarg, 0, INFINITY)) {
 				warn0("Invalid option: -o %s", optarg);
 				exit(1);
 			}
@@ -162,7 +159,7 @@ main(int argc, char * argv[])
 		GETOPT_OPTARG("-r"):
 			if (opt_r != 0.0)
 				usage();
-			if ((opt_r = strtod(optarg, NULL)) == 0.0) {
+			if (PARSENUM(&opt_r, optarg, 0, INFINITY)) {
 				warn0("Invalid option: -r %s", optarg);
 				exit(1);
 			}
