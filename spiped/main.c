@@ -72,8 +72,10 @@ main(int argc, char * argv[])
 	int opt_j = 0;
 	const char * opt_k = NULL;
 	intmax_t opt_n = 0;
+	int opt_o_set = 0;
 	double opt_o = 0.0;
 	char * opt_p = NULL;
+	int opt_r_set = 0;
 	double opt_r = 0.0;
 	int opt_R = 0;
 	const char * opt_s = NULL;
@@ -143,8 +145,9 @@ main(int argc, char * argv[])
 			}
 			break;
 		GETOPT_OPTARG("-o"):
-			if (opt_o != 0.0)
+			if (opt_o_set)
 				usage();
+			opt_o_set = 1;
 			if (PARSENUM(&opt_o, optarg, 0, INFINITY)) {
 				warn0("Invalid option: -o %s", optarg);
 				exit(1);
@@ -157,8 +160,9 @@ main(int argc, char * argv[])
 				OPT_EPARSE(ch, optarg);
 			break;
 		GETOPT_OPTARG("-r"):
-			if (opt_r != 0.0)
+			if (opt_r_set)
 				usage();
+			opt_r_set = 1;
 			if (PARSENUM(&opt_r, optarg, 0, INFINITY)) {
 				warn0("Invalid option: -r %s", optarg);
 				exit(1);
