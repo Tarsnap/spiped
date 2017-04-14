@@ -120,7 +120,11 @@ Disable transport layer keep-alives.
 .TP
 .B \-n <max # connections>
 Limit on the number of simultaneous connections allowed.
-This value must be between 1 and 500.
+A value of 0 indicates that no limit should be imposed; this may be
+inadvisable in some circumstances, since
+.B spiped
+will terminate if it fails to allocate memory for handling a new
+connection.
 Defaults to 100 connections.
 .TP
 .B \-o <connection timeout>

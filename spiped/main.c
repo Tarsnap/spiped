@@ -71,7 +71,8 @@ main(int argc, char * argv[])
 	int opt_F = 0;
 	int opt_j = 0;
 	const char * opt_k = NULL;
-	intmax_t opt_n = 0;
+	int opt_n_set = 0;
+	size_t opt_n = 0;
 	int opt_o_set = 0;
 	double opt_o = 0.0;
 	char * opt_p = NULL;
@@ -137,12 +138,15 @@ main(int argc, char * argv[])
 			opt_k = optarg;
 			break;
 		GETOPT_OPTARG("-n"):
-			if (opt_n != 0)
+			if (opt_n_set)
 				usage();
-			if (PARSENUM(&opt_n, optarg, 1, 500)) {
-				warn0("The parameter to -n must be between 1 and 500\n");
+			opt_n_set = 1;
+			if (PARSENUM(&opt_n, optarg)) {
+				warn0("Invalid option: -n %s", optarg);
 				exit(1);
 			}
+			if (opt_n == 0)
+				opt_n = SIZE_MAX;
 			break;
 		GETOPT_OPTARG("-o"):
 			if (opt_o_set)
@@ -208,7 +212,7 @@ main(int argc, char * argv[])
 	(void)argv; /* argv is not used beyond this point. */
 
 	/* Set defaults. */
-	if (opt_n == 0)
+	if (!opt_n_set)
 		opt_n = 100;
 	if (opt_o == 0.0)
 		opt_o = 5.0;
@@ -230,6 +234,14 @@ main(int argc, char * argv[])
 		usage();
 	if (opt_t == NULL)
 		usage();
+
+	/*
+	 * A limit of SIZE_MAX connections is equivalent to any larger limit;
+	 * we'll be unable to allocate memory for socket bookkeeping before we
+	 * reach either.
+	 */
+	if (opt_n > SIZE_MAX)
+		opt_n = SIZE_MAX;
 
 	/* Figure out where our pid should be written. */
 	if (opt_p == NULL) {
@@ -303,7 +315,7 @@ main(int argc, char * argv[])
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, (size_t)opt_n, opt_o, opt_1,
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o, opt_1,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
 		goto err5;
