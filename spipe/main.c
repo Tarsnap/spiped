@@ -48,6 +48,7 @@ main(int argc, char * argv[])
 	int opt_g = 0;
 	int opt_j = 0;
 	const char * opt_k = NULL;
+	int opt_o_set = 0;
 	double opt_o = 0.0;
 	const char * opt_t = NULL;
 
@@ -85,8 +86,9 @@ main(int argc, char * argv[])
 			opt_k = optarg;
 			break;
 		GETOPT_OPTARG("-o"):
-			if (opt_o != 0.0)
+			if (opt_o_set)
 				usage();
+			opt_o_set = 1;
 			if (PARSENUM(&opt_o, optarg, 0, INFINITY)) {
 				warn0("Invalid option: -o %s", optarg);
 				exit(1);
