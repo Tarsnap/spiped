@@ -326,7 +326,7 @@ sock_listener(const struct sock_addr * sa)
 	}
 
 	/* Mark the socket as listening. */
-	if (listen(s, 10)) {
+	if (listen(s, -1)) {
 		warnp("Error marking socket as listening");
 		goto err1;
 	}
