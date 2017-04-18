@@ -64,7 +64,7 @@ static int
 callback_connect(void * cookie)
 {
 	struct connect_cookie * C = cookie;
-	int sockerr;
+	int sockerr = 0;
 	socklen_t sockerrlen = sizeof(int);
 
 	/* Stop waiting for the timer callback. */
