@@ -65,6 +65,9 @@ publish: clean Makefiles
 	    < ${PKG}-${VERSION}/${F} > ${PKG}-${VERSION}/${F}.tmp
 	mv ${PKG}-${VERSION}/${F}.tmp ${PKG}-${VERSION}/${F}
 .endfor
+	sed -e 's/all: check-devel/all: /' < ${PKG}-${VERSION}/Makefile	\
+		> ${PKG}-${VERSION}/Makefile.tmp
+	mv ${PKG}-${VERSION}/Makefile.tmp ${PKG}-${VERSION}/Makefile
 	tar -cvzf ${PKG}-${VERSION}.tgz ${PKG}-${VERSION}
 	rm -r ${PKG}-${VERSION}
 
