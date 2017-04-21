@@ -77,7 +77,7 @@ void network_read_cancel(void *);
  * network_write(fd, buf, buflen, minwrite, callback, cookie):
  * Asynchronously write up to ${buflen} bytes of data from ${buf} to ${fd}.
  * When at least ${minwrite} bytes have been written or on error, invoke
- * ${callback}(${cookie}, lenwrit), where lenwrit is -1 on error and the
+ * ${callback}(${cookie}, lenwritten), where lenwritten is -1 on error and the
  * number of bytes written (between ${minwrite} and ${buflen} inclusive)
  * otherwise.  Return a cookie which can be passed to network_write_cancel in
  * order to cancel the write.
