@@ -34,4 +34,4 @@ before_install:
 - 'if [[ "$TRAVIS_OS_NAME" == "osx" && "$CC" == "gcc" ]]; then CC=gcc-4.9; $CC --version; fi'
 script:
 - test $TRAVIS_BRANCH != coverity-scan || exit 0
-- make && make test
+- make SPIPED_DEVEL=1 && make test
