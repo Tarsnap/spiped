@@ -23,7 +23,6 @@ struct accept_state {
 	int requirepfs;
 	int nokeepalive;
 	int * conndone;
-	int only_one;
 	int shutdown_requested;
 	const struct proto_secret * K;
 	size_t nconn;
@@ -136,10 +135,6 @@ callback_conndied(void * cookie)
 	if (A->shutdown_requested && (A->nconn == 0))
 		*A->conndone = 1;
 
-	/* If requested to do so, indicate that a connection closed. */
-	if (A->only_one)
-		*A->conndone = 1;
-
 	/* Maybe accept more connections. */
 	return (doaccept(A));
 }
@@ -213,7 +208,7 @@ err0:
 
 /**
  * dispatch_accept(s, tgt, rtime, sas, decr, nopfs, requirepfs, nokeepalive, K,
- *     nconn_max, timeo, only_one, conndone):
+ *     nconn_max, timeo, conndone):
  * Start accepting connections on the socket ${s}.  Connect to the target
  * ${tgt}, re-resolving it every ${rtime} seconds if ${rtime} > 0; on address
  * resolution failure use the most recent successfully obtained addresses, or
@@ -223,18 +218,16 @@ err0:
  * forward secrecy.  If ${requirepfs} is non-zero, require that both ends use
  * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
  * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
- * connecting to the target takes more than ${timeo} seconds.  If ${only_one}
- * is a non-zero value, then ${conndone} is set to a non-zero value as soon as
- * a connection closes.  If dispatch_request_shutdown is called then ${conndone}
- * is set to a non-zero value as soon as there are no active connections.
- * Return a cookie which can be passed to dispatch_shutdown and
- * dispatch_request_shutdown.
+ * connecting to the target takes more than ${timeo} seconds.  If
+ * dispatch_request_shutdown is called then ${conndone} is set to a non-zero
+ * value as soon as there are no active connections.  Return a cookie which can
+ * be passed to dispatch_shutdown and dispatch_request_shutdown.
  */
 void *
 dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
     int decr, int nopfs, int requirepfs, int nokeepalive,
     const struct proto_secret * K, size_t nconn_max, double timeo,
-    int only_one, int * conndone)
+    int * conndone)
 {
 	struct accept_state * A;
 
@@ -250,7 +243,6 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->requirepfs = requirepfs;
 	A->nokeepalive = nokeepalive;
 	A->conndone = conndone;
-	A->only_one = only_one;
 	A->shutdown_requested = 0;
 	A->K = K;
 	A->nconn = 0;

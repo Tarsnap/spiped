@@ -27,7 +27,7 @@ usage(void)
 	    "-t <target socket> -k <key file>\n"
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
-	    "    [-p <pidfile>] [-r <rtime> | -R] [-1]\n"
+	    "    [-p <pidfile>] [-r <rtime> | -R]\n"
 	    "       spiped -v\n");
 	exit(1);
 }
@@ -81,7 +81,6 @@ main(int argc, char * argv[])
 	int opt_R = 0;
 	const char * opt_s = NULL;
 	const char * opt_t = NULL;
-	int opt_1 = 0;
 
 	/* Working variables. */
 	struct sock_addr ** sas_s;
@@ -190,11 +189,6 @@ main(int argc, char * argv[])
 		GETOPT_OPT("-v"):
 			fprintf(stderr, "spiped @VERSION@\n");
 			exit(0);
-		GETOPT_OPT("-1"):
-			if (opt_1 != 0)
-				usage();
-			opt_1 = 1;
-			break;
 		GETOPT_MISSING_ARG:
 			warn0("Missing argument to %s\n", ch);
 			usage();
@@ -315,7 +309,7 @@ main(int argc, char * argv[])
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o, opt_1,
+	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
 		goto err5;
