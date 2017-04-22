@@ -10,3 +10,4 @@ tests/nc-server/*.o
 tests/nc-server/nc-server
 tests/valgrind/*.o
 tests/valgrind/potential-memleaks
+tests-output/
