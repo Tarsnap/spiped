@@ -72,7 +72,7 @@ prepare_directories() {
 }
 
 ## find_system (cmd, args...):
-# Looks for ${cmd} in the $PATH, and ensure that it supports ${args}.
+# Look for ${cmd} in the $PATH, and ensure that it supports ${args}.
 find_system() {
 	cmd=$1
 	cmd_with_args=$@
@@ -92,7 +92,7 @@ find_system() {
 }
 
 ## has_pid (cmd):
-# Looks for ${cmd} in ps; returns 0 if ${cmd} exists.
+# Look for ${cmd} in ps; return 0 if ${cmd} exists.
 has_pid() {
 	cmd=$1
 	pid=`ps -Aopid,command | grep "${cmd}" | grep -v "grep"`
@@ -116,7 +116,7 @@ check_optional_valgrind() {
 }
 
 ## ensure_valgrind_suppresssion (potential_memleaks_binary):
-# Runs the ${potential_memleaks_binary} through valgrind, keeping
+# Run the ${potential_memleaks_binary} through valgrind, keeping
 # track of any apparent memory leak in order to suppress reporting
 # those leaks when testing other binaries.
 ensure_valgrind_suppression() {
@@ -243,7 +243,7 @@ notify_success_or_fail() {
 }
 
 ## scenario_runner (scenario_filename):
-# Runs a test scenario from ${scenario_filename}.
+# Run a test scenario from ${scenario_filename}.
 scenario_runner() {
 	scenario_filename=$1
 	basename=`basename ${scenario_filename} .sh`
@@ -277,7 +277,7 @@ scenario_runner() {
 }
 
 ## run_scenarios (scenario_filenames):
-# Runs all scenarios matching ${scenario_filenames}.
+# Run all scenarios matching ${scenario_filenames}.
 run_scenarios() {
 	printf -- "Running tests\n"
 	printf -- "-------------\n"
