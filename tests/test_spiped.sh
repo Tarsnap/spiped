@@ -43,17 +43,29 @@ prepare_directories
 
 ################################ Helper functions
 
-check_leftover_nc_server() {
-	# Repeated testing, especially when doing ctrl-c to break out of
-	# (suspected) hanging, can leave a nc_server floating around, which
-	# is problematic for the next testing run.  Checking for this
-	# shouldn't be necessary for normal testing (as opposed to test-script
-	# development), but there's no harm in checking anyway.
-	leftover=""
 
+## check_leftover_servers():
+# Repeated testing, especially when doing ctrl-c to break out of (suspected)
+# hanging, can leave a nc_server or spiped process(es) floating around, which
+# is problematic for the next testing run.  Checking for this shouldn't be
+# necessary for normal testing (as opposed to test-script development), but
+# there's no harm in checking anyway.  Once identified, the user is notified
+# (instead of automatically removing them) -- a failing test will require
+# manual attention anyway.
+check_leftover_servers() {
 	# Find old nc-server on ${dst_port}.
 	if $( has_pid "${nc_server_binary} ${dst_port}" ); then
 		echo "Error: Left-over nc-server from previous run."
+		exit 1
+	fi
+
+	# Find old spiped {-d, -e} servers on {${mid_port}, ${src_port}}.
+	if $( has_pid "spiped -d -s \[127.0.0.1\]:${mid_port}" ); then
+		echo "Error: Left-over spiped -d from previous run."
+		exit 1
+	fi
+	if $( has_pid "spiped -e -s \[127.0.0.1\]:${src_port}" ); then
+		echo "Error: Left-over spiped -e from previous run."
 		exit 1
 	fi
 }
@@ -69,7 +81,7 @@ check_leftover_nc_server() {
 setup_spiped_decryption_server () {
 	nc_output=${1:-/dev/null}
 	use_system_spiped=${2:-0}
-	check_leftover_nc_server
+	check_leftover_servers
 
 	# Select system or compiled spiped.
 	if [ "${use_system_spiped}" -gt 0 ]; then
