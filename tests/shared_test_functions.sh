@@ -95,7 +95,7 @@ find_system() {
 # Look for ${cmd} in ps; return 0 if ${cmd} exists.
 has_pid() {
 	cmd=$1
-	pid=`ps -Aopid,command | grep "${cmd}" | grep -v "grep"` || true
+	pid=`ps -Aopid,args | grep "${cmd}" | grep -v "grep"` || true
 	if [ -n "${pid}" ]; then
 		return 0
 	fi
