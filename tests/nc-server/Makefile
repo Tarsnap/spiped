@@ -36,7 +36,7 @@ events.o: ../../libcperciva/events/events.c ../../libcperciva/datastruct/mpool.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../../libcperciva/events/events.c -o events.o
 network_accept.o: ../../libcperciva/network/network_accept.c ../../libcperciva/events/events.h ../../libcperciva/network/network.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../../libcperciva/network/network_accept.c -o network_accept.o
-network_read.o: ../../libcperciva/network/network_read.c ../../libcperciva/events/events.h ../../libcperciva/network/network.h
+network_read.o: ../../libcperciva/network/network_read.c ../../libcperciva/events/events.h ../../libcperciva/datastruct/mpool.h ../../libcperciva/network/network.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../../libcperciva/network/network_read.c -o network_read.o
 asprintf.o: ../../libcperciva/util/asprintf.c ../../libcperciva/util/asprintf.h
 	${CC} ${CFLAGS} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} -c ../../libcperciva/util/asprintf.c -o asprintf.o
