@@ -4,3 +4,6 @@ source-${X:.c=.o}: ${X}
 	@echo $>
 cflags-${X:.c=.o}:
 .endfor
+
+# Used to track the subdirectory depth (other directories append to this)
+SUBDIR_DEPTH	=	..
