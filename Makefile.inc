@@ -7,3 +7,6 @@ cflags-${X:.c=.o}:
 
 # Used to track the subdirectory depth (other directories append to this)
 SUBDIR_DEPTH	=	..
+
+# Expand ${IDIRS} before it is used
+IDIRS	:=	${IDIRS}

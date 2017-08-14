@@ -4,37 +4,40 @@ PROG	=	nc-client
 # Don't install it.
 NOINST	= 	1
 
+# Useful relative directories
+LIBCPERCIVA_DIR	=	../../libcperciva
+
 # main test code
 SRCS	=	main.c
 
 # Data structures
-.PATH.c	:	../../libcperciva/datastruct
+.PATH.c	:	${LIBCPERCIVA_DIR}/datastruct
 SRCS	+=	elasticarray.c
 SRCS	+=	ptrheap.c
 SRCS	+=	timerqueue.c
-IDIRS	+=	-I../../libcperciva/datastruct
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/datastruct
 
 # Event loop
-.PATH.c	:	../../libcperciva/events
+.PATH.c	:	${LIBCPERCIVA_DIR}/events
 SRCS	+=	events_immediate.c
 SRCS	+=	events_network.c
 SRCS	+=	events_network_selectstats.c
 SRCS	+=	events_timer.c
 SRCS	+=	events.c
-IDIRS	+=	-I../../libcperciva/events
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
 
 # Event-driven networking
-.PATH.c	:	../../libcperciva/network
+.PATH.c	:	${LIBCPERCIVA_DIR}/network
 SRCS	+=	network_connect.c
 SRCS	+=	network_read.c
 SRCS	+=	network_write.c
-IDIRS	+=	-I../../libcperciva/network
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/network
 
 # Utility functions
-.PATH.c	:	../../libcperciva/util
+.PATH.c	:	${LIBCPERCIVA_DIR}/util
 SRCS	+=	monoclock.c
 SRCS	+=	sock.c
 SRCS	+=	warnp.c
-IDIRS	+=	-I../../libcperciva/util
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 .include <bsd.prog.mk>
