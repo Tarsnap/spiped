@@ -1,8 +1,15 @@
 # Should be sourced by `command -p sh posix-cflags.sh "$PATH"` from within a Makefile
+
+# Sanity check environment variables
+if [ -z "${CC}" ]; then
+	echo "\$CC is not defined!  Cannot run any compiler tests." 1>&2
+	exit 1
+fi
 if ! [ ${PATH} = "$1" ]; then
 	echo "WARNING: POSIX violation: $SHELL's command -p resets \$PATH" 1>&2
 	PATH=$1
 fi
+
 FIRST=YES
 if ! ${CC} -D_POSIX_C_SOURCE=200809L posix-msg_nosignal.c 2>/dev/null; then
 	[ ${FIRST} = "NO" ] && printf " "; FIRST=NO
