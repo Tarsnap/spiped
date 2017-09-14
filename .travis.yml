@@ -5,7 +5,7 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: CFLAGS="-std=c99 -O2 -Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn"
+      env: CFLAGS="-std=c99 -O2 -Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro"
     - os: linux
       compiler: gcc
       env: CFLAGS="-std=c99 -O2 -Wall -Wextra -Werror -Wpedantic -pedantic-errors -Wno-clobbered"
