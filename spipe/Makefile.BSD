@@ -10,6 +10,9 @@ LDADD	=	-lrt
 LDADD_REQ	=	-lcrypto
 LDADD_REQ	+=	-lpthread
 
+# Useful relative directories
+LIBCPERCIVA_DIR	=	../libcperciva
+
 # spipe code
 SRCS	=	main.c
 SRCS	+=	pushbits.c
@@ -23,19 +26,19 @@ SRCS	+=	proto_pipe.c
 IDIRS	+=	-I../proto
 
 # Fundamental algorithms
-.PATH.c	:	../libcperciva/alg
+.PATH.c	:	${LIBCPERCIVA_DIR}/alg
 SRCS	+=	sha256.c
-IDIRS	+=	-I../libcperciva/alg
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/alg
 
 # Data structures
-.PATH.c	:	../libcperciva/datastruct
+.PATH.c	:	${LIBCPERCIVA_DIR}/datastruct
 SRCS	+=	elasticarray.c
 SRCS	+=	ptrheap.c
 SRCS	+=	timerqueue.c
-IDIRS	+=	-I../libcperciva/datastruct
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/datastruct
 
 # Utility functions
-.PATH.c	:	../libcperciva/util
+.PATH.c	:	${LIBCPERCIVA_DIR}/util
 SRCS	+=	asprintf.c
 SRCS	+=	entropy.c
 SRCS	+=	getopt.c
@@ -44,31 +47,31 @@ SRCS	+=	monoclock.c
 SRCS	+=	noeintr.c
 SRCS	+=	sock.c
 SRCS	+=	warnp.c
-IDIRS	+=	-I../libcperciva/util
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 # CPU features detection
-.PATH.c	:	../libcperciva/cpusupport
+.PATH.c	:	${LIBCPERCIVA_DIR}/cpusupport
 SRCS	+=	cpusupport_x86_aesni.c
-IDIRS	+=	-I../libcperciva/cpusupport
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/cpusupport
 
 # Event loop
-.PATH.c	:	../libcperciva/events
+.PATH.c	:	${LIBCPERCIVA_DIR}/events
 SRCS	+=	events_immediate.c
 SRCS	+=	events_network.c
 SRCS	+=	events_network_selectstats.c
 SRCS	+=	events_timer.c
 SRCS	+=	events.c
-IDIRS	+=	-I../libcperciva/events
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
 
 # Event-driven networking
-.PATH.c	:	../libcperciva/network
+.PATH.c	:	${LIBCPERCIVA_DIR}/network
 SRCS	+=	network_connect.c
 SRCS	+=	network_read.c
 SRCS	+=	network_write.c
-IDIRS	+=	-I../libcperciva/network
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/network
 
 # Crypto code
-.PATH.c	:	../libcperciva/crypto
+.PATH.c	:	${LIBCPERCIVA_DIR}/crypto
 SRCS	+=	crypto_aes.c
 SRCS	+=	crypto_aes_aesni.c
 SRCS	+=	crypto_aesctr.c
@@ -76,7 +79,7 @@ SRCS	+=	crypto_dh.c
 SRCS	+=	crypto_dh_group14.c
 SRCS	+=	crypto_entropy.c
 SRCS	+=	crypto_verify_bytes.c
-IDIRS	+=	-I../libcperciva/crypto
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/crypto
 
 cflags-crypto_aes_aesni.o:
 	@echo '$${CFLAGS_X86_AESNI}'

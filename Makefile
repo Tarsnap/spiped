@@ -4,18 +4,19 @@ PROGS=		spiped spipe
 TESTS=		tests/nc-client tests/nc-server tests/valgrind
 BINDIR_DEFAULT=	/usr/local/bin
 CFLAGS_DEFAULT=	-O2
+LIBCPERCIVA_DIR=	libcperciva
 
 all: cpusupport-config.h
 	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
-	export "LDADD_POSIX=`export CC=\"${CC}\"; cd libcperciva/POSIX && command -p sh posix-l.sh \"$$PATH\"`";	\
-	export "CFLAGS_POSIX=`export CC=\"${CC}\"; cd libcperciva/POSIX && command -p sh posix-cflags.sh \"$$PATH\"`";	\
+	export "LDADD_POSIX=`export CC=\"${CC}\"; cd ${LIBCPERCIVA_DIR}/POSIX && command -p sh posix-l.sh \"$$PATH\"`";	\
+	export "CFLAGS_POSIX=`export CC=\"${CC}\"; cd ${LIBCPERCIVA_DIR}/POSIX && command -p sh posix-cflags.sh \"$$PATH\"`";	\
 	. ./cpusupport-config.h;			\
 	for D in ${PROGS} ${TESTS}; do			\
 		( cd $${D} && ${MAKE} all ) || exit 2;	\
 	done
 
 cpusupport-config.h:
-	( export CC="${CC}"; command -p sh libcperciva/cpusupport/Build/cpusupport.sh "$$PATH" ) > cpusupport-config.h
+	( export CC="${CC}"; command -p sh ${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh "$$PATH" ) > cpusupport-config.h
 
 install: all
 	export BINDIR=$${BINDIR:-${BINDIR_DEFAULT}};	\

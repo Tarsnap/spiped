@@ -36,9 +36,10 @@ ${D}/Makefile::
 		S=`${MAKE} source-$${F}`;	\
 		CF=`${MAKE} cflags-$${F}`;	\
 		IDIRS=`${MAKE} -V IDIRS`;	\
-		echo `${CPP} $${S} -std=c99 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -I.. $${IDIRS} -MM -MT $${F}` \
+		SUBDIR_DEPTH=`${MAKE} -V SUBDIR_DEPTH`;	\
+		echo `${CPP} $${S} -std=c99 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -I$${SUBDIR_DEPTH} $${IDIRS} -MM -MT $${F}` \
 			| sed -e 's| \\ | |g'; \
-		echo "	\$${CC} \$${CFLAGS} \$${CFLAGS_POSIX} ${CFLAGS_HARDCODED} $${CF} -I.. \$${IDIRS} -c $${S} -o $${F}"; \
+		echo "	\$${CC} \$${CFLAGS} \$${CFLAGS_POSIX} ${CFLAGS_HARDCODED} $${CF} -I$${SUBDIR_DEPTH} \$${IDIRS} -c $${S} -o $${F}"; \
 	    done ) >> $@
 	rm -f cpusupport-config.h
 .endfor
