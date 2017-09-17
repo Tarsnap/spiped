@@ -81,7 +81,7 @@ main(int argc, char ** argv)
 	/* Write the output file. */
 	if (fclose(C->out) != 0) {
 		warnp("fclose");
-		goto err1;
+		goto err0;
 	}
 
 	/* Success! */
