@@ -190,10 +190,10 @@ main(int argc, char * argv[])
 			fprintf(stderr, "spiped @VERSION@\n");
 			exit(0);
 		GETOPT_MISSING_ARG:
-			warn0("Missing argument to %s\n", ch);
+			warn0("Missing argument to %s", ch);
 			usage();
 		GETOPT_DEFAULT:
-			warn0("illegal option -- %s\n", ch);
+			warn0("illegal option -- %s", ch);
 			usage();
 		}
 	}
