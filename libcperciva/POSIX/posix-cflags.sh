@@ -10,18 +10,21 @@ if ! [ ${PATH} = "$1" ]; then
 	PATH=$1
 fi
 
+# Find directory of this script and the source files
+D=`dirname $0`
+
 FIRST=YES
-if ! ${CC} -D_POSIX_C_SOURCE=200809L posix-msg_nosignal.c 2>/dev/null; then
+if ! ${CC} -D_POSIX_C_SOURCE=200809L $D/posix-msg_nosignal.c 2>/dev/null; then
 	[ ${FIRST} = "NO" ] && printf " "; FIRST=NO
 	printf %s "-DPOSIXFAIL_MSG_NOSIGNAL"
 	echo "WARNING: POSIX violation: <sys/socket.h> not defining MSG_NOSIGNAL" 1>&2
 fi
-if ! ${CC} -D_POSIX_C_SOURCE=200809L posix-clock_realtime.c 2>/dev/null; then
+if ! ${CC} -D_POSIX_C_SOURCE=200809L $D/posix-clock_realtime.c 2>/dev/null; then
 	[ ${FIRST} = "NO" ] && printf " "; FIRST=NO
 	printf %s "-DPOSIXFAIL_CLOCK_REALTIME"
 	echo "WARNING: POSIX violation: <time.h> not defining CLOCK_REALTIME" 1>&2
 fi
-if ! ${CC} -D_POSIX_C_SOURCE=200809L posix-clock_gettime.c 2>/dev/null; then
+if ! ${CC} -D_POSIX_C_SOURCE=200809L $D/posix-clock_gettime.c 2>/dev/null; then
 	[ ${FIRST} = "NO" ] && printf " "; FIRST=NO
 	printf %s "-DPOSIXFAIL_CLOCK_GETTIME"
 	echo "WARNING: POSIX violation: <time.h> not declaring clock_gettime()" 1>&2
@@ -40,9 +43,9 @@ else
 		echo "WARNING: POSIX violation: clock_gettime() is not linkable" 1>&2
 	fi
 fi
-if ! ${CC} -D_POSIX_C_SOURCE=200809L posix-restrict.c 2>/dev/null; then
+if ! ${CC} -D_POSIX_C_SOURCE=200809L $D/posix-restrict.c 2>/dev/null; then
 	echo "WARNING: POSIX violation: ${CC} does not accept 'restrict' keyword" 1>&2
-	if ${CC} -D_POSIX_C_SOURCE=200809L -std=c99 posix-restrict.c 2>/dev/null; then
+	if ${CC} -D_POSIX_C_SOURCE=200809L -std=c99 $D/posix-restrict.c 2>/dev/null; then
 		[ ${FIRST} = "NO" ] && printf " "; FIRST=NO
 		printf %s "-std=c99"
 	fi
