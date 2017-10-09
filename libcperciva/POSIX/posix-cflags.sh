@@ -44,7 +44,7 @@ else
 	fi
 fi
 if ! ${CC} -D_POSIX_C_SOURCE=200809L $D/posix-restrict.c 2>/dev/null; then
-	echo "WARNING: POSIX violation: ${CC} does not accept 'restrict' keyword" 1>&2
+	echo "WARNING: POSIX violation: ${CC} does not accept the 'restrict' keyword" 1>&2
 	if ${CC} -D_POSIX_C_SOURCE=200809L -std=c99 $D/posix-restrict.c 2>/dev/null; then
 		[ ${FIRST} = "NO" ] && printf " "; FIRST=NO
 		printf %s "-std=c99"
