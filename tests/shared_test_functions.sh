@@ -34,23 +34,23 @@
 # - c_valgrind_cmd: this is the valgrind command (including
 #       appropriate log file) if necessary, or is "" otherwise.
 
-set -o nounset
+set -o noclobber -o nounset -e
 
-### Constants
-out="tests-output"
-out_valgrind="tests-valgrind"
-valgrind_suppressions="${out_valgrind}/suppressions"
-valgrind_suppressions_log="${out_valgrind}/suppressions.pre"
-
-# Print output about test failures.
+# Keep the user-specified "print info about test failures", or initialize to 0
+# (don't print extra info).
 VERBOSE=${VERBOSE:-0}
 
-# Keep the user-specified ${USE_VALGRIND}, or initialize to 0.
+# Keep the user-specified ${USE_VALGRIND}, or initialize to 0 (don't do memory
+# tests).
 USE_VALGRIND=${USE_VALGRIND:-0}
 
 # A non-zero value unlikely to be used as an exit code by the programs being
 # tested.
 valgrind_exit_code=108
+
+# Set ${bindir} to $1 if given, else use "." for in-tree builds.
+bindir=$(CDPATH= cd -- "$(dirname -- "${1-.}")" && pwd -P)
+
 
 ## prepare_directories():
 # Delete any old directories, and create new ones as necessary.  Must be run
@@ -126,7 +126,10 @@ ensure_valgrind_suppression() {
 	if [ ! "$USE_VALGRIND" -gt 0 ]; then
 		return
 	fi;
+
 	printf "Generating valgrind suppressions... "
+	valgrind_suppressions="${out_valgrind}/suppressions"
+	valgrind_suppressions_log="${out_valgrind}/suppressions.pre"
 
 	# Run valgrind on the binary, sending it a "\n" so that
 	# a test which uses STDIN will not wait for user input.
@@ -142,7 +145,7 @@ ensure_valgrind_suppression() {
 	(grep -v "^==" ${valgrind_suppressions_log} 			\
 		| grep -v "   fun:pl_" -				\
 		| grep -v "   fun:main" -				\
-		> ${valgrind_suppressions} )
+		> ${valgrind_suppressions} ) || true
 
 	# Clean up
 	rm -f ${valgrind_suppressions_log}
@@ -157,11 +160,6 @@ ensure_valgrind_suppression() {
 setup_check_variables() {
 	# Set up the "exit" file.
 	c_exitfile="${s_basename}-`printf %02d ${s_count}`.exit"
-
-	# If we don't have a suppressions file, don't try to use it.
-	if [ ! -e ${valgrind_suppressions} ]; then
-		valgrind_suppressions=/dev/null
-	fi
 
 	# Set up the valgrind command if $USE_VALGRIND is greater
 	# than or equal to ${valgrind_min}; otherwise, produce an
@@ -279,6 +277,16 @@ scenario_runner() {
 ## run_scenarios (scenario_filenames):
 # Run all scenarios matching ${scenario_filenames}.
 run_scenarios() {
+	# Check for optional valgrind.
+	check_optional_valgrind
+
+	# Clean up previous directories, and create new ones.
+	prepare_directories
+
+	# Generate valgrind suppression file if it is required.  Must be
+	# done after preparing directories.
+	ensure_valgrind_suppression ${bindir}/tests/valgrind/potential-memleaks
+
 	printf -- "Running tests\n"
 	printf -- "-------------\n"
 	scenario_filenames=$@
