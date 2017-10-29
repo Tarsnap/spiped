@@ -1,23 +1,19 @@
 #!/bin/sh
 
-set -o noclobber -o nounset -e
+### Find script directory and load helper functions.
+scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+. ${scriptdir}/shared_test_functions.sh
 
-# Build directory (we don't allow out-of-tree builds in spiped).
-bindir=.
+
+### Project-specific constants and setup
+
+out="${bindir}/tests-output"
+out_valgrind="${bindir}/tests-valgrind"
 
 # This test script requires three ports.
 src_port=8000
 mid_port=8001
 dst_port=8002
-
-# Constants
-out="output-tests-spiped"
-
-################################ Setup variables from the command-line
-
-# Find script directory and load helper functions.
-scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
-. ${scriptdir}/shared_test_functions.sh
 
 # Find relative spiped binary paths.
 spiped_binary=${scriptdir}/../spiped/spiped
@@ -38,11 +34,8 @@ if ! command -v ${spipe_binary} >/dev/null 2>&1; then
 	exit 1
 fi
 
-# Clean up previous directories, and create new ones.
-prepare_directories
 
-################################ Helper functions
-
+### Helper functions
 
 ## check_leftover_servers():
 # Repeated testing, especially when doing ctrl-c to break out of (suspected)
@@ -69,8 +62,6 @@ check_leftover_servers() {
 		exit 1
 	fi
 }
-
-################################ Server setup
 
 ## setup_spiped_decryption_server(nc_output=/dev/null, use_system_spiped=0):
 # Set up a spiped decryption server, translating from ${mid_port}
@@ -149,7 +140,6 @@ servers_stop() {
 	done
 }
 
-####################################################
 
-# Run the test scenarios; this will exit on the first failure.
+### Run tests using project-specific constants
 run_scenarios ${scriptdir}/??-*.sh
