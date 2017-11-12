@@ -2,13 +2,13 @@
 
 /* Problem with FreeBSD 11.0 merely linking with -lrt. */
 static void
-pl_freebsd_link_lrt()
+pl_freebsd_link_lrt(void)
 {
 	/* Do nothing. */
 }
 
 int
-main()
+main(void)
 {
 
 	/* Test potential memory leaks. */
