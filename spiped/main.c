@@ -12,6 +12,7 @@
 #include "getopt.h"
 #include "graceful_shutdown.h"
 #include "parsenum.h"
+#include "setuidgid.h"
 #include "sock.h"
 #include "warnp.h"
 
@@ -27,7 +28,8 @@ usage(void)
 	    "-t <target socket> -k <key file>\n"
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
-	    "    [-p <pidfile>] [-r <rtime> | -R]\n"
+	    "    [-p <pidfile>] [-r <rtime> | -R] "
+	    "[-U {<username> | <username:groupname>}]\n"
 	    "       spiped -v\n");
 	exit(1);
 }
@@ -81,6 +83,7 @@ main(int argc, char * argv[])
 	int opt_R = 0;
 	const char * opt_s = NULL;
 	const char * opt_t = NULL;
+	const char * opt_U = NULL;
 
 	/* Working variables. */
 	struct sock_addr ** sas_s;
@@ -185,6 +188,11 @@ main(int argc, char * argv[])
 			if (opt_t)
 				usage();
 			opt_t = optarg;
+			break;
+		GETOPT_OPTARG("-U"):
+			if (opt_U != NULL)
+				usage();
+			opt_U = optarg;
 			break;
 		GETOPT_OPT("-v"):
 			fprintf(stderr, "spiped @VERSION@\n");
@@ -300,6 +308,14 @@ main(int argc, char * argv[])
 		    opt_s);
 	if ((s = sock_listener(sas_s[0])) == -1)
 		goto err4;
+
+	/* Drop privileges (if applicable). */
+	if (opt_U) {
+		if (setuidgid(opt_U, SETUIDGID_SGROUP_LEAVE_WARN)) {
+			warnp("Failed to drop privileges");
+			goto err4;
+		}
+	}
 
 	/* Daemonize and write pid. */
 	if (!opt_D && !opt_F && daemonize(opt_p)) {
