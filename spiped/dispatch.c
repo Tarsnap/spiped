@@ -61,8 +61,8 @@ callback_resolve(void * cookie, struct sock_addr ** sas)
 	}
 
 	/* Wait a while before resolving again. */
-	if (events_timer_register_double(callback_resolveagain,
-	    A, A->rtime) == NULL)
+	if ((A->dnstimer_cookie = events_timer_register_double(
+	    callback_resolveagain, A, A->rtime)) == NULL)
 		goto err0;
 
 	/* Success! */
@@ -78,6 +78,9 @@ static int
 callback_resolveagain(void * cookie)
 {
 	struct accept_state * A = cookie;
+
+	/* This timer is expired. */
+	A->dnstimer_cookie = NULL;
 
 	/* Re-resolve the target address. */
 	return (dnsthread_resolveone(A->T, A->tgt, callback_resolve, A));
@@ -308,6 +311,7 @@ dispatch_shutdown(void * dispatch_cookie)
 		events_timer_cancel(A->dnstimer_cookie);
 	if (A->T != NULL)
 		dnsthread_kill(A->T);
+	sock_addr_freelist(A->sas);
 	free(A);
 }
 
