@@ -315,6 +315,9 @@ main(int argc, char * argv[])
 		goto err5;
 	}
 
+	/* dispatch is now maintaining sas_t. */
+	sas_t = NULL;
+
 	/* Register a handler for SIGTERM. */
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
 	    dispatch_cookie)) {
@@ -341,7 +344,6 @@ main(int argc, char * argv[])
 	free(K);
 
 	/* Free arrays of resolved addresses. */
-	sock_addr_freelist(sas_t);
 	sock_addr_freelist(sas_s);
 
 	/* Free pid filename. */
