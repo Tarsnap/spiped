@@ -40,3 +40,7 @@ Makefiles:
 
 publish:
 	${MAKE} -f Makefile.BSD publish
+
+ssh-image.png: ssh-image.latex
+	lualatex $<
+	convert -density 300 ssh-image.pdf $@
