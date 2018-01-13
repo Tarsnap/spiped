@@ -61,7 +61,7 @@ to a host while protecting you in the event that someone finds an exploitable
 bug in the SSH daemon -- this serves the same purpose as port knocking or a
 firewall which restricts source IP addresses which can connect to SSH.
 
-![example of spiped protexting ssh](ssh-image.png)
+![example of spiped protecting ssh](ssh-image.png)
 
 On the SSH server, run
 
