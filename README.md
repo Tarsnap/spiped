@@ -59,8 +59,11 @@ You can also use spiped to protect SSH servers from attackers: Since data is
 authenticated before being forwarded to the target, this can allow you to SSH
 to a host while protecting you in the event that someone finds an exploitable
 bug in the SSH daemon -- this serves the same purpose as port knocking or a
-firewall which restricts source IP addresses which can connect to SSH.  On the
-SSH server, run
+firewall which restricts source IP addresses which can connect to SSH.
+
+![example of spiped protexting ssh](ssh-image.png)
+
+On the SSH server, run
 
     dd if=/dev/urandom bs=32 count=1 of=/etc/ssh/spiped.key
     spiped -d -s '[0.0.0.0]:8022' -t '[127.0.0.1]:22' -k /etc/ssh/spiped.key
