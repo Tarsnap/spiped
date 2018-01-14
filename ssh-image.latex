@@ -59,12 +59,13 @@
 
 \newcommand{\cmpt}[1]{{\small {#1}}}
 \newcommand{\cmptt}[1]{{\footnotesize \texttt{#1}\vertsp}}
-\newcommand{\cmd}[1]{\cmptt{\$ \color{blue}{#1}}}
+\newcommand{\cmd}[1]{\cmptt{\$\,\,\color{blue}{#1}}}
 
 \def\cy{-0.75em}
 \def\cyt{-1.25em}
 \def\cytlf{-0.1em}
 \def\cytls{-1.15em}
+\def\cyrad{0.45em}
 
 
 \node[Computer] (naiveclient)
@@ -74,39 +75,34 @@
   %rectangle split horizontal, rectangle split parts=2,
   %rectangle split part fill={red!30,white},
   ] (naiveserver)
-  %{server \\ \footnotesize{sshd @ 127.0.0.1:22}};
-  %{server \\ \footnotesize{sshd @} \cmptt{127.0.0.1:22}};
-  { myserver \\ \cmptt{ sshd @ 127.0.0.1:22}};
+  { myserver \\ \cmptt{sshd\,\,@\,\,127.0.0.1:22}};
 
 \node[Firewall,
     minimum width=0.4em, inner sep=0,
-    fit={(naiveserver.north west) (naiveserver.south west)},
+    fit={(naiveserver.north west) ($(naiveserver.west) + (0, \cy + \cyrad)$)},
     anchor = north east,
-    %anchor = north west,
   ]
   at (naiveserver.north west)
-  (naivefirewall)
-  %{ \rotatebox{90}{firewall} };
+  (naivefirewallup)
+  {};
+\node[Firewall,
+    minimum width=0.4em, inner sep=0,
+    fit={(naiveserver.south west) ($(naiveserver.west) + (0, \cy - \cyrad)$)},
+    anchor = south east,
+  ]
+  at (naiveserver.south west)
+  (naivefirewalldown)
   {};
 \node[color=red, font=\tiny, anchor=north]
-  at (naivefirewall.south east)
+  at (naivefirewalldown.south east)
   {Firewall};
-
-% "white-out"
-\draw[line width=0.85em, color=white, fill=white] ($ (naiveclient.east) + (0, \cy)$) --
-  ($(naiveserver.west) + (0, \cy)$);
-
-%\node[font=\tiny, anchor=south east]
-%  at ($(naiveserver.west) + (-0.5em, \cy)$)
-%  {port 22};
 
 \draw[Edge, ->] ($ (naiveclient.east) + (0, \cy)$) --
   node[below] (naivemidclientserver) {ssh}
   ($(naiveserver.west) + (0, \cy)$);
 
 \node[Title, yshift=1em]
-  %at ($(naiveclient.north east) !0.5! (naiveserver.north west)$)
-  at ($(naiveclient.north east) !0.5! (naivefirewall.north west)$)
+  at ($(naiveclient.north east) !0.5! (naivefirewallup.north west)$)
   (naivetitle) {NAIVE SSH};
 
 
@@ -114,34 +110,33 @@
 
 \node[Computer, below=of naiveclient, yshift=-3em] (spipedclient)
   {client \\ \cmd{ssh myserver} \\ \cmptt{\color{spipe}{ProxyCommand}}};
-  %{client \\ \cmd{ssh server} \\ \footnotesize{\color{spipe}{ProxyCommand}}};
 
 \node[Computer]
   at (spipedclient.north east -| naiveserver.south west)
   (spipedserver)
-  %{server \\ \footnotesize{sshd @ 127.0.0.1:22}
-  %  \\ \color{spipe}{\footnotesize{spiped @ 0.0.0.0:8022}}};
-  {myserver \\ \cmptt{sshd @ 127.0.0.1:22}
-    \\ \color{spipe}{\cmptt{spiped @ 0.0.0.0:8022}}};
+  {myserver \\ \cmptt{sshd\,\,@\,\,127.0.0.1:22}
+    \\ \color{spipe}{\cmptt{spiped\,\,@\,\,0.0.0.0:8022}}};
 
 \node[Firewall,
     minimum width=0.4em, inner sep=0,
-    fit={(spipedserver.north west) (spipedserver.south west)},
+    fit={(spipedserver.north west) ($(spipedserver.west) + (0, \cyt + \cyrad)$)},
     anchor = north east,
   ]
   at (spipedserver.north west)
-  (spipedfirewall)
-  %{ \rotatebox{90}{firewall} };
+  (spipedfirewallup)
   {};
-
+\node[Firewall,
+    minimum width=0.4em, inner sep=0,
+    fit={(spipedserver.south west) ($(spipedserver.west) + (0, \cyt - \cyrad)$)},
+    anchor = south east,
+  ]
+  at (spipedserver.south west)
+  (spipedfirewalldown)
+  {};
 \node[color=red, font=\tiny, anchor=north]
-  at (spipedfirewall.south east)
+  at (spipedfirewalldown.south east)
   {Firewall};
 
-% "white-out"
-\draw[line width=0.85em, color=white, fill=white]
-  ($(spipedclient.east) + (0, \cyt)$) --
-  ($(spipedserver.west) + (0, \cyt)$);
 
 
 \draw[Edge, ->, line width=0.25em, spipefill,
@@ -152,17 +147,13 @@
     {spipe \\ \color{blue}{(ssh inside)}}
   ($(spipedserver.west) + (0, \cyt)$);
 
-%\draw[Edge, ->, shorten >= 0.1em]
 \draw[Edge, ->]
   ($ (spipedclient.east) + (0, \cyt)$) --
-  %node[below, blue] (spipedmidclientserver)
-  %  {(ssh)}
   ($(spipedserver.west) + (-0.05em, \cyt)$);
 
 
 \node[Title, yshift=1em]
-  %at ($(spipedclient.north east) !0.5! (spipedserver.north west)$)
-  at ($(spipedclient.north east) !0.5! (spipedfirewall.north west)$)
+  at ($(spipedclient.north east) !0.5! (spipedfirewallup.north west)$)
   (spipedtitle) {SPIPED SSH};
 
 \draw[Loop, ->, blue]
@@ -170,13 +161,6 @@
   node [right, font=\tiny, yshift=0.3em] {ssh}
   to [out=10, in=40, looseness=2]
   ($(spipedclient.east) + (0.05em, \cytls) + (0em, 0.1em)$);
-
-%\draw[Loop, ->, line width=0.3em, spipefill]
-%  ($(spipedserver.east) + (0.05em, \cytls)$)
-%  node [right, font=\tiny, spipe]
-%    {spiped \\ \color{blue}{(ssh inside)}}
-%  to [out=10, in=-10, looseness=3]
-%  ($(spipedserver.east) + (0.05em, \cytlf)$);
 
 \draw[Loop, ->, blue]
   ($(spipedserver.east) + (0.05em, \cytls)$)
