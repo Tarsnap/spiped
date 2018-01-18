@@ -95,12 +95,18 @@ minimum width=10.5em,
   (naivefirewalldown)
   {};
 \node[color=red, font=\tiny, anchor=north]
+  (naivefirewalltitle)
   at (naivefirewalldown.south east)
   {Firewall};
 
 \draw[Edge, ->] ($ (naiveclient.east) + (0, \cy)$) --
   node[below] (naivemidclientserver) {smtp}
   ($(naiveserver.west) + (0, \cy)$);
+
+\node[font=\tiny, anchor = south east, color=black!80]
+  (naivespamtitle)
+  at ($(naiveserver.west) + (-0.1, \cy)$)
+  {Bad! \\ Spam relay?};
 
 \node[Title, yshift=1em]
   at ($(naiveclient.north east) !0.5! (naivefirewallup.north west)$)
