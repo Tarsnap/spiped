@@ -48,5 +48,4 @@ publish:
 .pdf.png:
 	convert -density 300 $*.pdf $@
 
-#images: ssh-image.png smtp-image.png
-images: ssh-image.pdf smtp-image.pdf
+images: ssh-image.png smtp-image.png
