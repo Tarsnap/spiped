@@ -72,10 +72,11 @@
   {client \\ \cmd{ssh myserver}};
 
 \node[Computer, right = of naiveclient, xshift=9em,
+  minimum width=9.5em,
   %rectangle split horizontal, rectangle split parts=2,
   %rectangle split part fill={red!30,white},
   ] (naiveserver)
-  { myserver \\ \cmptt{sshd\,\,@\,\,127.0.0.1:22}};
+  { myserver \\ \cmptt{sshd\,\,@\,\,0.0.0.0:22}};
 
 \node[Firewall,
     minimum width=0.4em, inner sep=0,
@@ -111,7 +112,7 @@
 \node[Computer, below=of naiveclient, yshift=-3em] (spipedclient)
   {client \\ \cmd{ssh myserver} \\ \cmptt{\color{spipe}{ProxyCommand}}};
 
-\node[Computer]
+\node[Computer, minimum width=9.5em]
   at (spipedclient.north east -| naiveserver.south west)
   (spipedserver)
   {myserver \\ \cmptt{sshd\,\,@\,\,127.0.0.1:22}
