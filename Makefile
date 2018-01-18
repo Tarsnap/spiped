@@ -41,6 +41,12 @@ Makefiles:
 publish:
 	${MAKE} -f Makefile.BSD publish
 
-ssh-image.png: ssh-image.latex
+.SUFFIXES:	.latex .pdf .png
+.latex.pdf:
 	lualatex $<
-	convert -density 300 ssh-image.pdf $@
+
+.pdf.png:
+	convert -density 300 $*.pdf $@
+
+#images: ssh-image.png smtp-image.png
+images: ssh-image.pdf smtp-image.pdf

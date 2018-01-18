@@ -1,0 +1,176 @@
+\documentclass{standalone}
+% Requirements:
+% - /usr/share/fonts/truetype/Humor-Sans-1.0.ttf
+% - lualatex ssh-images.latex
+
+\usepackage{tikz,color}
+\usetikzlibrary{positioning}
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{calc}
+\usetikzlibrary{shapes.multipart}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{fit}
+
+
+\usepackage{fontspec}
+\setmainfont{Humor-Sans}
+
+\begin{document}
+\begin{tikzpicture}[
+  decoration={random steps,segment length=1mm,amplitude=0.2pt},
+  every text node part/.style={align=center},
+]
+\tikzstyle{every node}=[
+  node distance = 2em,
+]
+\tikzstyle{Title}=[
+  font = \Large,
+]
+\tikzstyle{Computer}=[
+  anchor = north west,
+  font = \Large,
+  draw,
+  decorate,
+  %decoration={random steps,segment length=1mm,amplitude=0.2pt},
+  execute at begin node=\setlength{\baselineskip}{0.75em}
+]
+\tikzstyle{Firewall}=[
+  Computer,
+  font = \footnotesize,
+  color=black,
+  text=red!80!black,
+  fill=red!30!white,
+]
+\tikzstyle{Edge}=[
+  font=\footnotesize,
+  blue,
+  decorate,
+  %decoration={random steps,segment length=1mm,amplitude=0.2pt},
+]
+\tikzstyle{Loop}=[
+  font=\tiny,
+]
+
+\colorlet{spipe}{green!75!black}
+\colorlet{spipefill}{green!75!white}
+
+
+\newcommand{\vertsp}{\makebox[0pt][l]{\phantom{\$yPCLIENTSERVER}}}
+
+\newcommand{\cmpt}[1]{{\small {#1}}}
+\newcommand{\cmptt}[1]{{\footnotesize \texttt{#1}\vertsp}}
+\newcommand{\cmd}[1]{\cmptt{\$\,\,\color{blue}{#1}}}
+
+\def\cy{-0.75em}
+\def\cyt{-1.25em}
+\def\cytlf{-0.1em}
+\def\cytls{-1.15em}
+\def\cyrad{0.45em}
+
+
+\node[Computer] (naiveclient)
+  {client \\ \cmd{mailx}};
+
+\node[Computer, right = of naiveclient, xshift=9em,
+minimum width=10.5em,
+  %rectangle split horizontal, rectangle split parts=2,
+  %rectangle split part fill={red!30,white},
+  ] (naiveserver)
+  { myserver \\ \cmptt{sendmail\,\,@\,\,0.0.0.0:25}};
+
+\node[Firewall,
+    minimum width=0.4em, inner sep=0,
+    fit={(naiveserver.north west) ($(naiveserver.west) + (0, \cy + \cyrad)$)},
+    anchor = north east,
+  ]
+  at (naiveserver.north west)
+  (naivefirewallup)
+  {};
+\node[Firewall,
+    minimum width=0.4em, inner sep=0,
+    fit={(naiveserver.south west) ($(naiveserver.west) + (0, \cy - \cyrad)$)},
+    anchor = south east,
+  ]
+  at (naiveserver.south west)
+  (naivefirewalldown)
+  {};
+\node[color=red, font=\tiny, anchor=north]
+  at (naivefirewalldown.south east)
+  {Firewall};
+
+\draw[Edge, ->] ($ (naiveclient.east) + (0, \cy)$) --
+  node[below] (naivemidclientserver) {smtp}
+  ($(naiveserver.west) + (0, \cy)$);
+
+\node[Title, yshift=1em]
+  at ($(naiveclient.north east) !0.5! (naivefirewallup.north west)$)
+  (naivetitle) {naive smtp};
+
+
+
+
+\node[Computer, below=of naiveclient, yshift=-3em] (spipedclient)
+  {client \\ \cmd{mailx} \\ \color{spipe}\cmptt{spiped\,\,@\,\,127.0.0.1:25}};
+
+\node[Computer, minimum width=10.5em]
+  at (spipedclient.north east -| naiveserver.south west)
+  (spipedserver)
+  { myserver \\ \cmptt{sendmail\,\,@\,\,127.0.0.1:25}
+    \\ \color{spipe}{\cmptt{spiped\,\,@\,\,0.0.0.0:8025}}};
+
+\node[Firewall,
+    minimum width=0.4em, inner sep=0,
+    fit={(spipedserver.north west) ($(spipedserver.west) + (0, \cyt + \cyrad)$)},
+    anchor = north east,
+  ]
+  at (spipedserver.north west)
+  (spipedfirewallup)
+  {};
+\node[Firewall,
+    minimum width=0.4em, inner sep=0,
+    fit={(spipedserver.south west) ($(spipedserver.west) + (0, \cyt - \cyrad)$)},
+    anchor = south east,
+  ]
+  at (spipedserver.south west)
+  (spipedfirewalldown)
+  {};
+\node[color=red, font=\tiny, anchor=north]
+  at (spipedfirewalldown.south east)
+  {Firewall};
+
+
+
+\draw[Edge, ->, line width=0.25em, spipefill,
+  -{Latex[length=0.33em, width=0.85em]},
+  ]
+  ($ (spipedclient.east) + (0, \cyt)$) --
+  node[below, color=spipe] (spipedmidclientserver)
+    {spiped \\ \color{blue}{(smtp inside)}}
+  ($(spipedserver.west) + (0, \cyt)$);
+
+\draw[Edge, ->]
+  ($ (spipedclient.east) + (0, \cyt)$) --
+  ($(spipedserver.west) + (-0.05em, \cyt)$);
+
+
+\node[Title, yshift=1em]
+  at ($(spipedclient.north east) !0.5! (spipedfirewallup.north west)$)
+  (spipedtitle) {spiped smtp};
+
+\draw[Loop, ->, blue]
+  ($(spipedclient.east) + (0.05em, \cytlf)$)
+  node [right, font=\tiny, yshift=0.3em] {smtp}
+  to [out=10, in=40, looseness=2]
+  ($(spipedclient.east) + (0.05em, \cytls) + (0em, 0.1em)$);
+
+\draw[Loop, ->, blue]
+  ($(spipedserver.east) + (0.05em, \cytls)$)
+  node [right, yshift=-0.2em]
+    {smtp}
+  to [out=10, in=-10, looseness=3]
+  ($(spipedserver.east) + (0.05em, \cytlf)$);
+
+
+
+\end{tikzpicture}
+\end{document}
