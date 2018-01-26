@@ -76,9 +76,9 @@ setup_spiped_decryption_server () {
 
 	# Select system or compiled spiped.
 	if [ "${use_system_spiped}" -gt 0 ]; then
-		spiped_cmd=${system_spiped_binary}
+		this_spiped_cmd=${system_spiped_binary}
 	else
-		spiped_cmd=${spiped_binary}
+		this_spiped_cmd=${spiped_binary}
 	fi
 
 	# Start backend server.
@@ -86,7 +86,7 @@ setup_spiped_decryption_server () {
 	nc_pid=${!}
 
 	# Start spiped to connect middle port to backend.
-	${spiped_cmd} -d			\
+	${this_spiped_cmd} -d			\
 		-s [127.0.0.1]:${mid_port}	\
 		-t [127.0.0.1]:${dst_port}	\
 		-p ${s_basename}-spiped-d.pid	\
@@ -98,7 +98,7 @@ setup_spiped_decryption_server () {
 # to ${mid_port}, saving the exit code to ${c_exitfile}.
 setup_spiped_encryption_server () {
 	# Start spiped to connect source port to middle.
-	${spiped_cmd} -e			\
+	${spiped_binary} -e			\
 		-s [127.0.0.1]:${src_port}	\
 		-t [127.0.0.1]:${mid_port}	\
 		-p ${s_basename}-spiped-e.pid	\
