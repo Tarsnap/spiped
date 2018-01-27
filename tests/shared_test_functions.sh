@@ -34,7 +34,7 @@
 # - c_valgrind_cmd: this is the valgrind command (including
 #       appropriate log file) if necessary, or is "" otherwise.
 
-set -o noclobber -o nounset -e
+set -o noclobber -o nounset
 
 # Keep the user-specified "print info about test failures", or initialize to 0
 # (don't print extra info).
