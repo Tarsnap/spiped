@@ -4,6 +4,8 @@ spipe/*.o
 spipe/spipe
 spiped/*.o
 spiped/spiped
+tests/dnsthread-resolve/*.o
+tests/dnsthread-resolve/dnsthread-resolve
 tests/nc-client/*.o
 tests/nc-client/nc-client
 tests/nc-server/*.o
