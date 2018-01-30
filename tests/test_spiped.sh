@@ -20,6 +20,7 @@ spiped_binary=${scriptdir}/../spiped/spiped
 spipe_binary=${scriptdir}/../spipe/spipe
 nc_client_binary=${scriptdir}/../tests/nc-client/nc-client
 nc_server_binary=${scriptdir}/../tests/nc-server/nc-server
+dnsthread_resolve=${scriptdir}/../tests/dnsthread-resolve/dnsthread-resolve
 
 # Find system spiped
 system_spiped_binary=$( find_system spiped )

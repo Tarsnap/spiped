@@ -1,7 +1,8 @@
 .POSIX:
 
 PROGS=		spiped spipe
-TESTS=		tests/nc-client tests/nc-server tests/valgrind
+TESTS=		tests/dnsthread-resolve tests/nc-client tests/nc-server	\
+		tests/valgrind
 BINDIR_DEFAULT=	/usr/local/bin
 CFLAGS_DEFAULT=	-O2
 LIBCPERCIVA_DIR=	libcperciva
