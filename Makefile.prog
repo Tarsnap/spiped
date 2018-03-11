@@ -20,5 +20,5 @@ clean:
 	rm -f ${PROG} ${SRCS:.c=.o}
 
 ${PROG}:${SRCS:.c=.o}
-	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDADD_EXTRA} ${LDADD_REQ} ${LDADD_POSIX}
+	${CC} -o ${PROG} ${SRCS:.c=.o} ${LDFLAGS} ${LDADD_EXTRA} ${LDADD_REQ} ${LDADD_POSIX}
 
