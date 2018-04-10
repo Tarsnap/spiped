@@ -2,7 +2,7 @@ spiped
 ======
 
 Official signed releases are published at:
-> www.tarsnap.com/spiped.html
+> https://www.tarsnap.com/spiped.html
 
 
 **`spiped`** (pronounced "ess-pipe-dee") is a utility for creating
