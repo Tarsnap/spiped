@@ -11,4 +11,4 @@
  */
 ssize_t noeintr_write(int, const void *, size_t);
 
-#endif /* _NOEINTR_H_ */
+#endif /* !_NOEINTR_H_ */
