@@ -213,12 +213,16 @@ notify_success_or_fail() {
 		return
 	fi
 
+	# Count results
+	total_exitfiles=0
+	skip_exitfiles=0
+
 	# Check each exitfile.
 	for exitfile in `echo $exitfiles | sort`; do
 		ret=`cat ${exitfile}`
+		total_exitfiles=$(( total_exitfiles + 1 ))
 		if [ "${ret}" -lt 0 ]; then
-			echo "SKIP!"
-			return
+			skip_exitfiles=$(( skip_exitfiles + 1 ))
 		fi
 		if [ "${ret}" -gt 0 ]; then
 			echo "FAILED!"
@@ -237,7 +241,15 @@ notify_success_or_fail() {
 		fi
 	done
 
-	echo "SUCCESS!"
+	if [ ${skip_exitfiles} -gt 0 ]; then
+		if [ ${skip_exitfiles} -eq ${total_exitfiles} ]; then
+			echo "SKIP!"
+		else
+			echo "PARTIAL SUCCESS / SKIP!"
+		fi
+	else
+		echo "SUCCESS!"
+	fi
 }
 
 ## scenario_runner (scenario_filename):

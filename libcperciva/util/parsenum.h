@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 /* Handle compiler warnings about implicit variable conversion in PARSENUM. */
@@ -28,6 +29,15 @@ _Pragma("clang diagnostic pop")
 #define PARSENUM_PROLOGUE /* NOTHING */
 #define PARSENUM_EPILOGUE /* NOTHING */
 #endif /* !__clang__ */
+
+/* Print a message before assert(). */
+#define ASSERT_FAIL(s)							\
+	(								\
+		fprintf(stderr, "Assertion failed: " s			\
+		    ", function %s, file %s, line %d\n",		\
+		    __func__, __FILE__, __LINE__),			\
+		abort()							\
+	)
 
 /**
  * PARSENUM(x, s, min, max):
@@ -53,7 +63,7 @@ _Pragma("clang diagnostic pop")
 		(((*(x)) = -1) > 0) ?					\
 			((*(x)) = parsenum_unsigned((s), 0, (*(x)),	\
 			    (*(x)))) :					\
-			(assert(0 && "PARSENUM applied to signed integer without specified bounds"), 1),	\
+			(ASSERT_FAIL("PARSENUM applied to signed integer without specified bounds"), 1),	\
 		errno != 0						\
 		PARSENUM_EPILOGUE					\
 	)
