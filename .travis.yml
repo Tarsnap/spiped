@@ -5,31 +5,39 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: CFLAGS="-std=c99 -O2 -Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro -Wno-cast-align"
+      env: CFLAGS_STRICT="-Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro -Wno-cast-align"
     - os: linux
       compiler: gcc
-      env: CFLAGS="-std=c99 -O2 -Wall -Wextra -Werror -Wpedantic -pedantic-errors -Wno-clobbered"
+      env: CFLAGS_STRICT="-Wall -Wextra -Werror -Wpedantic -pedantic-errors -Wno-clobbered"
     - os: osx
       compiler: clang
-      env: CFLAGS="-std=c99 -O2 -Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro"
+      env: CFLAGS_STRICT="-Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro"
 env:
   global:
-    - secure: "X0KQ8RmzA5frmZWfdZDYT7mHQ2Wv57bdHvck0a6BkVKzOQxKK/4ZO2iP+GUKLDzTx3+U9HH0gaZsebWCBhC173nOvsSI/w3G3eTRkCVEeOm9j/fQPjRRv4tYfVOUjMo7E7bj6AcmSmrYrE13bcmY6Xdc+YKs0OOoPbJHUyzQ8yhqRhOgm9WhMvheGkO6RRheSWgx8F5Ah8Xx5rN+4gKpPWA0LEWdtOiAndPrLb0aAOm3IUAEOWdlbNOklNpztIKkyr+7lG/Mdyvh0HTor1OJUIaDrqISfbbFFFthScjlbgBZb+nCu/+sH3FjDLtGbUh45dRqDPP2d1QeuteTn98sG3chgv1bqqqWM+OPHYwVawT8JJOGPqMWhY815il5KO925NTy2zZ+7sDWZKZmluMa6yf6tso1bNPT5viTPCt3vva1MIfIw9KuXhxQ9wQLLt7NdtDPbaErKVi+IZgxR4B1dOaa1qtoipPtVNkKQsyQ7YBx7Diu/ebazqrTjixO6Mg4DdV6iVEslkibBNc42gXgDDzvj35zOUUFpOkAXNkJd2MBTsJqyHmFOImyFAfJPGgSTzaj9o+8BN2QRF9ia60B4nxRhBIFP9oybWmwU5veam+mnwtX/TRpsNt1Zqi+09ft/AX6PdHmwibJjs9Q+Ua0MOWyVLZttjMNh0hgHCic1+0="
+    # Some projects need -std=c99 to specify library support for ./configure
+    - CFLAGS="-std=c99 -O2"
+    - secure: "TM30hoegVhKk0UE8RDFVbZ9Q29Z/ewceU19DsJf9ifiBXDl6OVnxujrMYwW/ltdRYIuhvvkJ2K94hN21pNNdUuExEXWtdSUQlEi8OWSDQBPaStwsM39xLoqUusCBEs7VLoSluhTBzn7CbnbWiqod5ZITGpDOqqvpBwuHAHdrURI0Rb8oPi2DnmzW8r8p2F+xIN/Y4iaRTpdCSthagyJDbE5ZXxPQCfDK1Yi4hYnIRUxJN3K6hMGZOOgCZLgWVL0njHU8OUp3GKiYwqnJOnd6RZTyfB4GFKnmYKr6Uwx+loH+g0da5jFiQdL47yxa1I1zPyOv2gDgmLcSpPRnFcf+gJwfGqvI4Z1VFU0T22x57aCHc9zW/29VvQWBDtO3ObFxPLxKLU5sXEj85HuJKxVvAn+jFcgao4cyqe+Y6YqBiXi/Yexi/QXsr2z0vKoESibBqdG9WEoNmuGDgQQnZYK1aOIIdceSMrAzBe6LuJMqNi5Lit9IxLWUNxyoNPjwclMg08iJeB6i7erfQpPUEAH6uHHF/RSdLR6eFATmV4ixCKibHnN0EgNcI2CDFjetviAwAnY88E+5F8GukZqZUT2iVwsxu6iFOxgNf3e5vFToXVHIw54NSkVWI++MvuFJ9r5jLnIImq5bLwnT0JObm/nEVJo0T2pIXGJ2Zf7Jo6DqGbc="
     - TEST_DNSTHREAD_ENABLE_REMOTE=1
-
-addons:
-  coverity_scan:
-    project:
-      name: "Tarsnap/spiped"
-      description: "Build submitted via Travis CI"
-    notification_email: cperciva@tarsnap.com
-    build_command_prepend: ""
-    build_command: "make all clean"
-    branch_pattern: coverity-scan
-
+    - COVERITY_SCAN_PROJECT_NAME="Tarsnap/spiped"
+    - COVERITY_SCAN_BRANCH_PATTERN="coverity-scan"
+    - COVERITY_SCAN_NOTIFICATION_EMAIL="cperciva@tarsnap.com"
+    - COVERITY_SCAN_BUILD_COMMAND="make all clean"
 before_install:
-- test $TRAVIS_BRANCH != coverity-scan -o ${TRAVIS_JOB_NUMBER##*.} = 1 || exit 0
-- 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CFLAGS="-I/usr/local/opt/openssl/include $CFLAGS" LDFLAGS="-L/usr/local/opt/openssl/lib $LDFLAGS"; fi'
+  # Handle Coverity scan
+  - >
+    if [[ "${TRAVIS_BRANCH}" == "coverity-scan" ]]; then
+      if [[ "${TRAVIS_JOB_NUMBER##*.}" == "1" ]]; then
+        curl -s "https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh" | bash || true
+      else
+        echo "Not main job; do nothing."
+      fi
+      echo "Done Coverity scan."
+      sleep 1
+      exit 0
+    fi
+  # Otherwise, act normally.
+  - 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CFLAGS="-I/usr/local/opt/openssl/include $CFLAGS" LDFLAGS="-L/usr/local/opt/openssl/lib $LDFLAGS"; fi'
+# We can't use strict flags in CFLAGS as a general environment
+# variable, because that messes up ./configure and coverity-scan.
 script:
-- test $TRAVIS_BRANCH != coverity-scan || exit 0
-- make && make test
+  - make "CFLAGS=$CFLAGS $CFLAGS_STRICT" && make test
