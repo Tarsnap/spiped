@@ -38,6 +38,8 @@ spiped - secure pipe daemon
 [\-p <pidfile>]
 [\-r <rtime> | \-R]
 .br
+[\-u <username> | <:groupname> | <username:groupname>]
+.br
 .B spiped
 \-v
 .SH OPTIONS
@@ -151,6 +153,12 @@ Defaults to re-resolution every 60 seconds.
 .TP
 .B \-R
 Disable target address re-resolution.
+.TP
+.B \-u <username> | <:groupname> | <username:groupname>
+After binding a socket, change the user to
+.I username
+and/or the group to
+.IR groupname .
 .TP
 .B \-v
 Print version number.

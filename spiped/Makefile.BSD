@@ -56,6 +56,7 @@ SRCS	+=	getopt.c
 SRCS	+=	insecure_memzero.c
 SRCS	+=	monoclock.c
 SRCS	+=	noeintr.c
+SRCS	+=	setuidgid.c
 SRCS	+=	sock.c
 SRCS	+=	sock_util.c
 SRCS	+=	warnp.c
