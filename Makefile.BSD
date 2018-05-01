@@ -6,7 +6,7 @@ PUBLISH= ${PROGS} BUILDING DESIGN.md CHANGELOG COPYRIGHT README.md STYLE Makefil
 
 # These definitions improve the readability of the below material.
 MAKEBSD:=	${MAKE} -f Makefile.BSD
-RELEASEDATE!=   date "+%B %d, %Y"
+RELEASEDATE!=	date "+%B %d, %Y"
 CFLAGS_HARDCODED=	-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\\\"cpusupport-config.h\\\"
 
 # This creates (and deletes) a fake cpusupport-config.h that is
