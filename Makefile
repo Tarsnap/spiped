@@ -6,6 +6,7 @@ TESTS=		tests/dnsthread-resolve tests/nc-client tests/nc-server	\
 BINDIR_DEFAULT=	/usr/local/bin
 CFLAGS_DEFAULT=	-O2
 LIBCPERCIVA_DIR=	libcperciva
+TEST_CMD=	tests/test_spiped.sh
 
 all:	cpusupport-config.h
 	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
@@ -33,7 +34,7 @@ clean:
 
 .PHONY:	test test-clean
 test:	all
-	tests/test_spiped.sh
+	${TEST_CMD}
 
 test-clean:
 	rm -rf tests-output/ tests-valgrind/
