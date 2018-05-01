@@ -9,8 +9,10 @@ enum {
 
 /**
  * setuidgid(user_group_string, leave_suppgrp):
- * Set the UID and/or GID to the names given in ${user_group_string}.
- * Depending on the existence and position of a colon ":", the behaviour is
+ * Set the UID and/or GID to the names given in ${user_group_string}.  If no
+ * UID or GID can be found matching those strings, treat the values as numeric
+ * IDs.  Depending on the existence and position of a colon ":", the behaviour
+ * is
  * - no ":" means that the string is a username.
  * - ":" in the first position means that the string is a groupname.
  * - otherwise, the string is parsed into "username:groupname".

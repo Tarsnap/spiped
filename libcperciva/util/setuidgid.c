@@ -46,6 +46,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "parsenum.h"
 #include "warnp.h"
 
 #include "setuidgid.h"
@@ -131,16 +132,22 @@ set_group(const char * groupname)
 	gid_t gid;
 	struct group * group_info;
 
-	/* Find numerical GID. */
+	/*
+	 * Attempt to convert the group name to a group ID.  If the database
+	 * lookup fails with an error, return; but if it fails without an error
+	 * (indicating that it successfully found that the name does not exist)
+	 * fall back to trying to parse the name as a numeric group ID.
+	 */
 	errno = 0;
-	if ((group_info = getgrnam(groupname)) == NULL) {
-		if (errno)
-			warnp("getgrnam(\"%s\")", groupname);
-		else
-			warn0("No such group: %s", groupname);
+	if ((group_info = getgrnam(groupname)) != NULL) {
+		gid = group_info->gr_gid;
+	} else if (errno) {
+		warnp("getgrnam(\"%s\")", groupname);
+		goto err0;
+	} else if (PARSENUM(&gid, groupname)) {
+		warn0("No such group: %s", groupname);
 		goto err0;
 	}
-	gid = group_info->gr_gid;
 
 	/* Set GID. */
 	if (setgid(gid)) {
@@ -165,16 +172,17 @@ set_user(const char * username)
 	uid_t uid;
 	struct passwd * user_info;
 
-	/* Calculate numerical UID. */
+	/* See similar code in set_gid(). */
 	errno = 0;
-	if ((user_info = getpwnam(username)) == NULL) {
-		if (errno)
-			warnp("getpwnam(\"%s\")", username);
-		else
-			warn0("No such user: %s", username);
+	if ((user_info = getpwnam(username)) != NULL) {
+		uid = user_info->pw_uid;
+	} else if (errno) {
+		warnp("getpwnam(\"%s\")", username);
+		goto err0;
+	} else if (PARSENUM(&uid, username)) {
+		warn0("No such user: %s", username);
 		goto err0;
 	}
-	uid = user_info->pw_uid;
 
 	/* Set UID. */
 	if (setuid(uid)) {
@@ -256,8 +264,10 @@ err0:
 
 /**
  * setuidgid(user_group_string, leave_suppgrp):
- * Set the UID and/or GID to the names given in ${user_group_string}.
- * Depending on the existence and position of a colon ":", the behaviour is
+ * Set the UID and/or GID to the names given in ${user_group_string}.  If no
+ * UID or GID can be found matching those strings, treat the values as numeric
+ * IDs.  Depending on the existence and position of a colon ":", the behaviour
+ * is
  * - no ":" means that the string is a username.
  * - ":" in the first position means that the string is a groupname.
  * - otherwise, the string is parsed into "username:groupname".
