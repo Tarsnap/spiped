@@ -43,6 +43,29 @@ ${D}/Makefile::
 			| sed -e 's| \\ | |g'; \
 		echo "	\$${CC} \$${CFLAGS_POSIX} ${CFLAGS_HARDCODED} $${CF} -I$${SUBDIR_DEPTH} \$${IDIRS} \$${CPPFLAGS} \$${CFLAGS} -c $${S} -o $${F}"; \
 	    done ) >> $@
+	if grep -q "test:" ${D}/Makefile.BSD ; then		\
+		printf "\n" >> $@;					\
+		( cd ${D} && awk '/test:/, /^$$/' Makefile.BSD |	\
+		    awk '$$1' ) >> $@;					\
+	fi
+	if grep -q "all_extra:" ${D}/Makefile.BSD ; then		\
+		printf "\n" >> $@;					\
+		( cd ${D} && awk '/all_extra:/, /^$$/' Makefile.BSD |	\
+		    awk '$$1' ) >> $@;					\
+		( cd ${D} && awk					\
+		    '/all:\t${PROG}/ {print $$0 " all_extra";next}{print}' \
+		    Makefile > Makefile.new );				\
+		( cd ${D} && mv Makefile.new Makefile );		\
+	fi
+	if grep -q "clean_extra:" ${D}/Makefile.BSD ; then		\
+		printf "\n" >> $@;					\
+		( cd ${D} && awk '/clean_extra:/, /^$$/' Makefile.BSD |	\
+		    awk '$$1' ) >> $@;					\
+		( cd ${D} && awk					\
+		    '/clean:/ {print $$0 "\tclean_extra";next}{print}'	\
+		    Makefile > Makefile.new );				\
+		( cd ${D} && mv Makefile.new Makefile );		\
+	fi
 	rm -f cpusupport-config.h
 .endfor
 

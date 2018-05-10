@@ -20,7 +20,14 @@ all:	cpusupport-config.h
 	done
 
 cpusupport-config.h:
-	( export CC="${CC}"; command -p sh ${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh "$$PATH" ) > cpusupport-config.h
+	if [ -e ${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh ];	\
+	then								\
+		( export CC="${CC}"; command -p sh 			\
+		    ${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh	\
+		    "$$PATH" ) > cpusupport-config.h;			\
+	else								\
+		: > cpusupport-config.h;				\
+	fi
 
 install:	all
 	export BINDIR=$${BINDIR:-${BINDIR_DEFAULT}};	\
