@@ -48,7 +48,7 @@ _Pragma("clang diagnostic pop")
  * the value into ${x}, set errno to zero, and return zero.  Otherwise, return
  * nonzero with an unspecified value of ${x} and errno set to EINVAL or ERANGE
  * as appropriate.
- * 
+ *
  * For floating-point and unsigned integer variables ${x}, this can also be
  * invoked as PARSENUM(x, s), in which case the minimum and maximum values are
  * set to +/- infinity or the limits of the unsigned integer type.

@@ -66,7 +66,7 @@ static int string_extract_user_group(const char *, char **, char **);
  * on the platform, return 0 anyway.
  */
 static int
-setgroups_none()
+setgroups_none(void)
 {
 
 #ifndef NO_SETGROUPS
@@ -88,7 +88,7 @@ err0:
 
 /* Check if we're in any supplementary groups. */
 static int
-check_supplementary_groups_none()
+check_supplementary_groups_none(void)
 {
 	gid_t grouplist[1];
 	int ngroups;
