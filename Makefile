@@ -14,9 +14,17 @@ all:	cpusupport-config.h posix-flags.sh
 	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
+	export HAVE_BUILD_FLAGS=1;			\
 	for D in ${PROGS} ${TESTS}; do			\
 		( cd $${D} && ${MAKE} all ) || exit 2;	\
 	done
+
+# For "loop-back" building of a subdirectory
+buildsubdir: cpusupport-config.h posix-flags.sh
+	. ./cpusupport-config.h; \
+	. ./posix-flags.sh; \
+	export HAVE_BUILD_FLAGS=1; \
+	cd ${BUILD_SUBDIR} && ${MAKE} ${BUILD_TARGET}
 
 posix-flags.sh:
 	if [ -d ${LIBCPERCIVA_DIR}/POSIX/ ]; then			\

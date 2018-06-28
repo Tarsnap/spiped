@@ -54,8 +54,8 @@ ${D}/Makefile::
 		printf "\n" >> $@;					\
 		( cd ${D} && awk '/all_extra:/, /^$$/' Makefile.BSD |	\
 		    awk '$$1' ) >> $@;					\
-		( cd ${D} && awk					\
-		    '/all:\t${PROG}/ {print $$0 " all_extra";next}{print}' \
+		( cd ${D} && sed -e					\
+		    's/$${MAKE} $${PROG}/$${MAKE} $${PROG} all_extra/'	\
 		    Makefile > Makefile.new );				\
 		( cd ${D} && mv Makefile.new Makefile );		\
 	fi
