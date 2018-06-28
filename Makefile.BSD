@@ -22,6 +22,8 @@ ${D}/Makefile::
 	( cd ${D} && printf 'SRCS=' && ${MAKEBSD} -V SRCS | sed -e 's| cpusupport-config.h||' ) >> $@
 	( cd ${D} && printf 'IDIRS=' && ${MAKEBSD} -V IDIRS ) >> $@
 	( cd ${D} && printf 'LDADD_REQ=' && ${MAKEBSD} -V LDADD_REQ ) >> $@
+	( cd ${D} && printf 'SUBDIR_DEPTH=' && ${MAKEBSD} -V SUBDIR_DEPTH ) >> $@
+	( cd ${D} && printf 'RELATIVE_DIR=${D}\n' ) >> $@
 	if [ `cd ${D} && ${MAKEBSD} -V NOINST` ]; then		\
 		cat Makefile.prog |				\
 		    perl -0pe 's/(install:.*?)\n\n//s' >> $@ ;	\
