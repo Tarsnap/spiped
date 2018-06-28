@@ -131,21 +131,35 @@ ensure_valgrind_suppression() {
 	valgrind_suppressions="${out_valgrind}/suppressions"
 	valgrind_suppressions_log="${out_valgrind}/suppressions.pre"
 
-	# Run valgrind on the binary, sending it a "\n" so that
-	# a test which uses STDIN will not wait for user input.
-	printf "\n" | (valgrind --leak-check=full --show-leak-kinds=all	\
-		--gen-suppressions=all					\
-		--log-file=${valgrind_suppressions_log}			\
-		${potential_memleaks_binary})
+	# Start off with an empty suppression file
+	touch ${valgrind_suppressions}
 
-	# Strip out useless parts from the log file, as well as
-	# removing references to the main and "pl_*" ("potential
-	# loss") functions so that the suppressions can apply to
-	# other binaries.
-	(grep -v "^==" ${valgrind_suppressions_log} 			\
-		| grep -v "   fun:pl_" -				\
-		| grep -v "   fun:main" -				\
-		> ${valgrind_suppressions} ) || true
+	# Get list of tests
+	${potential_memleaks_binary} | while read testname; do
+		this_valgrind_supp="${valgrind_suppressions_log}-${testname}"
+
+		# Run valgrind on the binary, sending it a "\n" so that
+		# a test which uses STDIN will not wait for user input.
+		printf "\n" | (valgrind 				\
+		    --leak-check=full --show-leak-kinds=all		\
+		    --gen-suppressions=all				\
+		    --suppressions=${valgrind_suppressions}		\
+		    --log-file=${this_valgrind_supp}			\
+		    ${potential_memleaks_binary}			\
+		    ${testname})
+
+		# Append name to suppressions file
+		printf "# ${testname}\n" >> ${valgrind_suppressions}
+
+		# Strip out useless parts from the log file, as well as
+		# removing references to the main and "pl_*" ("potential loss")
+		# functions so that the suppressions can apply to other
+		# binaries.  Append to suppressions file.
+		(grep -v "^==" ${this_valgrind_supp}			\
+			| grep -v "   fun:pl_" -			\
+			| grep -v "   fun:main" -			\
+			>> ${valgrind_suppressions} ) || true
+	done
 
 	# Clean up
 	rm -f ${valgrind_suppressions_log}
