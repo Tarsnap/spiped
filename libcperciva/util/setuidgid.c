@@ -11,6 +11,8 @@
 #if defined(__linux__)
 /* setgroups() includes for Linux. */
 #define _BSD_SOURCE 1
+#define _DEFAULT_SOURCE 1
+
 #include <grp.h>
 
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE__)
