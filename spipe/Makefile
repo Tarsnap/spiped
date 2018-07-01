@@ -5,8 +5,17 @@ MAN1=spipe.1
 SRCS=main.c pushbits.c proto_conn.c proto_crypt.c proto_handshake.c proto_pipe.c sha256.c elasticarray.c ptrheap.c timerqueue.c asprintf.c entropy.c getopt.c insecure_memzero.c monoclock.c noeintr.c sock.c warnp.c cpusupport_x86_aesni.c cpusupport_x86_rdrand.c events_immediate.c events_network.c events_network_selectstats.c events_timer.c events.c network_connect.c network_read.c network_write.c crypto_aes.c crypto_aes_aesni.c crypto_aesctr.c crypto_dh.c crypto_dh_group14.c crypto_entropy.c crypto_entropy_rdrand.c crypto_verify_bytes.c
 IDIRS=-I../proto -I../libcperciva/alg -I../libcperciva/datastruct -I../libcperciva/util -I../libcperciva/cpusupport -I../libcperciva/events -I../libcperciva/network -I../libcperciva/crypto
 LDADD_REQ=-lcrypto -lpthread
+SUBDIR_DEPTH=..
+RELATIVE_DIR=spipe
 
-all:	${PROG}
+all:
+	if [ -z "$${HAVE_BUILD_FLAGS}" ]; then \
+		cd ${SUBDIR_DEPTH}; \
+		${MAKE} BUILD_SUBDIR=${RELATIVE_DIR} \
+		    BUILD_TARGET=${PROG} buildsubdir; \
+	else \
+		${MAKE} ${PROG}; \
+	fi
 
 install:${PROG}
 	mkdir -p ${BINDIR}
