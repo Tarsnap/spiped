@@ -5,7 +5,7 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env: CFLAGS_STRICT="-Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro -Wno-cast-align"
+      env: CFLAGS_STRICT="-Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro -Wno-cast-align -Wno-unused-macros"
     - os: linux
       compiler: gcc
       env: CFLAGS_STRICT="-Wall -Wextra -Werror -Wpedantic -pedantic-errors -Wno-clobbered"

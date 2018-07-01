@@ -5,8 +5,17 @@ MAN1=
 SRCS=potential-memleaks.c
 IDIRS=
 LDADD_REQ=
+SUBDIR_DEPTH=../..
+RELATIVE_DIR=tests/valgrind
 
-all:	${PROG}
+all:
+	if [ -z "$${HAVE_BUILD_FLAGS}" ]; then \
+		cd ${SUBDIR_DEPTH}; \
+		${MAKE} BUILD_SUBDIR=${RELATIVE_DIR} \
+		    BUILD_TARGET=${PROG} buildsubdir; \
+	else \
+		${MAKE} ${PROG}; \
+	fi
 
 clean:
 	rm -f ${PROG} ${SRCS:.c=.o}
