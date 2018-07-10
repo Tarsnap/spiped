@@ -1,6 +1,9 @@
 # Program name.
 PROG	=	potential-memleaks
 
+# Library code required
+LDADD_REQ	+=	-lpthread
+
 # Don't install it.
 NOINST	= 	1
 
