@@ -11,9 +11,9 @@ out="${bindir}/tests-output"
 out_valgrind="${bindir}/tests-valgrind"
 
 # This test script requires three ports.
-src_port=8000
-mid_port=8001
-dst_port=8002
+src_port=8001
+mid_port=8002
+dst_port=8003
 
 # Find relative spiped binary paths.
 spiped_binary=${scriptdir}/../spiped/spiped
