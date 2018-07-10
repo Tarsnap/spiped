@@ -4,7 +4,7 @@ PROG=potential-memleaks
 MAN1=
 SRCS=potential-memleaks.c
 IDIRS=
-LDADD_REQ=
+LDADD_REQ=-lpthread
 SUBDIR_DEPTH=../..
 RELATIVE_DIR=tests/valgrind
 
