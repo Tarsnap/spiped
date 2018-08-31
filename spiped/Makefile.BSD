@@ -28,6 +28,7 @@ IDIRS	+=	-I../proto
 # Fundamental algorithms
 .PATH.c	:	${LIBCPERCIVA_DIR}/alg
 SRCS	+=	sha256.c
+SRCS	+=	sha256_shani.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/alg
 
 # Data structures
@@ -66,6 +67,8 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 .PATH.c	:	${LIBCPERCIVA_DIR}/cpusupport
 SRCS	+=	cpusupport_x86_aesni.c
 SRCS	+=	cpusupport_x86_rdrand.c
+SRCS	+=	cpusupport_x86_shani.c
+SRCS	+=	cpusupport_x86_ssse3.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/cpusupport
 
 # Event loop
@@ -102,5 +105,8 @@ cflags-crypto_aes_aesni.o:
 
 cflags-crypto_entropy_rdrand.o:
 	@echo '$${CFLAGS_X86_RDRAND}'
+
+cflags-sha256_shani.o:
+	@echo '$${CFLAGS_X86_SHANI} $${CFLAGS_X86_SSSE3}'
 
 .include <bsd.prog.mk>
