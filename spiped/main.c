@@ -57,7 +57,7 @@ diediedie_handler(int signo)
 
 /* Simplify error-handling in command-line parse loop. */
 #define OPT_EPARSE(opt, arg) do {					\
-	warnp("Error parsing argument: -%c %s", opt, arg);		\
+	warnp("Error parsing argument: %s %s", opt, arg);		\
 	exit(1);							\
 } while (0)
 
@@ -143,10 +143,8 @@ main(int argc, char * argv[])
 			if (opt_n_set)
 				usage();
 			opt_n_set = 1;
-			if (PARSENUM(&opt_n, optarg)) {
-				warn0("Invalid option: -n %s", optarg);
-				exit(1);
-			}
+			if (PARSENUM(&opt_n, optarg))
+				OPT_EPARSE(ch, optarg);
 			if (opt_n == 0)
 				opt_n = SIZE_MAX;
 			break;
@@ -154,10 +152,8 @@ main(int argc, char * argv[])
 			if (opt_o_set)
 				usage();
 			opt_o_set = 1;
-			if (PARSENUM(&opt_o, optarg, 0, INFINITY)) {
-				warn0("Invalid option: -o %s", optarg);
-				exit(1);
-			}
+			if (PARSENUM(&opt_o, optarg, 0, INFINITY))
+				OPT_EPARSE(ch, optarg);
 			break;
 		GETOPT_OPTARG("-p"):
 			if (opt_p)
@@ -169,10 +165,8 @@ main(int argc, char * argv[])
 			if (opt_r_set)
 				usage();
 			opt_r_set = 1;
-			if (PARSENUM(&opt_r, optarg, 0, INFINITY)) {
-				warn0("Invalid option: -r %s", optarg);
-				exit(1);
-			}
+			if (PARSENUM(&opt_r, optarg, 0, INFINITY))
+				OPT_EPARSE(ch, optarg);
 			break;
 		GETOPT_OPT("-R"):
 			if (opt_R)
