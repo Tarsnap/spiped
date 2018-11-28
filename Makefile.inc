@@ -10,3 +10,6 @@ SUBDIR_DEPTH	=	..
 
 # Expand ${IDIRS} before it is used
 IDIRS	:=	${IDIRS}
+
+# Default is no man pages
+MAN	=
