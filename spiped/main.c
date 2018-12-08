@@ -354,6 +354,12 @@ main(int argc, char * argv[])
 	/* Free arrays of resolved addresses. */
 	sock_addr_freelist(sas_s);
 
+	/* If a unix domain socket, remove the file. */
+	if ((opt_s[0] == '/') && unlink(opt_s)) {
+		warnp("unlink");
+		goto err0;
+	}
+
 	/* Free pid filename. */
 	free(opt_p);
 
