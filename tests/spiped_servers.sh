@@ -26,15 +26,17 @@ check_leftover_servers() {
 	fi
 }
 
-## setup_spiped_decryption_server(nc_output=/dev/null, use_system_spiped=0):
+## setup_spiped_decryption_server(nc_output=/dev/null, use_system_spiped=0,
+#      use_nc=1):
 # Set up a spiped decryption server, translating from ${mid_sock}
 # to ${dst_sock}, saving the exit code to ${c_exitfile}.  Also set
 # up a nc-server listening to ${dst_sock}, saving output to
-# ${nc_output}.  Uses the system's spiped (instead of the
-# version in this source tree) if ${use_system_spiped} is 1.
+# ${nc_output}, unless ${use_nc} is 0.  Uses the system's spiped (instead of
+# the version in this source tree) if ${use_system_spiped} is 1.
 setup_spiped_decryption_server () {
 	nc_output=${1:-/dev/null}
 	use_system_spiped=${2:-0}
+	use_nc=${3:-1}
 	check_leftover_servers
 
 	# Select system or compiled spiped.
@@ -44,9 +46,10 @@ setup_spiped_decryption_server () {
 		this_spiped_cmd=${spiped_binary}
 	fi
 
-	# Start backend server.
-	${nc_server_binary} ${dst_sock} ${nc_output} &
-	nc_pid=${!}
+	# Start backend server (if desired).
+	if [ ! "${use_nc}" -eq 0 ]; then
+		${nc_server_binary} ${dst_sock} ${nc_output} &
+	fi
 
 	# Start spiped to connect middle port to backend.
 	${this_spiped_cmd} -d			\
