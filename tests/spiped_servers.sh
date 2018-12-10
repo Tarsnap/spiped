@@ -10,9 +10,11 @@
 # manual attention anyway.
 check_leftover_servers() {
 	# Find old nc-server on ${dst_sock}.
-	if $( has_pid "${nc_server_binary} ${dst_sock}" ); then
-		echo "Error: Left-over nc-server from previous run."
-		exit 1
+	if [ -n "${nc_server_binary+set}" ]; then
+		if $( has_pid "${nc_server_binary} ${dst_sock}" ); then
+			echo "Error: Left-over nc-server from previous run."
+			exit 1
+		fi
 	fi
 
 	# Find old spiped {-d, -e} servers on {${mid_sock}, ${src_sock}}.
@@ -98,10 +100,12 @@ servers_stop() {
 		fi
 		sleep 1
 	done
-	while $( has_pid "${nc_server_binary} ${dst_sock}" ); do
-		if [ ${VERBOSE} -ne 0 ]; then
-			echo "Waiting to stop: ncat"
-		fi
-		sleep 1
-	done
+	if [ -n "${nc_server_binary+set}" ]; then
+		while $( has_pid "${nc_server_binary} ${dst_sock}" ); do
+			if [ ${VERBOSE} -ne 0 ]; then
+				echo "Waiting to stop: ncat"
+			fi
+			sleep 1
+		done
+	fi
 }
