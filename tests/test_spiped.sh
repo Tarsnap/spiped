@@ -10,10 +10,10 @@ scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 out="${bindir}/tests-output"
 out_valgrind="${bindir}/tests-valgrind"
 
-# This test script requires three ports.
-src_port=8001
-mid_port=8002
-dst_port=8003
+# This test script requires three sockets.
+src_sock=[127.0.0.1]:8001
+mid_sock=[127.0.0.1]:8002
+dst_sock=[127.0.0.1]:8003
 
 # Find relative spiped binary paths.
 spiped_binary=${scriptdir}/../spiped/spiped

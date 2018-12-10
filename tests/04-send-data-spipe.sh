@@ -17,7 +17,7 @@ scenario_cmd() {
 	setup_check_variables
 	(
 		cat ${scriptdir}/lorem-send.txt | ${spipe_binary}	\
-			-t [127.0.0.1]:${mid_port} -k /dev/null
+			-t ${mid_sock} -k /dev/null
 		echo $? > ${c_exitfile}
 	)
 

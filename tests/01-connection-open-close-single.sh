@@ -17,7 +17,7 @@ scenario_cmd() {
 	# Open and close a connection.
 	setup_check_variables
 	(
-		echo "" | ${nc_client_binary} [127.0.0.1]:${src_port}
+		echo "" | ${nc_client_binary} ${src_sock}
 		echo $? > ${c_exitfile}
 	)
 
