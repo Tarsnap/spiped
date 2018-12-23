@@ -1,6 +1,3 @@
-#include <netinet/in.h>
-
-#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,8 +38,7 @@ main(int argc, char ** argv)
 {
 	struct nc_cookie cookie;
 	struct nc_cookie * C = &cookie;
-	unsigned long port_long;
-	in_port_t port;
+	const char * sockname;
 	const char * filename;
 
 	WARNP_INIT;
@@ -52,17 +48,7 @@ main(int argc, char ** argv)
 		fprintf(stderr, "usage: %s PORT FILENAME\n", argv[0]);
 		goto err0;
 	}
-
-	/* Parse port number. */
-	errno = 0;
-	port_long = strtoul(argv[1], NULL, 0);
-	if (errno || port_long > UINT16_MAX) {
-		warnp("strtoul");
-		goto err0;
-	}
-	port = (in_port_t)port_long;
-
-	/* Get output filename. */
+	sockname = argv[1];
 	filename = argv[2];
 
 	/* Open the output file; can be /dev/null. */
@@ -72,7 +58,7 @@ main(int argc, char ** argv)
 	}
 
 	/* Run the server. */
-	if (simple_server(port, MAX_CONNECTIONS, SHUTDOWN_AFTER,
+	if (simple_server(sockname, MAX_CONNECTIONS, SHUTDOWN_AFTER,
 	    &callback_snc_response, C)) {
 		warn0("simple_server failed");
 		goto err1;

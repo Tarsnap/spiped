@@ -19,7 +19,7 @@ scenario_cmd() {
 	setup_check_variables
 	(
 		( echo "" ; sleep 2 ) |		\
-			 ${nc_client_binary} [127.0.0.1]:${src_port}
+			 ${nc_client_binary} ${src_sock}
 		echo $? > ${c_exitfile}
 	) &
 	sleep 3

@@ -1,11 +1,7 @@
-#include <netinet/in.h>
-
 #include <assert.h>
-#include <inttypes.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "asprintf.h"
 #include "events.h"
 #include "network.h"
 #include "sock.h"
@@ -291,20 +287,13 @@ simple_server_shutdown(void * cookie)
  * after ${shutdown_after} connections have been dropped.
  */
 int
-simple_server(in_port_t port, size_t nconn_max, size_t shutdown_after,
+simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
     int (* callback_nc_message)(void *, uint8_t *, size_t),
     void * caller_cookie)
 {
 	struct accept_state * A;
-	char * addr;
 	struct sock_addr ** sas;
 	int sock;
-
-	/* Create an address string suitable for sock_resolve. */
-	if (asprintf(&addr, "[0.0.0.0]:%" PRIu16, port) == -1) {
-		warn0("Out of memory");
-		goto err0;
-	}
 
 	/* Resolve the address. */
 	if ((sas = sock_resolve(addr)) == NULL) {
@@ -349,7 +338,6 @@ simple_server(in_port_t port, size_t nconn_max, size_t shutdown_after,
 
 	/* Clean up. */
 	sock_addr_freelist(sas);
-	free(addr);
 	simple_server_shutdown(A);
 	events_shutdown();
 
@@ -363,9 +351,8 @@ err3:
 err2:
 	sock_addr_freelist(sas);
 err1:
-	free(addr);
 	events_shutdown();
-err0:
+
 	/* Failure! */
 	return (-1);
 }

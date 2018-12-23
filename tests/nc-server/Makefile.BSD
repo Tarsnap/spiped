@@ -35,7 +35,6 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/network
 
 # Utility functions
 .PATH.c	:	${LIBCPERCIVA_DIR}/util
-SRCS	+=	asprintf.c
 SRCS	+=	monoclock.c
 SRCS	+=	sock.c
 SRCS	+=	warnp.c
