@@ -4,6 +4,7 @@ posix-flags.sh
 *.o
 spipe/spipe
 spiped/spiped
+perftests/send-zeros/send-zeros
 tests/dnsthread-resolve/dnsthread-resolve
 tests/nc-client/nc-client
 tests/nc-server/nc-server

@@ -2,7 +2,8 @@
 
 PROGS=		spiped spipe
 TESTS=		tests/dnsthread-resolve tests/nc-client tests/nc-server	\
-		tests/valgrind
+		tests/valgrind						\
+		perftests/send-zeros
 BINDIR_DEFAULT=	/usr/local/bin
 CFLAGS_DEFAULT=	-O2
 LIBCPERCIVA_DIR=	libcperciva

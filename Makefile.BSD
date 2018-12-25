@@ -1,6 +1,8 @@
 PKG=	spiped
 PROGS=	spiped spipe
-TESTS=	tests/dnsthread-resolve tests/nc-client tests/nc-server tests/valgrind
+TESTS=	tests/dnsthread-resolve tests/nc-client tests/nc-server		\
+	tests/valgrind							\
+	perftests/send-zeros
 SUBST_VERSION_FILES=    spipe/spipe.1 spiped/spiped.1 spipe/main.c spiped/main.c
 PUBLISH= ${PROGS} BUILDING DESIGN.md CHANGELOG COPYRIGHT README.md STYLE Makefile lib libcperciva proto tests
 
