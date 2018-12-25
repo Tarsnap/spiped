@@ -1,0 +1,17 @@
+# Program name.
+PROG	=	recv-zeros
+
+# Don't install it.
+NOINST	= 	1
+
+# Main test code
+SRCS	=	main.c
+
+# Utility functions
+.PATH.c	:	../../libcperciva/util
+SRCS	+=	monoclock.c
+SRCS	+=	sock.c
+SRCS	+=	warnp.c
+IDIRS	+=	-I../../libcperciva/util
+
+.include <bsd.prog.mk>
