@@ -11,3 +11,4 @@ tests/nc-client/nc-client
 tests/nc-server/nc-server
 tests/valgrind/potential-memleaks
 tests-output/
+perftests-output/
