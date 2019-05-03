@@ -11,9 +11,9 @@
 #include "network.h"
 #include "sock.h"
 
+#include "proto_crypt.h"
 #include "proto_handshake.h"
 #include "proto_pipe.h"
-#include "proto_crypt.h"
 
 #include "proto_conn.h"
 
