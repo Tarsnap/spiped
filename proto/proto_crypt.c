@@ -348,7 +348,8 @@ proto_crypt_enc(uint8_t * ibuf, size_t len, uint8_t obuf[PCRYPT_ESZ],
  * is valid, write it into ${obuf} and return the length; otherwise, return
  * -1.
  */
-ssize_t proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
+ssize_t
+proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
     struct proto_keys * k)
 {
 	HMAC_SHA256_CTX ctx;

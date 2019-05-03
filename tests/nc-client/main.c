@@ -25,7 +25,8 @@ struct senddata {
 /* Forward declaration. */
 static int callback_wrote(void *, ssize_t);
 
-static int callback_stopping(void * cookie, ssize_t lenread)
+static int
+callback_stopping(void * cookie, ssize_t lenread)
 {
 	struct senddata * send = (struct senddata *)cookie;
 
