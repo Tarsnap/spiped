@@ -224,7 +224,7 @@ drop(struct conn_list_node * node_ptr)
 	if (node_ptr->network_read_cookie != NULL)
 		network_read_cancel(node_ptr->network_read_cookie);
 
-	/* Close the incoming connection. */       
+	/* Close the incoming connection. */
 	if (close(node_ptr->sock_read) == -1) {
 		warn0("close");
 		goto err0;
