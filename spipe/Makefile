@@ -42,7 +42,7 @@ main.o: main.c ../libcperciva/events/events.h ../libcperciva/util/getopt.h ../li
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c main.c -o main.o
 pushbits.o: pushbits.c ../libcperciva/util/noeintr.h ../libcperciva/util/warnp.h pushbits.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c pushbits.c -o pushbits.o
-proto_conn.o: ../proto/proto_conn.c ../libcperciva/events/events.h ../libcperciva/network/network.h ../libcperciva/util/sock.h ../proto/proto_handshake.h ../proto/proto_pipe.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h ../proto/proto_conn.h
+proto_conn.o: ../proto/proto_conn.c ../libcperciva/events/events.h ../libcperciva/network/network.h ../libcperciva/util/sock.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h ../proto/proto_handshake.h ../proto/proto_pipe.h ../proto/proto_conn.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../proto/proto_conn.c -o proto_conn.o
 proto_crypt.o: ../proto/proto_crypt.c ../libcperciva/crypto/crypto_aes.h ../libcperciva/crypto/crypto_aesctr.h ../libcperciva/crypto/crypto_verify_bytes.h ../libcperciva/alg/sha256.h ../libcperciva/util/sysendian.h ../libcperciva/util/warnp.h ../proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../proto/proto_crypt.c -o proto_crypt.o
