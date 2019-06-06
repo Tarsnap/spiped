@@ -2,7 +2,7 @@
 PROG	=	dnsthread-resolve
 
 # Don't install it.
-NOINST	= 	1
+NOINST	=	1
 
 LDADD_REQ =	-lpthread
 

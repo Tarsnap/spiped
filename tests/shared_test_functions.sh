@@ -140,7 +140,7 @@ ensure_valgrind_suppression() {
 
 		# Run valgrind on the binary, sending it a "\n" so that
 		# a test which uses STDIN will not wait for user input.
-		printf "\n" | (valgrind 				\
+		printf "\n" | (valgrind					\
 		    --leak-check=full --show-leak-kinds=all		\
 		    --gen-suppressions=all				\
 		    --suppressions=${valgrind_suppressions}		\

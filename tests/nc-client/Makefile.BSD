@@ -2,7 +2,7 @@
 PROG	=	nc-client
 
 # Don't install it.
-NOINST	= 	1
+NOINST	=	1
 
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../../libcperciva

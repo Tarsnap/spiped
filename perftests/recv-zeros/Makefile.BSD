@@ -2,7 +2,7 @@
 PROG	=	recv-zeros
 
 # Don't install it.
-NOINST	= 	1
+NOINST	=	1
 
 # Main test code
 SRCS	=	main.c
