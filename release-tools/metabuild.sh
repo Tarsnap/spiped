@@ -6,6 +6,18 @@ CFLAGS_HARDCODED=$3
 
 OUT=Makefile
 
+# Check environment
+if [ -z "$CPP" ]; then
+	echo "Need CPP environment variable."
+	exit 1
+fi
+
+# Check command-line arguments
+if [ "$#" -ne 3 ]; then
+	echo "Usage: $0 DIR MAKEBSD CFLAGS_HARDCODED"
+	exit 1
+fi
+
 # Set up directories
 cd ${D}
 SUBDIR_DEPTH=`${MAKEBSD} -V SUBDIR_DEPTH`
