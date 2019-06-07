@@ -17,7 +17,7 @@ CFLAGS_HARDCODED=	-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CON
 # blank (and thus does not require any special CFLAGS to compile).
 .for D in ${PROGS} ${TESTS}
 ${D}/Makefile::
-	CC="${CC}" CPP="${CPP}" ./release-tools/metabuild.sh	\
+	CPP="${CPP}" ./release-tools/metabuild.sh	\
 	    "${D}" "${MAKEBSD}"	"${CFLAGS_HARDCODED}"
 .endfor
 
