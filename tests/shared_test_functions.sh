@@ -210,6 +210,23 @@ get_val_logfile() {
 	echo "${val_basename}-${num}.log"
 }
 
+## expected_exitcode (expected, exitcode):
+# If ${exitcode} matches the ${expected} value, return 0.  If the exitcode is
+# ${valgrind_exit_code}, return that.  Otherwise, return 1 to indicate
+# failure.
+expected_exitcode() {
+	expected=$1
+	exitcode=$2
+
+	if [ "${exitcode}" -eq "${expected}" ]; then
+		echo "0"
+	elif [ "${exitcode}" -eq "${valgrind_exit_code}" ]; then
+		echo "${valgrind_exit_code}"
+	else
+		echo "1"
+	fi
+}
+
 ## notify_success_or_fail (log_basename, val_log_basename):
 # Examine all "exit code" files beginning with ${log_basename} and
 # print "SUCCESS!" or "FAILED!" as appropriate.  If the test failed
