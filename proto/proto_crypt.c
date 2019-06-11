@@ -121,7 +121,7 @@ err0:
 
 /**
  * proto_crypt_dhmac(K, nonce_l, nonce_r, dhmac_l, dhmac_r, decr):
- * Using the key file hash ${K}, and the local and remote nonces ${nonce_l}
+ * Using the protocol secret ${K}, and the local and remote nonces ${nonce_l}
  * and ${nonce_r}, compute the local and remote diffie-hellman parameter MAC
  * keys ${dhmac_l} and ${dhmac_r}.  If ${decr} is non-zero, "local" == "S"
  * and "remote" == "C"; otherwise the assignments are opposite.
