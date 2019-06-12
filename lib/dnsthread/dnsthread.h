@@ -18,10 +18,11 @@ DNSTHREAD dnsthread_spawn(void);
  * dnsthread_resolveone(T, addr, callback, cookie):
  * Using the thread for which ${T} was returned by dnsthread_spawn, resolve
  * the address ${addr}, which must be in one of the forms accepted by the
- * sock_resolve function.  If ${T} is already resolving an address, fail with
- * EALREADY.  Upon completion, invoke ${callback}(${cookie}, sas), where
- * ${sas} is a NULL-terminated array of pointers to sock_addr structures or
- * NULL on resolution failure.
+ * sock_resolve function.  If ${T} is already resolving an address, do not
+ * resolve this address and instead return with errno == EALREADY.  Upon
+ * completion, invoke ${callback}(${cookie}, sas), where ${sas} is a
+ * NULL-terminated array of pointers to sock_addr structures or NULL on
+ * resolution failure.
  */
 int dnsthread_resolveone(DNSTHREAD, const char *,
     int (*)(void *, struct sock_addr **), void *);

@@ -72,7 +72,6 @@ handshakefail(struct handshake_cookie * H)
  * needed for the reverse direction; or f = r = NULL if the handshake failed.
  * Return a cookie which can be passed to proto_handshake_cancel to cancel the
  * handshake.
-
  */
 void *
 proto_handshake(int s, int decr, int nopfs, int requirepfs,

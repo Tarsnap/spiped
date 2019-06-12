@@ -280,9 +280,9 @@ simple_server_shutdown(void * cookie)
 }
 
 /**
- * simple_server(port, nconn_max, shutdown_after, callback, caller_cookie):
- * Run a server which accepts up to ${nconn_max} connections to port ${port}.
- * After receiving a message, call ${callback} and pass it the
+ * simple_server(addr, nconn_max, shutdown_after, callback, caller_cookie):
+ * Run a server which accepts up to ${nconn_max} connections to socket
+ * ${addr}.  After receiving a message, call ${callback} and pass it the
  * ${caller_cookie}, along with the message.  Automatically shuts itself down
  * after ${shutdown_after} connections have been dropped.
  */
