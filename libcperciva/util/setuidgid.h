@@ -1,5 +1,5 @@
-#ifndef SETUIDGID_H
-#define SETUIDGID_H
+#ifndef _SETUIDGID_H_
+#define _SETUIDGID_H_
 
 enum {
 	SETUIDGID_SGROUP_IGNORE = 0,
@@ -26,4 +26,4 @@ enum {
  */
 int setuidgid(const char *, int);
 
-#endif
+#endif /* !_SETUIDGID_H_ */
