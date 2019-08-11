@@ -30,4 +30,4 @@ void * proto_conn_create(int, struct sock_addr **, int, int, int, int,
  */
 int proto_conn_drop(void * conn_cookie);
 
-#endif /* !_CONN_H_ */
+#endif /* !_PROTO_CONN_H_ */

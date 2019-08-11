@@ -1,5 +1,5 @@
-#ifndef _PCRYPT_H_
-#define _PCRYPT_H_
+#ifndef _PROTO_CRYPT_H_
+#define _PROTO_CRYPT_H_
 
 #include <stdint.h>
 #include <unistd.h>
@@ -102,4 +102,4 @@ ssize_t proto_crypt_dec(uint8_t[PCRYPT_ESZ], uint8_t *, struct proto_keys *);
  */
 void proto_crypt_free(struct proto_keys *);
 
-#endif /* !_PCRYPT_H_ */
+#endif /* !_PROTO_CRYPT_H_ */
