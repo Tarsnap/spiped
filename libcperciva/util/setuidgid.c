@@ -63,7 +63,7 @@ static int set_user(const char *);
 static int string_extract_user_group(const char *, char **, char **);
 
 /**
- * setgroups_none():
+ * setgroups_none(void):
  * Attempt to leave all supplementary groups.  If we do not know how to do this
  * on the platform, return 0 anyway.
  */
