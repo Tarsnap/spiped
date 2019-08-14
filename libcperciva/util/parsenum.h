@@ -62,7 +62,7 @@ _Pragma("clang diagnostic pop")
 			    (double)-INFINITY, (double)INFINITY)) :	\
 		(((*(x)) = -1) > 0) ?					\
 			((*(x)) = parsenum_unsigned((s), 0, (*(x)),	\
-			    (*(x)))) :					\
+			    (*(x)), 0)) :				\
 			(ASSERT_FAIL("PARSENUM applied to signed integer without specified bounds"), 1),	\
 		errno != 0						\
 		PARSENUM_EPILOGUE					\
@@ -77,10 +77,10 @@ _Pragma("clang diagnostic pop")
 		(((*(x)) = -1) <= 0) ?					\
 			((*(x)) = parsenum_signed((s),			\
 			    (*(x) <= 0) ? (min) : 0,			\
-			    (*(x) <= 0) ? (max) : 0)) :			\
+			    (*(x) <= 0) ? (max) : 0, 0)) :		\
 			(((*(x)) = parsenum_unsigned((s),		\
 			    (min) <= 0 ? 0 : (min),			\
-				(uintmax_t)(max), *(x))),		\
+				(uintmax_t)(max), *(x), 0)),		\
 			((((max) < 0) && (errno == 0)) ?		\
 			    (errno = ERANGE) : 0)),			\
 		errno != 0						\
@@ -110,12 +110,12 @@ parsenum_float(const char * s, double min, double max)
 }
 
 static inline intmax_t
-parsenum_signed(const char * s, intmax_t min, intmax_t max)
+parsenum_signed(const char * s, intmax_t min, intmax_t max, int base)
 {
 	char * eptr;
 	intmax_t val;
 
-	val = strtoimax(s, &eptr, 0);
+	val = strtoimax(s, &eptr, base);
 	if ((eptr == s) || (*eptr != '\0'))
 		errno = EINVAL;
 	else if ((val < min) || (val > max)) {
@@ -127,12 +127,12 @@ parsenum_signed(const char * s, intmax_t min, intmax_t max)
 
 static inline uintmax_t
 parsenum_unsigned(const char * s, uintmax_t min, uintmax_t max,
-    uintmax_t typemax)
+    uintmax_t typemax, int base)
 {
 	char * eptr;
 	uintmax_t val;
 
-	val = strtoumax(s, &eptr, 0);
+	val = strtoumax(s, &eptr, base);
 	if ((eptr == s) || (*eptr != '\0'))
 		errno = EINVAL;
 	else if ((val < min) || (val > max) || (val > typemax))
