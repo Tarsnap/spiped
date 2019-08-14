@@ -5,6 +5,15 @@
 struct proto_secret;
 struct sock_addr;
 
+/* Reason why the connection was dropped. */
+enum {
+	PROTO_CONN_CLOSED = 0,		/* Normal exit */
+	PROTO_CONN_CANCELLED,		/* Exit triggered by client code */
+	PROTO_CONN_CONNECT_FAILED,	/* Could not connect */
+	PROTO_CONN_HANDSHAKE_FAILED,	/* Handshake failed */
+	PROTO_CONN_ERROR,		/* Unspecified reason */
+};
+
 /**
  * proto_conn_create(s, sas, decr, nopfs, requirepfs, nokeepalive, K, timeo,
  *     callback_dead, cookie):
@@ -21,13 +30,13 @@ struct sock_addr;
  * proto_conn_drop.
  */
 void * proto_conn_create(int, struct sock_addr **, int, int, int, int,
-    const struct proto_secret *, double, int (*)(void *), void *);
+    const struct proto_secret *, double, int (*)(void *, int), void *);
 
 /**
- * proto_conn_drop(conn_cookie):
- * Drop connection and frees memory associated with ${conn_cookie}.  Return
- * success or failure.
+ * proto_conn_drop(conn_cookie, reason):
+ * Drop connection and frees memory associated with ${conn_cookie}, due to
+ * ${reason}.  Return success or failure.
  */
-int proto_conn_drop(void *);
+int proto_conn_drop(void *, int);
 
 #endif /* !_PROTO_CONN_H_ */

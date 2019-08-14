@@ -18,7 +18,7 @@
 #include "proto_conn.h"
 
 struct conn_state {
-	int (* callback_dead)(void *);
+	int (* callback_dead)(void *, int);
 	void * cookie;
 	struct sock_addr ** sas;
 	int decr;
@@ -136,12 +136,12 @@ err0:
 }
 
 /**
- * proto_conn_drop(conn_cookie):
- * Drop connection and frees memory associated with ${conn_cookie}.  Return
- * success or failure.
+ * proto_conn_drop(conn_cookie, reason):
+ * Drop connection and frees memory associated with ${conn_cookie}, due to
+ * ${reason}.  Return success or failure.
  */
 int
-proto_conn_drop(void * conn_cookie)
+proto_conn_drop(void * conn_cookie, int reason)
 {
 	struct conn_state * C = conn_cookie;
 	int rc;
@@ -181,7 +181,7 @@ proto_conn_drop(void * conn_cookie)
 		proto_pipe_cancel(C->pipe_r);
 
 	/* Notify the upstream that we've dropped a connection. */
-	rc = (C->callback_dead)(C->cookie);
+	rc = (C->callback_dead)(C->cookie, reason);
 
 	/* Free the connection cookie. */
 	free(C);
@@ -208,7 +208,7 @@ proto_conn_drop(void * conn_cookie)
 void *
 proto_conn_create(int s, struct sock_addr ** sas, int decr, int nopfs,
     int requirepfs, int nokeepalive, const struct proto_secret * K,
-    double timeo, int (* callback_dead)(void *), void * cookie)
+    double timeo, int (* callback_dead)(void *, int), void * cookie)
 {
 	struct conn_state * C;
 
@@ -283,7 +283,7 @@ callback_connect_done(void * cookie, int t)
 
 	/* Did we manage to connect? */
 	if ((C->t = t) == -1)
-		return (proto_conn_drop(C));
+		return (proto_conn_drop(C, PROTO_CONN_CONNECT_FAILED));
 
 	/* If we're encrypting, start the handshake. */
 	if (!C->decr) {
@@ -301,7 +301,7 @@ callback_connect_done(void * cookie, int t)
 	return (0);
 
 err1:
-	proto_conn_drop(C);
+	proto_conn_drop(C, PROTO_CONN_ERROR);
 
 	/* Failure! */
 	return (-1);
@@ -324,7 +324,7 @@ callback_connect_timeout(void * cookie)
 	 */
 
 	/* Drop the connection. */
-	return (proto_conn_drop(C));
+	return (proto_conn_drop(C, PROTO_CONN_ERROR));
 }
 
 /* We have performed the protocol handshake. */
@@ -343,7 +343,7 @@ callback_handshake_done(void * cookie, struct proto_keys * f,
 
 	/* If the protocol handshake failed, drop the connection. */
 	if ((f == NULL) && (r == NULL))
-		return (proto_conn_drop(C));
+		return (proto_conn_drop(C, PROTO_CONN_HANDSHAKE_FAILED));
 
 	/* We should have two keys. */
 	assert(f != NULL);
@@ -363,7 +363,7 @@ callback_handshake_done(void * cookie, struct proto_keys * f,
 	return (0);
 
 err1:
-	proto_conn_drop(C);
+	proto_conn_drop(C, PROTO_CONN_ERROR);
 
 	/* Failure! */
 	return (-1);
@@ -379,7 +379,7 @@ callback_handshake_timeout(void * cookie)
 	C->handshake_timeout_cookie = NULL;
 
 	/* Drop the connection. */
-	return (proto_conn_drop(C));
+	return (proto_conn_drop(C, PROTO_CONN_ERROR));
 }
 
 /* The status of one of the directions has changed. */
@@ -390,11 +390,11 @@ callback_pipestatus(void * cookie)
 
 	/* If we have an error in either direction, kill the connection. */
 	if ((C->stat_f == -1) || (C->stat_r == -1))
-		return (proto_conn_drop(C));
+		return (proto_conn_drop(C, PROTO_CONN_ERROR));
 
 	/* If both directions have been shut down, kill the connection. */
 	if ((C->stat_f == 0) && (C->stat_r == 0))
-		return (proto_conn_drop(C));
+		return (proto_conn_drop(C, PROTO_CONN_CLOSED));
 
 	/* Nothing to do. */
 	return (0);

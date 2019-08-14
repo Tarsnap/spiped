@@ -17,9 +17,11 @@
 #include "pushbits.h"
 
 static int
-callback_conndied(void * cookie)
+callback_conndied(void * cookie, int reason)
 {
 	int * conndone = cookie;
+
+	(void)reason; /* UNUSED */
 
 	/* Quit event loop. */
 	*conndone = 1;
@@ -198,7 +200,7 @@ main(int argc, char * argv[])
 	exit(0);
 
 err3:
-	proto_conn_drop(conn_cookie);
+	proto_conn_drop(conn_cookie, PROTO_CONN_CANCELLED);
 	sas_t = NULL;
 	events_shutdown();
 err2:
