@@ -16,12 +16,30 @@
 
 #include "pushbits.h"
 
+static int connection_error = 0;
+
 static int
 callback_conndied(void * cookie, int reason)
 {
 	int * conndone = cookie;
 
-	(void)reason; /* UNUSED */
+	/* Check reason. */
+	switch (reason) {
+	case PROTO_CONN_CLOSED:
+	case PROTO_CONN_CANCELLED:
+		break;
+	case PROTO_CONN_CONNECT_FAILED:
+		warn0("Could not connect");
+		connection_error = 1;
+		break;
+	case PROTO_CONN_HANDSHAKE_FAILED:
+		warn0("Handshake failed");
+		connection_error = 1;
+		break;
+	default:
+		warn0("Connection error");
+		connection_error = 1;
+	}
 
 	/* Quit event loop. */
 	*conndone = 1;
@@ -195,6 +213,10 @@ main(int argc, char * argv[])
 	/* Clean up. */
 	events_shutdown();
 	free(K);
+
+	/* Handle a connection error. */
+	if (connection_error)
+		goto err0;
 
 	/* Success! */
 	exit(0);
