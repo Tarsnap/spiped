@@ -106,10 +106,12 @@ doaccept(struct accept_state * A)
 
 /* A connection has closed.  Accept more if necessary. */
 static int
-callback_conndied(void * cookie)
+callback_conndied(void * cookie, int reason)
 {
 	struct conn_list_node * node_ptr = cookie;
 	struct accept_state * A = node_ptr->A;
+
+	(void)reason; /* UNUSED */
 
 	/* We should always have a non-empty list of conn_cookies. */
 	assert(A->conn_cookies != NULL);
@@ -303,7 +305,8 @@ dispatch_shutdown(void * dispatch_cookie)
 	 * the list of conn_cookies.
 	 */
 	while (A->conn_cookies != NULL)
-		proto_conn_drop(A->conn_cookies->conn_cookie);
+		proto_conn_drop(A->conn_cookies->conn_cookie,
+		    PROTO_CONN_CANCELLED);
 
 	if (A->accept_cookie != NULL)
 		network_accept_cancel(A->accept_cookie);
