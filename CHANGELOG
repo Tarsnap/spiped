@@ -1,3 +1,9 @@
+spiped-1.6.1
+* New option -u username:groupname (spiped): change the user and/or group
+  ownership of the process.
+* Use RDRAND as an additional source of entropy on CPUs which support it.
+* Use SHANI instructions on CPUs which support them.
+* Warn about failed connections and exit with non-zero status (spipe).
 spiped-1.6.0
 * The -n option (spiped) is no longer limited to a maximum limit of
   500 simultaneous connections.
