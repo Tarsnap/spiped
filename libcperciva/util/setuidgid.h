@@ -1,6 +1,7 @@
 #ifndef _SETUIDGID_H_
 #define _SETUIDGID_H_
 
+/* How should we treat supplementary groups? */
 enum {
 	SETUIDGID_SGROUP_IGNORE = 0,
 	SETUIDGID_SGROUP_LEAVE_WARN,
