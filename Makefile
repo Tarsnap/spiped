@@ -22,9 +22,9 @@ all:	cpusupport-config.h posix-flags.sh
 
 # For "loop-back" building of a subdirectory
 buildsubdir: cpusupport-config.h posix-flags.sh
-	. ./cpusupport-config.h; \
-	. ./posix-flags.sh; \
-	export HAVE_BUILD_FLAGS=1; \
+	. ./posix-flags.sh;				\
+	. ./cpusupport-config.h;			\
+	export HAVE_BUILD_FLAGS=1;			\
 	cd ${BUILD_SUBDIR} && ${MAKE} ${BUILD_TARGET}
 
 posix-flags.sh:
