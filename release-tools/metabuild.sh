@@ -49,7 +49,8 @@ add_object_files() {
 	    sed -e 's| cpusupport-config.h||' |			\
 	    tr ' ' '\n' |					\
 	    sed -E 's/.c$/.o/' )
-	CPP_ARGS_FIXED="-std=c99 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -I${SUBDIR_DEPTH} -MM"
+	CPP_CONFIG="-DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\""
+	CPP_ARGS_FIXED="-std=c99 ${CPP_CONFIG} -I${SUBDIR_DEPTH} -MM"
 	OUT_CC_BEGIN="\${CC} \${CFLAGS_POSIX} ${CFLAGS_HARDCODED}"
 	OUT_CC_MID="-I${SUBDIR_DEPTH} \${IDIRS} \${CPPFLAGS} \${CFLAGS}"
 
