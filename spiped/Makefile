@@ -80,7 +80,7 @@ noeintr.o: ../libcperciva/util/noeintr.c ../libcperciva/util/noeintr.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/util/noeintr.c -o noeintr.o
 setuidgid.o: ../libcperciva/util/setuidgid.c ../libcperciva/util/parsenum.h ../libcperciva/util/warnp.h ../libcperciva/util/setuidgid.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/util/setuidgid.c -o setuidgid.o
-sock.o: ../libcperciva/util/sock.c ../libcperciva/util/imalloc.h ../libcperciva/util/warnp.h ../libcperciva/util/sock.h ../libcperciva/util/sock_internal.h
+sock.o: ../libcperciva/util/sock.c ../libcperciva/util/imalloc.h ../libcperciva/util/parsenum.h ../libcperciva/util/warnp.h ../libcperciva/util/sock.h ../libcperciva/util/sock_internal.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/util/sock.c -o sock.o
 sock_util.o: ../libcperciva/util/sock_util.c ../libcperciva/util/asprintf.h ../libcperciva/util/sock.h ../libcperciva/util/sock_internal.h ../libcperciva/util/sock_util.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/util/sock_util.c -o sock_util.o
