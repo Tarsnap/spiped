@@ -25,7 +25,7 @@ main.o: main.c ../../libcperciva/util/parsenum.h ../../libcperciva/util/sock.h .
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c main.c -o main.o
 monoclock.o: ../../libcperciva/util/monoclock.c ../../libcperciva/util/warnp.h ../../libcperciva/util/monoclock.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../../libcperciva/util/monoclock.c -o monoclock.o
-sock.o: ../../libcperciva/util/sock.c ../../libcperciva/util/imalloc.h ../../libcperciva/util/warnp.h ../../libcperciva/util/sock.h ../../libcperciva/util/sock_internal.h
+sock.o: ../../libcperciva/util/sock.c ../../libcperciva/util/imalloc.h ../../libcperciva/util/parsenum.h ../../libcperciva/util/warnp.h ../../libcperciva/util/sock.h ../../libcperciva/util/sock_internal.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../../libcperciva/util/sock.c -o sock.o
 warnp.o: ../../libcperciva/util/warnp.c ../../libcperciva/util/warnp.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../../libcperciva/util/warnp.c -o warnp.o

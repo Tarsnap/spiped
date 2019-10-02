@@ -85,7 +85,9 @@ int events_timer_reset(void *);
  * be run.  If any event function returns a non-zero result, no further
  * events will be run and said non-zero result will be returned; on error,
  * -1 will be returned.  May be interrupted by events_interrupt, in which case
- * 0 will be returned.
+ * 0 will be returned.  If there are runnable events, events_run is guaranteed
+ * to run at least one; but it may return while there are still more runnable
+ * events.
  */
 int events_run(void);
 
@@ -107,8 +109,7 @@ void events_interrupt(void);
 
 /**
  * events_shutdown(void):
- * Clean up and free memory.  This call is not necessary on program exit and
- * is only expected to be useful when checking for memory leaks.
+ * Deprecated function; does nothing.
  */
 void events_shutdown(void);
 
