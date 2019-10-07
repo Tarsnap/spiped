@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e -o nounset
+
 D=$1
 MAKEBSD=$2
 CFLAGS_HARDCODED=$3
@@ -35,7 +37,7 @@ copyvar() {
 }
 
 add_makefile_prog() {
-	if [ `${MAKEBSD} -V NOINST` ]; then
+	if [ "$(${MAKEBSD} -V NOINST)" = "1" ]; then
 		cat ${SUBDIR_DEPTH}/Makefile.prog |		\
 		    perl -0pe 's/(install:.*?)\n\n//s' >> $OUT
 	else
