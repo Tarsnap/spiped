@@ -12,6 +12,6 @@
  * after ${shutdown_after} connections have been dropped.
  */
 int simple_server(const char *, size_t, size_t, int (*)(void *, uint8_t *,
-    size_t), void *);
+    size_t, int), void *);
 
 #endif /* !_SIMPLE_SERVER_H_ */

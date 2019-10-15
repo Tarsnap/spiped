@@ -15,9 +15,11 @@ struct nc_cookie {
 
 /* A client sent a message. */
 static int
-callback_snc_response(void * cookie, uint8_t * buf, size_t buflen)
+callback_snc_response(void * cookie, uint8_t * buf, size_t buflen, int sock)
 {
 	struct nc_cookie * C = cookie;
+
+	(void)sock; /* UNUSED */
 
 	/* Write buffer to the previously-opened file. */
 	if (fwrite(buf, sizeof(uint8_t), buflen, C->out) != buflen) {
