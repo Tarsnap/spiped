@@ -333,7 +333,7 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	/* Loop until we die. */
 	if (events_spin(&A->conndone)) {
 		warnp("Error running event loop");
-		goto err4;
+		goto err5;
 	}
 
 	/* Clean up. */
@@ -344,6 +344,9 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	/* Success! */
 	return (0);
 
+err5:
+	if (A->accept_cookie != NULL)
+		network_accept_cancel(A->accept_cookie);
 err4:
 	free(A);
 err3:
