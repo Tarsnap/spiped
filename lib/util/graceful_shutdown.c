@@ -1,5 +1,6 @@
 #include <signal.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include "events.h"
 #include "warnp.h"
@@ -10,7 +11,7 @@
 static int (* begin_shutdown)(void *);
 static void (* sighandler_sigterm_orig)(int);
 static void * caller_cookie;
-static void * timer_cookie;
+static void * timer_cookie = NULL;
 
 /* Flag to show that SIGTERM was received. */
 static volatile sig_atomic_t should_shutdown = 0;
@@ -22,6 +23,16 @@ graceful_shutdown_handler(int signo)
 
 	(void)signo; /* UNUSED */
 	should_shutdown = 1;
+}
+
+static void
+graceful_shutdown_atexit(void)
+{
+
+	if (timer_cookie != NULL) {
+		events_timer_cancel(timer_cookie);
+		timer_cookie = NULL;
+	}
 }
 
 /* Requests a graceful shutdown of the caller via the cookie info. */
@@ -81,6 +92,10 @@ graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
 		warnp("signal");
 		goto err0;
 	}
+
+	/* Clean up the timer cookie at exit. */
+	if (atexit(graceful_shutdown_atexit))
+		goto err0;
 
 	/* Periodically check whether a signal was received. */
 	if ((timer_cookie = events_timer_register_double(
