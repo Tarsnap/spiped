@@ -1,7 +1,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
 
+#include "parsenum.h"
 #include "warnp.h"
 
 #include "simple_server.h"
@@ -11,11 +14,59 @@
 
 struct nc_cookie {
 	FILE * out;
+	size_t bps;
 };
+
+/* Wait duration can be interrupted by signals. */
+static int
+wait_ms(size_t msec)
+{
+	struct timespec ts;
+
+	ts.tv_sec = msec / 1000;
+	ts.tv_nsec = (msec % 1000) * 1000000;
+	nanosleep(&ts, NULL);
+
+	return (0);
+}
+
+/* Send a message, limited to bytes per second.  Send in bursts of 10ms. */
+static int
+write_bps(int sock, uint8_t * buf, size_t buflen, size_t bps)
+{
+	size_t remaining = buflen;
+	size_t bp_cs = bps / 100;	/* bytes per centi-second. */
+	size_t to_send;
+
+	do {
+		/* How much data should we send? */
+		if (remaining >= bp_cs)
+			to_send = bp_cs;
+		else
+			to_send = remaining;
+
+		/* Send a burst. */
+		if (write(sock, buf, to_send) == -1) {
+			warnp("write");
+			goto err0;
+		}
+
+		/* Record effect of sending. */
+		remaining -= to_send;
+		buf += to_send;
+
+		/* Wait 10ms. */
+		wait_ms(10);
+	} while (remaining > 0);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
 
 /* A client sent a message. */
 static int
-callback_snc_response(void * cookie, uint8_t * buf, size_t buflen)
+callback_snc_response(void * cookie, uint8_t * buf, size_t buflen, int sock)
 {
 	struct nc_cookie * C = cookie;
 
@@ -24,6 +75,10 @@ callback_snc_response(void * cookie, uint8_t * buf, size_t buflen)
 		warnp("fwrite");
 		goto err0;
 	}
+
+	/* Echo to the client (if applicable).  */
+	if ((C->bps > 0) && (write_bps(sock, buf, buflen, C->bps)))
+		goto err0;
 
 	/* Success! */
 	return (0);
@@ -45,11 +100,24 @@ main(int argc, char ** argv)
 
 	/* Parse command-line arguments. */
 	if (argc < 3) {
-		fprintf(stderr, "usage: %s PORT FILENAME\n", argv[0]);
+		fprintf(stderr, "usage: %s PORT FILENAME [ECHO_BPS]\n",
+		    argv[0]);
 		goto err0;
 	}
 	sockname = argv[1];
 	filename = argv[2];
+	if (argc > 3) {
+		/* Allow up to 1 MB per second of echoing. */
+		if (PARSENUM(&C->bps, argv[3], 0, 1000000)) {
+			warnp("parsenum");
+			goto err0;
+		}
+		if ((C->bps % 100) != 0) {
+			warn0("BPS must be a multiple of 100");
+			goto err0;
+		}
+	} else
+		C->bps = 0;
 
 	/* Open the output file; can be /dev/null. */
 	if ((C->out = fopen(filename, "wb")) == NULL) {

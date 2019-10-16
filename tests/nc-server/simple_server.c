@@ -22,7 +22,7 @@ struct accept_state {
 	void * accept_cookie;
 	struct conn_list_node * conn_cookies;
 	void * caller_cookie;
-	int (* callback_nc_message)(void *, uint8_t *, size_t);
+	int (* callback_nc_message)(void *, uint8_t *, size_t, int);
 };
 
 /* Doubly linked list. */
@@ -180,6 +180,7 @@ callback_read(void * cookie, ssize_t lenread)
 {
 	struct conn_list_node * R = cookie;
 	struct accept_state * A = R->A;
+	int sock = R->sock_read;
 
 	/* Cookie is no longer valid. */
 	R->network_read_cookie = NULL;
@@ -188,7 +189,7 @@ callback_read(void * cookie, ssize_t lenread)
 	if (lenread > 0) {
 		/* Handle it with the parent code. */
 		A->callback_nc_message(A->caller_cookie, R->buf,
-		    (size_t)lenread);
+		    (size_t)lenread, sock);
 
 		/* Try to read some more data. */
 		if ((R->network_read_cookie = network_read(R->sock_read,
@@ -288,7 +289,7 @@ simple_server_shutdown(void * cookie)
  */
 int
 simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
-    int (* callback_nc_message)(void *, uint8_t *, size_t),
+    int (* callback_nc_message)(void *, uint8_t *, size_t, int),
     void * caller_cookie)
 {
 	struct accept_state * A;
