@@ -1,6 +1,8 @@
 language: c
-sudo: false
-dist: trusty
+# Ubuntu xenial 16.04 comes with valgrind-3.11, which can't handle the
+# RDRAND instructions and aborts with "Illegal instruction".  This is not a
+# problem with Ubuntu bionic 18.04, which has valgrind-3.13.
+dist: bionic
 matrix:
   include:
     - os: linux
