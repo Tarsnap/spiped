@@ -6,6 +6,7 @@
 
 #include "crypto_dh.h"
 
+/* Opaque structures. */
 struct proto_keys;
 struct proto_secret;
 

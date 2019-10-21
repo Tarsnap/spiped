@@ -1,6 +1,7 @@
 #ifndef _PROTO_PIPE_H_
 #define _PROTO_PIPE_H_
 
+/* Opaque structure. */
 struct proto_keys;
 
 /**
