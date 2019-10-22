@@ -70,14 +70,14 @@ workthread(void * cookie)
 }
 
 /**
- * pushbits(in, out):
- * Create a thread which copies data from ${in} to ${out}.
+ * pushbits(in, out, thr):
+ * Create a thread which copies data from ${in} to ${out} and
+ * store the thread ID in ${thr}.
  */
 int
-pushbits(int in, int out)
+pushbits(int in, int out, pthread_t * thr)
 {
 	struct push * P;
-	pthread_t thr;
 	int rc;
 
 	/* Allocate structure. */
@@ -87,7 +87,7 @@ pushbits(int in, int out)
 	P->out = out;
 
 	/* Create thread. */
-	if ((rc = pthread_create(&thr, NULL, workthread, P)) != 0) {
+	if ((rc = pthread_create(thr, NULL, workthread, P)) != 0) {
 		warn0("pthread_create: %s", strerror(rc));
 		goto err1;
 	}
