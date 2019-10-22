@@ -49,7 +49,7 @@ USE_VALGRIND=${USE_VALGRIND:-0}
 valgrind_exit_code=108
 
 # Set ${bindir} to $1 if given, else use "." for in-tree builds.
-bindir=$(CDPATH= cd -- "$(dirname -- "${1-.}")" && pwd -P)
+bindir=$(CDPATH='' cd -- "$(dirname -- "${1-.}")" && pwd -P)
 
 
 ## prepare_directories():
