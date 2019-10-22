@@ -79,9 +79,6 @@ main(int argc, char ** argv)
 		goto err0;
 	}
 
-	/* Clean up. */
-	events_shutdown();
-
 	/* Success! */
 	exit(0);
 

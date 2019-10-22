@@ -320,7 +320,7 @@ main(int argc, char * argv[])
 	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		goto err5;
+		goto err4;
 	}
 
 	/* dispatch is now maintaining sas_t. */
@@ -330,7 +330,7 @@ main(int argc, char * argv[])
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
 	    dispatch_cookie)) {
 		warn0("Failed to start graceful_shutdown timer");
-		goto err6;
+		goto err5;
 	}
 
 	/*
@@ -339,14 +339,11 @@ main(int argc, char * argv[])
 	 */
 	if (events_spin(&conndone)) {
 		warnp("Error running event loop");
-		goto err6;
+		goto err5;
 	}
 
 	/* Stop accepting connections and shut down the dispatcher. */
 	dispatch_shutdown(dispatch_cookie);
-
-	/* Shut down the events system. */
-	events_shutdown();
 
 	/* Free the protocol secret structure. */
 	free(K);
@@ -360,10 +357,8 @@ main(int argc, char * argv[])
 	/* Success! */
 	exit(0);
 
-err6:
-	dispatch_shutdown(dispatch_cookie);
 err5:
-	events_shutdown();
+	dispatch_shutdown(dispatch_cookie);
 err4:
 	free(K);
 err3:
