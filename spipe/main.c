@@ -1,6 +1,7 @@
 #include <sys/socket.h>
 
 #include <math.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -85,6 +86,7 @@ main(int argc, char * argv[])
 	int s[2];
 	int conndone = 0;
 	void * conn_cookie;
+	pthread_t threads[2];
 
 	WARNP_INIT;
 
@@ -193,13 +195,13 @@ main(int argc, char * argv[])
 	}
 
 	/* Push bits from stdin into the socket. */
-	if (pushbits(STDIN_FILENO, s[0])) {
+	if (pushbits(STDIN_FILENO, s[0], &threads[0])) {
 		warnp("Could not push bits");
 		goto err3;
 	}
 
 	/* Push bits from the socket to stdout. */
-	if (pushbits(s[0], STDOUT_FILENO)) {
+	if (pushbits(s[0], STDOUT_FILENO, &threads[1])) {
 		warnp("Could not push bits");
 		goto err3;
 	}

@@ -9,5 +9,6 @@ perftests/recv-zeros/recv-zeros
 tests/dnsthread-resolve/dnsthread-resolve
 tests/nc-client/nc-client
 tests/nc-server/nc-server
+tests/pushbits/test_pushbits
 tests/valgrind/potential-memleaks
 tests-output/
