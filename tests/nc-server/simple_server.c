@@ -299,19 +299,19 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	/* Resolve the address. */
 	if ((sas = sock_resolve(addr)) == NULL) {
 		warn0("sock_resolve");
-		goto err1;
+		goto err0;
 	}
 
 	/* Create a socket, bind it, mark it as listening. */
 	if ((sock = sock_listener(sas[0])) == -1) {
 		warn0("sock_listener");
-		goto err2;
+		goto err1;
 	}
 
 	/* Bake a cookie for the server. */
 	if ((A = malloc(sizeof(struct accept_state))) == NULL) {
 		warnp("Out of memory");
-		goto err3;
+		goto err2;
 	}
 	A->s = sock;
 	A->conndone = 0;
@@ -328,35 +328,32 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	/* Accept a connection. */
 	if (doaccept(A)) {
 		warn0("doaccept");
-		goto err4;
+		goto err3;
 	}
 
 	/* Loop until we die. */
 	if (events_spin(&A->conndone)) {
 		warnp("Error running event loop");
-		goto err5;
+		goto err4;
 	}
 
 	/* Clean up. */
 	sock_addr_freelist(sas);
 	simple_server_shutdown(A);
-	events_shutdown();
 
 	/* Success! */
 	return (0);
 
-err5:
+err4:
 	if (A->accept_cookie != NULL)
 		network_accept_cancel(A->accept_cookie);
-err4:
-	free(A);
 err3:
-	close(sock);
+	free(A);
 err2:
-	sock_addr_freelist(sas);
+	close(sock);
 err1:
-	events_shutdown();
-
+	sock_addr_freelist(sas);
+err0:
 	/* Failure! */
 	return (-1);
 }

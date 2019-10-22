@@ -211,7 +211,6 @@ main(int argc, char ** argv)
 	}
 
 	/* Clean up. */
-	events_shutdown();
 	sock_addr_freelist(sas_t);
 	free(send->buffer);
 
@@ -225,7 +224,6 @@ err3:
 		network_write_cancel(send->write_cookie);
 	if (send->read_cookie != NULL)
 		network_read_cancel(send->read_cookie);
-	events_shutdown();
 err2:
 	sock_addr_freelist(sas_t);
 err1:

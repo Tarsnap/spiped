@@ -213,7 +213,6 @@ main(int argc, char * argv[])
 	}
 
 	/* Clean up. */
-	events_shutdown();
 	free(K);
 
 	/* Handle a connection error. */
@@ -226,7 +225,6 @@ main(int argc, char * argv[])
 err3:
 	proto_conn_drop(conn_cookie, PROTO_CONN_CANCELLED);
 	sas_t = NULL;
-	events_shutdown();
 err2:
 	free(K);
 err1:
