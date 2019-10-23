@@ -44,11 +44,17 @@ setup_spiped_decryption_server () {
 	nc_bps=${4:-0}
 	check_leftover_servers
 
+	# We need to set this up here so that ${c_valgrind_cmd} is set.
+	setup_check_variables
+
 	# Select system or compiled spiped.
 	if [ "${use_system_spiped}" -gt 0 ]; then
 		this_spiped_cmd=${system_spiped_binary}
+		# Disable valgrind for system spiped
+		this_c_valgrind_cmd=""
 	else
 		this_spiped_cmd=${spiped_binary}
+		this_c_valgrind_cmd=${c_valgrind_cmd}
 	fi
 
 	# Start backend server (if desired).
@@ -57,6 +63,7 @@ setup_spiped_decryption_server () {
 	fi
 
 	# Start spiped to connect middle port to backend.
+	${this_c_valgrind_cmd}			\
 	${this_spiped_cmd} -d			\
 		-s ${mid_sock}			\
 		-t ${dst_sock}			\
@@ -69,6 +76,8 @@ setup_spiped_decryption_server () {
 # to ${mid_sock}, saving the exit code to ${c_exitfile}.
 setup_spiped_encryption_server () {
 	# Start spiped to connect source port to middle.
+	setup_check_variables
+	${c_valgrind_cmd}			\
 	${spiped_binary} -e			\
 		-s ${src_sock}			\
 		-t ${mid_sock}			\

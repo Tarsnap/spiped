@@ -6,6 +6,7 @@
 # - close one of the connections.
 
 ### Constants
+c_valgrind_min=1
 
 
 ### Actual command

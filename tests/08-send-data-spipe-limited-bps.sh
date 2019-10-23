@@ -5,6 +5,7 @@
 #   connection, while the receiving side keeps working.
 
 ### Constants
+c_valgrind_min=1
 echo_limited_output="${s_basename}-echo-limited-output.txt"
 
 ### Actual command
@@ -14,7 +15,8 @@ scenario_cmd() {
 	setup_check_variables
 	setup_spiped_decryption_server /dev/null 0 1 1000
 	cat ${scriptdir}/lorem-send.txt				\
-		| ${spipe_binary} -t ${mid_sock} -k /dev/null	\
+		| ${c_valgrind_cmd}				\
+		${spipe_binary} -t ${mid_sock} -k /dev/null	\
 		> ${echo_limited_output}
 	echo $? > ${c_exitfile}
 
