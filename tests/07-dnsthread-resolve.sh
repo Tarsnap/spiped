@@ -4,6 +4,7 @@
 # - ensure that dnsquery can find simple addresses
 
 ### Constants
+c_valgrind_min=1
 addr_output="${s_basename}-addrs.txt"
 # These don't need a network connection to resolve
 addrs_local="	localhost:80
@@ -28,6 +29,7 @@ scenario_cmd() {
 	for addr in ${addrs}
 	do
 		setup_check_variables
+		${c_valgrind_cmd}				\
 		${dnsthread_resolve} ${addr} >> ${addr_output}
 		echo $? > ${c_exitfile}
 	done

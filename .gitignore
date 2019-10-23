@@ -12,3 +12,4 @@ tests/nc-server/nc-server
 tests/pushbits/test_pushbits
 tests/valgrind/potential-memleaks
 tests-output/
+tests-valgrind/

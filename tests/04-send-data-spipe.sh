@@ -6,6 +6,7 @@
 # - the received file should match lorem-send.txt
 
 ### Constants
+c_valgrind_min=1
 ncat_output="${s_basename}-ncat-output.txt"
 
 ### Actual command
@@ -16,7 +17,8 @@ scenario_cmd() {
 	# Send data.
 	setup_check_variables
 	(
-		cat ${scriptdir}/lorem-send.txt | ${spipe_binary}	\
+		cat ${scriptdir}/lorem-send.txt | 		\
+			${c_valgrind_cmd} ${spipe_binary}	\
 			-t ${mid_sock} -k /dev/null
 		echo $? > ${c_exitfile}
 	)

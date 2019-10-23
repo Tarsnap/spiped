@@ -7,6 +7,7 @@
 # - do the above for network sockets and unix domain sockets
 
 ### Constants
+c_valgrind_min=1
 
 
 ### Helper functions

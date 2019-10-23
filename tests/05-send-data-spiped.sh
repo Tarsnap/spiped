@@ -7,6 +7,7 @@
 # - the received file should match lorem-send.txt
 
 ### Constants
+c_valgrind_min=1
 ncat_output="${s_basename}-ncat-output.txt"
 
 ### Actual command

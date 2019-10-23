@@ -7,6 +7,7 @@
 #   gave it -o 1).
 
 ### Constants
+c_valgrind_min=1
 
 
 ### Actual command
