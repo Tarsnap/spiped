@@ -151,13 +151,16 @@ ensure_valgrind_suppression() {
 		# Append name to suppressions file
 		printf "# ${testname}\n" >> ${valgrind_suppressions}
 
-		# Strip out useless parts from the log file, as well as
-		# removing references to the main and "pl_*" ("potential loss")
-		# functions so that the suppressions can apply to other
-		# binaries.  Append to suppressions file.
+		# Strip out useless parts from the log file, and allow the
+		# suppressions to apply to other binaries by removing:
+		# - references to the main() function,
+		# - "pl_*" ("potential loss") functions,
+		# - references to the binary itself.
+		# Append to suppressions file.
 		(grep -v "^==" ${this_valgrind_supp}			\
 			| grep -v "   fun:pl_" -			\
 			| grep -v "   fun:main" -			\
+			| grep -v -E "   obj:.*/potential-memleaks" -	\
 			>> ${valgrind_suppressions} ) || true
 	done
 
