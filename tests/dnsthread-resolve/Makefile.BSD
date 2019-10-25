@@ -4,9 +4,10 @@ PROG	=	dnsthread-resolve
 # Don't install it.
 NOINST	=	1
 
+# Library code required
 LDADD_REQ =	-lpthread
 
-# main test code
+# Main test code
 SRCS	=	main.c
 
 # Data structures

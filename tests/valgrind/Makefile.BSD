@@ -1,13 +1,13 @@
 # Program name.
 PROG	=	potential-memleaks
 
-# Library code required
-LDADD_REQ	+=	-lpthread
-
 # Don't install it.
 NOINST	=	1
 
-# main test code
+# Library code required
+LDADD_REQ	+=	-lpthread
+
+# Main test code
 SRCS	=	potential-memleaks.c
 
 .include <bsd.prog.mk>

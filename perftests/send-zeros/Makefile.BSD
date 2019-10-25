@@ -4,7 +4,7 @@ PROG	=	send-zeros
 # Don't install it.
 NOINST	=	1
 
-# main test code
+# Main test code
 SRCS	=	main.c
 
 # Utility functions
