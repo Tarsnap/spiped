@@ -12,6 +12,7 @@ LDADD_REQ	+=	-lpthread
 
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../libcperciva
+LIB_DIR	=	../lib
 
 # spiped code
 SRCS	=	main.c
@@ -39,14 +40,14 @@ SRCS	+=	timerqueue.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/datastruct
 
 # DNS resolution
-.PATH.c	:	../lib/dnsthread
+.PATH.c	:	${LIB_DIR}/dnsthread
 SRCS	+=	dnsthread.c
-IDIRS	+=	-I../lib/dnsthread
+IDIRS	+=	-I${LIB_DIR}/dnsthread
 
 # spiped utility functions
-.PATH.c	:	../lib/util
+.PATH.c	:	${LIB_DIR}/util
 SRCS	+=	graceful_shutdown.c
-IDIRS	+=	-I../lib/util
+IDIRS	+=	-I${LIB_DIR}/util
 
 # Utility functions
 .PATH.c	:	${LIBCPERCIVA_DIR}/util
