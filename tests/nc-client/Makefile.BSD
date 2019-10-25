@@ -7,7 +7,7 @@ NOINST	=	1
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../../libcperciva
 
-# main test code
+# Main test code
 SRCS	=	main.c
 
 # Data structures
