@@ -7,45 +7,49 @@ NOINST	=	1
 # Library code required
 LDADD_REQ =	-lpthread
 
+# Useful relative directories
+LIBCPERCIVA_DIR	=	../../libcperciva
+LIB_DIR	=	../../lib
+
 # Main test code
 SRCS	=	main.c
 
 # Data structures
-.PATH.c	:	../../libcperciva/datastruct
+.PATH.c	:	${LIBCPERCIVA_DIR}/datastruct
 SRCS	+=	elasticarray.c
 SRCS	+=	ptrheap.c
 SRCS	+=	timerqueue.c
-IDIRS	+=	-I../../libcperciva/datastruct
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/datastruct
 
 # Event loop
-.PATH.c	:	../../libcperciva/events
+.PATH.c	:	${LIBCPERCIVA_DIR}/events
 SRCS	+=	events_immediate.c
 SRCS	+=	events_network.c
 SRCS	+=	events_network_selectstats.c
 SRCS	+=	events_timer.c
 SRCS	+=	events.c
-IDIRS	+=	-I../../libcperciva/events
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
 
 # Event-driven networking
-.PATH.c	:	../../libcperciva/network
+.PATH.c	:	${LIBCPERCIVA_DIR}/network
 SRCS	+=	network_connect.c
 SRCS	+=	network_read.c
 SRCS	+=	network_write.c
-IDIRS	+=	-I../../libcperciva/network
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/network
 
 # Utility functions
-.PATH.c	:	../../libcperciva/util
+.PATH.c	:	${LIBCPERCIVA_DIR}/util
 SRCS	+=	asprintf.c
 SRCS	+=	monoclock.c
 SRCS	+=	noeintr.c
 SRCS	+=	sock.c
 SRCS	+=	sock_util.c
 SRCS	+=	warnp.c
-IDIRS	+=	-I../../libcperciva/util
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 # Dnsthread functions
-.PATH.c	:	../../lib/dnsthread
+.PATH.c	:	${LIB_DIR}/dnsthread
 SRCS	+=	dnsthread.c
-IDIRS	+=	-I../../lib/dnsthread
+IDIRS	+=	-I${LIB_DIR}/dnsthread
 
 .include <bsd.prog.mk>

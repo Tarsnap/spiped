@@ -4,14 +4,17 @@ PROG	=	send-zeros
 # Don't install it.
 NOINST	=	1
 
+# Useful relative directories
+LIBCPERCIVA_DIR	=	../../libcperciva
+
 # Main test code
 SRCS	=	main.c
 
 # Utility functions
-.PATH.c	:	../../libcperciva/util
+.PATH.c	:	${LIBCPERCIVA_DIR}/util
 SRCS	+=	monoclock.c
 SRCS	+=	sock.c
 SRCS	+=	warnp.c
-IDIRS	+=	-I../../libcperciva/util
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 .include <bsd.prog.mk>
