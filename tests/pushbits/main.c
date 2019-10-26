@@ -115,7 +115,7 @@ chain_one()
 	int in[2];
 	int out[2];
 	const char * msg = "ping";
-	size_t msglen = strlen(msg);
+	size_t msglen = strlen(msg) + 1;
 	char * buf;
 	ssize_t r;
 
@@ -198,7 +198,7 @@ chain_two()
 	int middle[2];
 	int out[2];
 	const char * msg = "ping";
-	size_t msglen = strlen(msg);
+	size_t msglen = strlen(msg) + 1;
 	char * buf;
 	ssize_t r;
 
