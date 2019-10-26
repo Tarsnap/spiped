@@ -19,6 +19,29 @@ struct push {
 	int out;
 };
 
+static void
+workthread_cleanup(void * cookie)
+{
+	struct push * P = cookie;
+
+	/* Close the descriptor we hit EOF on. */
+	close(P->in);
+
+	/*
+	 * Try to shut down the descriptor we're writing to.  Ignore ENOTSOCK,
+	 * since it might, indeed, not be a socket.
+	 */
+	if (shutdown(P->out, SHUT_WR)) {
+		if (errno != ENOTSOCK) {
+			warnp("Error shutting down socket");
+			exit(1);
+		}
+	}
+
+	/* Free our parameters. */
+	free(P);
+}
+
 /* Bit-pushing thread. */
 static void *
 workthread(void * cookie)
@@ -48,22 +71,8 @@ workthread(void * cookie)
 		}
 	} while (1);
 
-	/* Close the descriptor we hit EOF on. */
-	close(P->in);
-
-	/*
-	 * Try to shut down the descriptor we're writing to.  Ignore ENOTSOCK,
-	 * since it might, indeed, not be a socket.
-	 */
-	if (shutdown(P->out, SHUT_WR)) {
-		if (errno != ENOTSOCK) {
-			warnp("Error shutting down socket");
-			exit(1);
-		}
-	}
-
-	/* Free our parameters. */
-	free(P);
+	/* Clean up. */
+	workthread_cleanup(P);
 
 	/* We're done. */
 	return (NULL);
