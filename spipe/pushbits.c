@@ -24,7 +24,7 @@ workthread_cleanup(void * cookie)
 {
 	struct push * P = cookie;
 
-	/* Close the descriptor we hit EOF on. */
+	/* Close the descriptor (we either hit EOF, or received a cancel). */
 	close(P->in);
 
 	/*
@@ -49,6 +49,9 @@ workthread(void * cookie)
 	struct push * P = cookie;
 	ssize_t readlen;
 
+	/* Set up cleanup function. */
+	pthread_cleanup_push(workthread_cleanup, P);
+
 	/* Infinite loop unless we hit EOF or an error. */
 	do {
 		/* Read data and die on error. */
@@ -72,7 +75,7 @@ workthread(void * cookie)
 	} while (1);
 
 	/* Clean up. */
-	workthread_cleanup(P);
+	pthread_cleanup_pop(1);
 
 	/* We're done. */
 	return (NULL);
