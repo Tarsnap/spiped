@@ -4,7 +4,7 @@ TESTS=	tests/dnsthread-resolve tests/nc-client tests/nc-server		\
 	tests/pushbits tests/valgrind					\
 	perftests/recv-zeros perftests/send-zeros
 SUBST_VERSION_FILES=    spipe/spipe.1 spiped/spiped.1 spipe/main.c spiped/main.c
-PUBLISH= ${PROGS} BUILDING DESIGN.md CHANGELOG COPYRIGHT README.md STYLE Makefile lib libcperciva proto tests
+PUBLISH= ${PROGS} BUILDING DESIGN.md CHANGELOG COPYRIGHT README.md STYLE Makefile lib libcperciva perftests proto tests
 
 ### Shared code between Tarsnap projects.
 
