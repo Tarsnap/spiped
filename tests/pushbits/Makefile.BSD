@@ -5,7 +5,7 @@ PROG	=	test_pushbits
 NOINST	=	1
 
 # Library code required
-LDADD_REQ =	-lpthread
+LDADD_REQ	=	-lpthread
 
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../../libcperciva
