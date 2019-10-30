@@ -13,3 +13,14 @@ IDIRS	:=	${IDIRS}
 
 # Default is no man pages
 MAN	=
+
+# Lines below this point are only relevant if running
+#     make -f Makefile.BSD
+# in a subdirectory; they have no influence on the generated Makefiles.
+
+# Use POSIX standard
+CFLAGS	+=	-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700
+
+# Make logic
+CFLAGS	+=	${IDIRS}
+LDADD	+=	${LDADD_REQ}
