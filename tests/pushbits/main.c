@@ -153,7 +153,7 @@ chain_one()
 		goto err3;
 	}
 
-	/* Message was sent succesfully; close the input. */
+	/* Message was sent successfully; close the input. */
 	if (close(in[0])) {
 		warnp("close");
 		goto err2;
@@ -244,7 +244,7 @@ chain_two()
 		goto err3;
 	}
 
-	/* Message was sent succesfully; close the input. */
+	/* Message was sent successfully; close the input. */
 	if (close(in[0])) {
 		warnp("close");
 		goto err3;
