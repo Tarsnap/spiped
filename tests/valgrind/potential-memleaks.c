@@ -20,7 +20,7 @@ pl_freebsd_strlen(void)
 	/* More than 8 bytes, and not a multiple of 8. */
 	char problem[] = {1, 2, 3, 4, 5, 6, 7, 8, 0};
 
-	/* Play games to avoid the compiler optimzing away strlen(). */
+	/* Play games to avoid the compiler optimizing away strlen(). */
 	size_t (* const volatile strlen_func)(const char *) = strlen;
 	volatile size_t len = strlen_func(problem);
 	(void)len;
