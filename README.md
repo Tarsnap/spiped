@@ -77,6 +77,11 @@ A small test suite can be run with:
 
     make test
 
+Memory-testing with valgrind (takes approximately twice as long as without
+valgrind) can be enabled with:
+
+    make test USE_VALGRIND=1
+
 
 Code layout
 -----------
