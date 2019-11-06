@@ -17,12 +17,17 @@
 
 #include "pushbits.h"
 
-static int connection_error = 0;
+/* Cookie with variables about the event loop and threads. */
+struct events_threads {
+	pthread_t threads[2];
+	int conndone;
+	int connection_error;
+};
 
 static int
 callback_conndied(void * cookie, int reason)
 {
-	int * conndone = cookie;
+	struct events_threads * ET = cookie;
 
 	/* Check reason. */
 	switch (reason) {
@@ -31,19 +36,19 @@ callback_conndied(void * cookie, int reason)
 		break;
 	case PROTO_CONN_CONNECT_FAILED:
 		warn0("Could not connect");
-		connection_error = 1;
+		ET->connection_error = 1;
 		break;
 	case PROTO_CONN_HANDSHAKE_FAILED:
 		warn0("Handshake failed");
-		connection_error = 1;
+		ET->connection_error = 1;
 		break;
 	default:
 		warn0("Connection error");
-		connection_error = 1;
+		ET->connection_error = 1;
 	}
 
 	/* Quit event loop. */
-	*conndone = 1;
+	ET->conndone = 1;
 
 	/* Success! */
 	return (0);
@@ -80,13 +85,12 @@ main(int argc, char * argv[])
 	const char * opt_t = NULL;
 
 	/* Working variables. */
+	struct events_threads ET;
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
 	const char * ch;
 	int s[2];
-	int conndone = 0;
 	void * conn_cookie;
-	pthread_t threads[2];
 
 	WARNP_INIT;
 
@@ -158,6 +162,10 @@ main(int argc, char * argv[])
 	if (opt_t == NULL)
 		usage();
 
+	/* Initialize the "events & threads" cookie. */
+	ET.conndone = 0;
+	ET.connection_error = 0;
+
 	/* Resolve target address. */
 	if ((sas_t = sock_resolve(opt_t)) == NULL) {
 		warnp("Error resolving socket address: %s", opt_t);
@@ -189,25 +197,25 @@ main(int argc, char * argv[])
 
 	/* Set up a connection. */
 	if ((conn_cookie = proto_conn_create(s[1], sas_t, 0, opt_f, opt_g,
-	    opt_j, K, opt_o, callback_conndied, &conndone)) == NULL) {
+	    opt_j, K, opt_o, callback_conndied, &ET)) == NULL) {
 		warnp("Could not set up connection");
 		goto err2;
 	}
 
 	/* Push bits from stdin into the socket. */
-	if (pushbits(STDIN_FILENO, s[0], &threads[0])) {
+	if (pushbits(STDIN_FILENO, s[0], &ET.threads[0])) {
 		warnp("Could not push bits");
 		goto err3;
 	}
 
 	/* Push bits from the socket to stdout. */
-	if (pushbits(s[0], STDOUT_FILENO, &threads[1])) {
+	if (pushbits(s[0], STDOUT_FILENO, &ET.threads[1])) {
 		warnp("Could not push bits");
 		goto err3;
 	}
 
 	/* Loop until we're done with the connection. */
-	if (events_spin(&conndone)) {
+	if (events_spin(&ET.conndone)) {
 		warnp("Error running event loop");
 		exit(1);
 	}
@@ -216,7 +224,7 @@ main(int argc, char * argv[])
 	free(K);
 
 	/* Handle a connection error. */
-	if (connection_error)
+	if (ET.connection_error)
 		goto err0;
 
 	/* Success! */
