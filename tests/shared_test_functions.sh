@@ -102,6 +102,18 @@ has_pid() {
 	return 1
 }
 
+## wait_for_file (filename):
+# Waits until ${filename} exists.
+wait_for_file() {
+	filename=$1
+	while [ ! -e ${filename} ]; do
+		if [ ${VERBOSE} -ne 0 ]; then
+			echo "Waiting for ${filename}" 1>&2
+		fi
+		sleep 1
+	done
+}
+
 ## check_optional_valgrind ():
 # Return a $USE_VALGRIND variable defined; if it was previously defined and
 # was greater than 0, then check that valgrind is available in the $PATH.
