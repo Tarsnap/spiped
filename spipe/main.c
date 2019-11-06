@@ -9,6 +9,7 @@
 
 #include "events.h"
 #include "getopt.h"
+#include "graceful_shutdown.h"
 #include "parsenum.h"
 #include "sock.h"
 #include "warnp.h"
@@ -23,6 +24,7 @@ struct events_threads {
 	pthread_t threads[2];
 	int conndone;
 	int connection_error;
+	int stopped;
 };
 
 static int
@@ -53,6 +55,43 @@ callback_conndied(void * cookie, int reason)
 
 	/* Success! */
 	return (0);
+}
+
+static int
+callback_graceful_shutdown(void * cookie)
+{
+	struct events_threads * ET = cookie;
+	int rc;
+	int i;
+
+	/*
+	 * We need to cancel & join these threads in order, because otherwise
+	 * we risk thread[1] closing a socket before thread[0] tries to
+	 * shutdown() that socket.
+	 */
+	for (i = 0; i < 2; i++) {
+		if ((rc = pthread_cancel(ET->threads[i])) != 0) {
+			warn0("pthread_cancel: %s", strerror(rc));
+			goto err0;
+		}
+		if ((rc = pthread_join(ET->threads[i], NULL)) != 0) {
+			warn0("pthread_join: %s", strerror(rc));
+			goto err0;
+		}
+	}
+
+	/* We've stopped the threads. */
+	ET->stopped = 1;
+
+	/* Shut down the main event loop. */
+	ET->conndone = 1;
+
+	/* Success! */
+	return(0);
+
+err0:
+	/* Failure! */
+	return (-1);
 }
 
 static void
@@ -167,6 +206,7 @@ main(int argc, char * argv[])
 	/* Initialize the "events & threads" cookie. */
 	ET.conndone = 0;
 	ET.connection_error = 0;
+	ET.stopped = 0;
 
 	/* Resolve target address. */
 	if ((sas_t = sock_resolve(opt_t)) == NULL) {
@@ -219,20 +259,28 @@ main(int argc, char * argv[])
 		goto err3;
 	}
 
+	/* Register a handler for SIGTERM. */
+	if (graceful_shutdown_initialize(&callback_graceful_shutdown, &ET)) {
+		warn0("Failed to start graceful_shutdown timer");
+		goto err3;
+	}
+
 	/* Loop until we're done with the connection. */
 	if (events_spin(&ET.conndone)) {
 		warnp("Error running event loop");
 		exit(1);
 	}
 
-	/* Wait for threads to finish. */
-	if ((rc = pthread_join(ET.threads[0], NULL)) != 0) {
-		warn0("pthread_join: %s", strerror(rc));
-		goto err2;
-	}
-	if ((rc = pthread_join(ET.threads[1], NULL)) != 0) {
-		warn0("pthread_join: %s", strerror(rc));
-		goto err2;
+	/* Wait for threads to finish (if necessary) */
+	if (ET.stopped == 0) {
+		if ((rc = pthread_join(ET.threads[0], NULL)) != 0) {
+			warn0("pthread_join: %s", strerror(rc));
+			goto err2;
+		}
+		if ((rc = pthread_join(ET.threads[1], NULL)) != 0) {
+			warn0("pthread_join: %s", strerror(rc));
+			goto err2;
+		}
 	}
 
 	/* Clean up. */
