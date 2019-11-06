@@ -194,6 +194,9 @@ main(int argc, char * argv[])
 		goto err2;
 	}
 
+	/* sas_t is now owned by proto_conn. */
+	sas_t = NULL;
+
 	/* Push bits from stdin into the socket. */
 	if (pushbits(STDIN_FILENO, s[0], &threads[0])) {
 		warnp("Could not push bits");
@@ -224,7 +227,6 @@ main(int argc, char * argv[])
 
 err3:
 	proto_conn_drop(conn_cookie, PROTO_CONN_CANCELLED);
-	sas_t = NULL;
 err2:
 	free(K);
 err1:
