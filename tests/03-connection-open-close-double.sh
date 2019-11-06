@@ -7,6 +7,8 @@
 
 ### Constants
 c_valgrind_min=1
+flag_1="${s_basename}-1.flag"
+flag_2="${s_basename}-2.flag"
 
 
 ### Actual command
@@ -21,14 +23,20 @@ scenario_cmd() {
 		( echo "" ; sleep 2 ) |		\
 			 ${nc_client_binary} ${src_sock}
 		echo $? > ${c_exitfile}
+		touch "${flag_1}"
 	) &
 
+	# Open another connection (before the first has closed).
 	setup_check_variables
 	(
 		echo "" | ${nc_client_binary} ${src_sock}
 		echo $? > ${c_exitfile}
-	)
-	sleep 3
+		touch "${flag_2}"
+	) &
+
+	# Wait for both connections to have closed.
+	wait_for_file "${flag_1}"
+	wait_for_file "${flag_2}"
 
 	# Wait for server(s) to quit.
 	servers_stop
