@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "events.h"
@@ -91,6 +92,7 @@ main(int argc, char * argv[])
 	const char * ch;
 	int s[2];
 	void * conn_cookie;
+	int rc;
 
 	WARNP_INIT;
 
@@ -221,6 +223,16 @@ main(int argc, char * argv[])
 	if (events_spin(&ET.conndone)) {
 		warnp("Error running event loop");
 		exit(1);
+	}
+
+	/* Wait for threads to finish. */
+	if ((rc = pthread_join(ET.threads[0], NULL)) != 0) {
+		warn0("pthread_join: %s", strerror(rc));
+		goto err2;
+	}
+	if ((rc = pthread_join(ET.threads[1], NULL)) != 0) {
+		warn0("pthread_join: %s", strerror(rc));
+		goto err2;
 	}
 
 	/* Clean up. */
