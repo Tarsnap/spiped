@@ -12,6 +12,7 @@ LDADD_REQ	+=	-lpthread
 
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../libcperciva
+LIB_DIR	=	../lib
 PROTO_DIR	=	../proto
 
 # spipe code
@@ -25,6 +26,11 @@ SRCS	+=	proto_crypt.c
 SRCS	+=	proto_handshake.c
 SRCS	+=	proto_pipe.c
 IDIRS	+=	-I${PROTO_DIR}
+
+# spiped utility functions
+.PATH.c	:	${LIB_DIR}/util
+SRCS	+=	graceful_shutdown.c
+IDIRS	+=	-I${LIB_DIR}/util
 
 # Fundamental algorithms
 .PATH.c	:	${LIBCPERCIVA_DIR}/alg
