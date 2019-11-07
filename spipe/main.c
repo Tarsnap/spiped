@@ -256,19 +256,19 @@ main(int argc, char * argv[])
 	/* Push bits from stdin into the socket. */
 	if (pushbits(STDIN_FILENO, s[0], &ET.threads[0])) {
 		warnp("Could not push bits");
-		goto err3;
+		goto err4;
 	}
 
 	/* Register a handler for SIGTERM. */
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown, &ET)) {
 		warn0("Failed to start graceful_shutdown timer");
-		goto err3;
+		goto err5;
 	}
 
 	/* Loop until we're done with the connection. */
 	if (events_spin(&ET.conndone)) {
 		warnp("Error running event loop");
-		exit(1);
+		goto err3;
 	}
 
 	/* Wait for threads to finish (if necessary) */
@@ -293,6 +293,16 @@ main(int argc, char * argv[])
 	/* Success! */
 	exit(0);
 
+err5:
+	if ((rc = pthread_cancel(ET.threads[0])) != 0)
+		warn0("pthread_cancel: %s", strerror(rc));
+	if ((rc = pthread_join(ET.threads[0], NULL)) != 0)
+		warn0("pthread_join: %s", strerror(rc));
+err4:
+	if ((rc = pthread_cancel(ET.threads[1])) != 0)
+		warn0("pthread_cancel: %s", strerror(rc));
+	if ((rc = pthread_join(ET.threads[1], NULL)) != 0)
+		warn0("pthread_join: %s", strerror(rc));
 err3:
 	proto_conn_drop(conn_cookie, PROTO_CONN_CANCELLED);
 err2:
