@@ -247,14 +247,14 @@ main(int argc, char * argv[])
 	/* sas_t is now owned by proto_conn. */
 	sas_t = NULL;
 
-	/* Push bits from stdin into the socket. */
-	if (pushbits(STDIN_FILENO, s[0], &ET.threads[0])) {
+	/* Push bits from the socket to stdout. */
+	if (pushbits(s[0], STDOUT_FILENO, &ET.threads[1])) {
 		warnp("Could not push bits");
 		goto err3;
 	}
 
-	/* Push bits from the socket to stdout. */
-	if (pushbits(s[0], STDOUT_FILENO, &ET.threads[1])) {
+	/* Push bits from stdin into the socket. */
+	if (pushbits(STDIN_FILENO, s[0], &ET.threads[0])) {
 		warnp("Could not push bits");
 		goto err3;
 	}
