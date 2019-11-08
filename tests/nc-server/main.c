@@ -100,7 +100,7 @@ main(int argc, char ** argv)
 
 	/* Parse command-line arguments. */
 	if (argc < 3) {
-		fprintf(stderr, "usage: %s PORT FILENAME [ECHO_BPS]\n",
+		fprintf(stderr, "usage: %s ADDRESS FILENAME [ECHO_BPS]\n",
 		    argv[0]);
 		goto err0;
 	}
