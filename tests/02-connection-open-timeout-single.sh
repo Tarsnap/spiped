@@ -8,6 +8,7 @@
 
 ### Constants
 c_valgrind_min=1
+flag_1="${s_basename}-1.flag"
 
 
 ### Actual command
@@ -22,8 +23,9 @@ scenario_cmd() {
 		( echo "" ; sleep 2 ) |		\
 			 ${nc_client_binary} ${src_sock}
 		echo $? > ${c_exitfile}
+		touch "${flag_1}"
 	) &
-	sleep 3
+	wait_for_file "${flag_1}"
 
 	# Wait for server(s) to quit.
 	servers_stop
