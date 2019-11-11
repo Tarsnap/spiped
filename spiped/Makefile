@@ -18,18 +18,18 @@ all:
 	fi
 
 install:${PROG}
-	mkdir -p ${BINDIR}
-	cp ${PROG} ${BINDIR}/_inst.${PROG}.$$$$_ &&	\
-	    strip ${BINDIR}/_inst.${PROG}.$$$$_ &&	\
-	    chmod 0555 ${BINDIR}/_inst.${PROG}.$$$$_ && \
-	    mv -f ${BINDIR}/_inst.${PROG}.$$$$_ ${BINDIR}/${PROG}
-	if ! [ -z "${MAN1DIR}" ]; then			\
-		mkdir -p ${MAN1DIR};			\
-		for MPAGE in ${MAN1}; do						\
-			cp $$MPAGE ${MAN1DIR}/_inst.$$MPAGE.$$$$_ &&			\
-			    chmod 0444 ${MAN1DIR}/_inst.$$MPAGE.$$$$_ &&		\
-			    mv -f ${MAN1DIR}/_inst.$$MPAGE.$$$$_ ${MAN1DIR}/$$MPAGE;	\
-		done;									\
+	mkdir -p ${DESTDIR}${BINDIR}
+	cp ${PROG} ${DESTDIR}${BINDIR}/_inst.${PROG}.$$$$_ &&		\
+	    strip ${DESTDIR}${BINDIR}/_inst.${PROG}.$$$$_ &&		\
+	    chmod 0555 ${DESTDIR}${BINDIR}/_inst.${PROG}.$$$$_ && 	\
+	    mv -f ${DESTDIR}${BINDIR}/_inst.${PROG}.$$$$_ ${DESTDIR}${BINDIR}/${PROG}
+	if ! [ -z "${DESTDIR}${MAN1DIR}" ]; then			\
+		mkdir -p ${DESTDIR}${MAN1DIR};				\
+		for MPAGE in ${DESTDIR}${MAN1}; do			\
+			cp $$MPAGE ${DESTDIR}${MAN1DIR}/_inst.$$MPAGE.$$$$_ && \
+			    chmod 0444 ${DESTDIR}${MAN1DIR}/_inst.$$MPAGE.$$$$_ && \
+			    mv -f ${DESTDIR}${MAN1DIR}/_inst.$$MPAGE.$$$$_ ${DESTDIR}${MAN1DIR}/$$MPAGE;		\
+		done;							\
 	fi
 
 clean:
