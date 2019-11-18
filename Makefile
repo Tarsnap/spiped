@@ -37,6 +37,10 @@ posix-flags.sh:
 		printf "export \"CFLAGS_POSIX=";			\
 		command -p sh posix-cflags.sh "$$PATH";			\
 		printf "\"\n";						\
+		printf "export \"CFLAGS_DEFAULT_CHECKED=";		\
+		export CFLAGS_DEFAULT="${CFLAGS_DEFAULT}";		\
+		command -p sh posix-cflags-default.sh "$$PATH";		\
+		printf "\"\n";						\
 	else								\
 		:;							\
 	fi > $@
