@@ -11,10 +11,11 @@ TEST_CMD=	tests/test_spiped.sh
 
 ### Shared code between Tarsnap projects.
 
+# CFLAGS_DEFAULT_CHECKED comes from posix-flags.sh
 all:	cpusupport-config.h posix-flags.sh
-	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
+	export CFLAGS="$${CFLAGS:-$${CFLAGS_DEFAULT_CHECKED}}";	\
 	export HAVE_BUILD_FLAGS=1;			\
 	for D in ${PROGS} ${TESTS}; do			\
 		( cd $${D} && ${MAKE} all ) || exit 2;	\
@@ -24,6 +25,7 @@ all:	cpusupport-config.h posix-flags.sh
 buildsubdir: cpusupport-config.h posix-flags.sh
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
+	export CFLAGS="$${CFLAGS:-$${CFLAGS_DEFAULT_CHECKED}}";	\
 	export HAVE_BUILD_FLAGS=1;			\
 	cd ${BUILD_SUBDIR} && ${MAKE} ${BUILD_TARGET}
 
