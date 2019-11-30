@@ -5,6 +5,7 @@ PROG	=	potential-memleaks
 NOINST	=	1
 
 # Library code required
+LDADD_REQ	=	-lcrypto
 LDADD_REQ	+=	-lpthread
 
 # Main test code
