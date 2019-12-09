@@ -37,9 +37,10 @@ posix-flags.sh:
 		printf "export \"CFLAGS_POSIX=";			\
 		command -p sh posix-cflags.sh "$$PATH";			\
 		printf "\"\n";						\
-	else								\
-		:;							\
 	fi > $@
+	if [ ! -s $@ ]; then						\
+		printf "#define POSIX_COMPATIBILITY_NOT_CHECKED 1\n";	\
+	fi >> $@
 
 cpusupport-config.h:
 	if [ -d ${LIBCPERCIVA_DIR}/cpusupport/ ]; then			\
@@ -47,9 +48,10 @@ cpusupport-config.h:
 		command -p sh						\
 		    ${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh	\
 		    "$$PATH";						\
-	else								\
-		:;							\
 	fi > $@
+	if [ ! -s $@ ]; then						\
+		printf "#define CPUSUPPORT_NONE 1\n";			\
+	fi >> $@
 
 install:	all
 	export BINDIR=$${BINDIR:-${BINDIR_DEFAULT}};	\
