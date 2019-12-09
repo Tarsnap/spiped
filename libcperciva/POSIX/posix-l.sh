@@ -19,7 +19,7 @@ for LIB in rt xnet; do
 		printf "%s" "-l${LIB}";
 		FIRST=NO;
 	else
-		echo "WARNING: POSIX violation: make's CC doesn't understand -l${LIB}" 1>&2
+		echo "WARNING: POSIX violation: ${CC} does not understand -l${LIB}" 1>&2
 	fi
 	rm -f a.out
 done
