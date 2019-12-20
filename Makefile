@@ -11,19 +11,21 @@ TEST_CMD=	tests/test_spiped.sh
 
 ### Shared code between Tarsnap projects.
 
-all:	cpusupport-config.h posix-flags.sh
+all:	cflags-filter.sh cpusupport-config.h posix-flags.sh
 	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
+	. ./cflags-filter.sh;				\
 	export HAVE_BUILD_FLAGS=1;			\
 	for D in ${PROGS} ${TESTS}; do			\
 		( cd $${D} && ${MAKE} all ) || exit 2;	\
 	done
 
 # For "loop-back" building of a subdirectory
-buildsubdir: cpusupport-config.h posix-flags.sh
+buildsubdir: cflags-filter.sh cpusupport-config.h posix-flags.sh
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
+	. ./cflags-filter.sh;				\
 	export HAVE_BUILD_FLAGS=1;			\
 	cd ${BUILD_SUBDIR} && ${MAKE} ${BUILD_TARGET}
 
@@ -40,6 +42,17 @@ posix-flags.sh:
 	fi > $@
 	if [ ! -s $@ ]; then						\
 		printf "#define POSIX_COMPATIBILITY_NOT_CHECKED 1\n";	\
+	fi >> $@
+
+cflags-filter.sh:
+	if [ -d ${LIBCPERCIVA_DIR}/POSIX/ ]; then			\
+		export CC="${CC}";					\
+		cd ${LIBCPERCIVA_DIR}/POSIX;				\
+		command -p sh posix-cflags-filter.sh "$$PATH";		\
+	fi > $@
+	if [ ! -s $@ ]; then						\
+		printf "# Compiler understands normal flags; ";		\
+		printf "nothing to filter out\n";			\
 	fi >> $@
 
 cpusupport-config.h:
@@ -60,7 +73,7 @@ install:	all
 	done
 
 clean:
-	rm -f cpusupport-config.h posix-flags.sh
+	rm -f cflags-filter.sh cpusupport-config.h posix-flags.sh
 	for D in ${PROGS} ${TESTS}; do				\
 		( cd $${D} && ${MAKE} clean ) || exit 2;	\
 	done

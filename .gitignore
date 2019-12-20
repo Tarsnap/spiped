@@ -1,3 +1,4 @@
+cflags-filter.sh
 cpusupport-config.h
 posix-flags.sh
 # Other directories
