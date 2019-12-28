@@ -62,7 +62,7 @@ err0:
 }
 
 static int
-echo_stdin_stdout()
+echo_stdin_stdout(void)
 {
 	pthread_t thread;
 
@@ -109,7 +109,7 @@ wait_ms(size_t msec)
 }
 
 static int
-chain_one()
+chain_one(void)
 {
 	pthread_t thread;
 	int in[2];
@@ -191,7 +191,7 @@ err0:
 }
 
 static int
-chain_two()
+chain_two(void)
 {
 	pthread_t thread[2];
 	int in[2];
