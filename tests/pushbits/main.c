@@ -21,6 +21,7 @@ basic_copy(const char * filename_in, const char * filename_out)
 {
 	pthread_t thread;
 	int in, out;
+	int rc;
 
 	/* Open input and output. */
 	if ((in = open(filename_in, O_RDONLY)) == -1) {
@@ -40,8 +41,8 @@ basic_copy(const char * filename_in, const char * filename_out)
 	}
 
 	/* Wait for thread to finish. */
-	if (pthread_join(thread, NULL)) {
-		warnp("pthread_join");
+	if ((rc = pthread_join(thread, NULL)) != 0) {
+		warn0("pthread_join: %s", strerror(rc));
 		goto err2;
 	}
 
@@ -65,6 +66,7 @@ static int
 echo_stdin_stdout(void)
 {
 	pthread_t thread;
+	int rc;
 
 	/* Start echoing. */
 	if (pushbits(STDIN_FILENO, STDOUT_FILENO, &thread)) {
@@ -74,14 +76,14 @@ echo_stdin_stdout(void)
 
 	/* Wait a short while, then cancel the thread. */
 	sleep(1);
-	if (pthread_cancel(thread)) {
-		warnp("pthread_cancel");
+	if ((rc = pthread_cancel(thread)) != 0) {
+		warn0("pthread_cancel: %s", strerror(rc));
 		goto err0;
 	}
 
 	/* Wait for thread to finish. */
-	if (pthread_join(thread, NULL)) {
-		warnp("pthread_join");
+	if ((rc = pthread_join(thread, NULL)) != 0) {
+		warn0("pthread_join: %s", strerror(rc));
 		goto err0;
 	}
 
@@ -118,6 +120,7 @@ chain_one(void)
 	size_t msglen = strlen(msg) + 1;
 	char * buf;
 	ssize_t r;
+	int rc;
 
 	/* Initialize output message buffer. */
 	if ((buf = malloc(msglen)) == NULL) {
@@ -170,8 +173,8 @@ chain_one(void)
 	}
 
 	/* Wait for thread to finish, then clean up. */
-	if (pthread_join(thread, NULL)) {
-		warnp("pthread_join");
+	if ((rc = pthread_join(thread, NULL)) != 0) {
+		warn0("pthread_join: %s", strerror(rc));
 		goto err1;
 	}
 	free(buf);
@@ -201,6 +204,7 @@ chain_two(void)
 	size_t msglen = strlen(msg) + 1;
 	char * buf;
 	ssize_t r;
+	int rc;
 
 	/* Initialize output message buffer. */
 	if ((buf = malloc(msglen)) == NULL) {
@@ -251,8 +255,8 @@ chain_two(void)
 	}
 
 	/* Shut down the first thread. */
-	if (pthread_join(thread[0], NULL)) {
-		warnp("pthread_join");
+	if ((rc = pthread_join(thread[0], NULL)) != 0) {
+		warn0("pthread_join: %s", strerror(rc));
 		goto err2;
 	}
 
@@ -267,8 +271,8 @@ chain_two(void)
 	}
 
 	/* Wait for the second thread to finish, then clean up. */
-	if (pthread_join(thread[1], NULL)) {
-		warnp("pthread_join");
+	if ((rc = pthread_join(thread[1], NULL)) != 0) {
+		warn0("pthread_join: %s", strerror(rc));
 		goto err1;
 	}
 	free(buf);
