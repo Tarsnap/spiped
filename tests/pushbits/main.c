@@ -77,8 +77,18 @@ echo_stdin_stdout(void)
 	/* Wait a short while, then cancel the thread. */
 	sleep(1);
 	if ((rc = pthread_cancel(thread)) != 0) {
-		warn0("pthread_cancel: %s", strerror(rc));
-		goto err0;
+		/*
+		 * These tests ignore an ESRCH error returned by
+		 * pthread_cancel.  According to the POSIX standard, a
+		 * thread ID should still be valid after pthread_exit has
+		 * been invoked by the thread if pthread_join() has not yet
+		 * been called.  However, many platforms return ESRCH in
+		 * this situation.
+		 */
+		if (rc != ESRCH) {
+			warn0("pthread_cancel: %s", strerror(rc));
+			goto err0;
+		}
 	}
 
 	/* Wait for thread to finish. */
