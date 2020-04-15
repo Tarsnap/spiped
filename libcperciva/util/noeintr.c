@@ -13,14 +13,14 @@
  * a signal.  Return ${nbytes} on success or -1 on error.
  */
 ssize_t
-noeintr_write(int d, const void * buf, size_t nbyte)
+noeintr_write(int d, const void * buf, size_t nbytes)
 {
 	const uint8_t * p = buf;
-	size_t len = nbyte;
+	size_t len = nbytes;
 	ssize_t lenwrit;
 
 	/* Implementation-defined: Don't allow oversized writes. */
-	assert(nbyte <= SSIZE_MAX);
+	assert(nbytes <= SSIZE_MAX);
 
 	/* Loop until we have no data left to write. */
 	while (len > 0) {
@@ -46,7 +46,7 @@ noeintr_write(int d, const void * buf, size_t nbyte)
 	}
 
 	/* Success! */
-	return (ssize_t)(nbyte);
+	return (ssize_t)(nbytes);
 
 err0:
 	/* Failure! */
