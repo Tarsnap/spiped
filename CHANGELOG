@@ -1,3 +1,5 @@
+(unreleased)
+* Warn if the maximum number of connections is reached in spiped.
 spiped-1.6.1
 * New option -u username:groupname (spiped): change the user and/or group
   ownership of the process.
