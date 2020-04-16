@@ -125,7 +125,7 @@ main(int argc, char ** argv)
 	/* Print duration and speed. */
 	duration_s = timeval_diff(begin, end);
 	printf("%zu\t%zu\t%.4f\t%.2f\n", buflen, count, duration_s,
-	    buflen * count / duration_s / 1e6);
+	    (double)(buflen * count) / duration_s / 1e6);
 
 	/* Clean up. */
 	if (close(socket)) {
