@@ -92,6 +92,12 @@ doaccept(struct accept_state * A)
 {
 	int rc = 0;
 
+	/* Warn about reaching nconn_max. */
+	if (A->nconn >= A->nconn_max) {
+		warn0("Maximum number of connections (%zu) reached",
+		    A->nconn_max);
+	}
+
 	/* If we can, accept a new connection. */
 	if ((A->nconn < A->nconn_max) && (A->accept_cookie == NULL) &&
 	    !A->shutdown_requested) {
