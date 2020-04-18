@@ -177,6 +177,10 @@ chain_one(void)
 		warnp("read");
 		goto err2;
 	}
+	if ((size_t)r != msglen) {
+		warn0("Message is not the expected length");
+		goto err2;
+	}
 	if (strncmp(buf, msg, msglen) != 0) {
 		warn0("failed to get the (full?) message");
 		goto err2;
@@ -273,6 +277,10 @@ chain_two(void)
 	/* Read message; assume that we'll get it all at once. */
 	if ((r = read(out[1], buf, msglen)) == -1) {
 		warnp("read");
+		goto err2;
+	}
+	if ((size_t)r != msglen) {
+		warn0("Message is not the expected length");
 		goto err2;
 	}
 	if (strncmp(buf, msg, msglen) != 0) {
