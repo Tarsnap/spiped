@@ -95,7 +95,16 @@ find_system() {
 # Look for ${cmd} in ps; return 0 if ${cmd} exists.
 has_pid() {
 	cmd=$1
-	pid=`ps -Aopid,args | grep -F "${cmd}" | grep -v "grep"` || true
+
+	# Escape square brackets in the command, e.g.,
+	#     [127.0.0.1]:8001
+	# We could avoid this by using grep -F, but that's not supported in
+	# Oracle Solaris 11.4's default grep; users would need to take special
+	# action to ensure that their POSIX-compatible grep was used instead.
+	cmd_escaped=$( echo "${cmd}" | sed 's:\[:\\\\[:g' | sed 's:\]:\\\\]:g' )
+
+	# Look for ${cmd_escaped} in ps.
+	pid=`ps -Aopid,args | grep "${cmd_escaped}" | grep -v "grep"` || true
 	if [ -n "${pid}" ]; then
 		return 0
 	fi
