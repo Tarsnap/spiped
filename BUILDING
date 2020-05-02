@@ -43,6 +43,14 @@ Platform-specific notes
   or LDADD_EXTRA="-L/usr/sfw/lib -lsocket -lnsl" (linker option) to the make
   command line.
 
+- On Solaris, the command-line utilities in /usr/bin are not
+  necessarily POSIX-compatible.  According to standards(7), in order to use
+  POSIX.1-2008 standard-conforming utilities, you must set your PATH so that
+  certain directories (such as /usr/xpg4/bin/) take precedence over /usr/bin.
+  Please check the documentation in your version of Solaris by:
+      $ man standards
+  and carefully read the "Utilities" section.
+
 - On some platforms (OpenBSD prior to 5.4, and possibly others) you will need to
   add #include <sys/types.h> at the start of
 	lib/dnsthread/dnsthread.c
