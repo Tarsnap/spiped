@@ -144,7 +144,7 @@ set_group(const char * groupname)
 	if ((group_info = getgrnam(groupname)) != NULL) {
 		gid = group_info->gr_gid;
 	} else if (errno) {
-		warnp("getgrnam(\"%s\")", groupname);
+		warnp("getgrnam(%s)", groupname);
 		goto err0;
 	} else if (PARSENUM(&gid, groupname)) {
 		warn0("No such group: %s", groupname);
@@ -179,7 +179,7 @@ set_user(const char * username)
 	if ((user_info = getpwnam(username)) != NULL) {
 		uid = user_info->pw_uid;
 	} else if (errno) {
-		warnp("getpwnam(\"%s\")", username);
+		warnp("getpwnam(%s)", username);
 		goto err0;
 	} else if (PARSENUM(&uid, username)) {
 		warn0("No such user: %s", username);
