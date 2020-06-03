@@ -17,7 +17,7 @@ run_test() {
 	setup_spiped_encryption_server
 
 	# Open and close a connection.
-	setup_check_variables
+	setup_check_variables "open close"
 	(
 		echo "" | ${nc_client_binary} ${src_sock}
 		echo $? > ${c_exitfile}

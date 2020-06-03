@@ -16,7 +16,7 @@ scenario_cmd() {
 	if [ ! -n "${system_spiped_binary}" ]; then
 		printf "no system spiped, or it is too old... "
 		# Suppress warning
-		setup_check_variables
+		setup_check_variables "system spiped skip"
 		echo "-1" > ${c_exitfile}
 		return;
 	fi
@@ -26,7 +26,7 @@ scenario_cmd() {
 	setup_spiped_encryption_server
 
 	# Open and close a connection.
-	setup_check_variables
+	setup_check_variables "system spiped"
 	(
 		cat ${scriptdir}/lorem-send.txt |	\
 			${nc_client_binary} ${src_sock}
@@ -36,7 +36,7 @@ scenario_cmd() {
 	# Wait for server(s) to quit.
 	servers_stop
 
-	setup_check_variables
+	setup_check_variables "system spiped output"
 	if ! cmp -s ${ncat_output} ${scriptdir}/lorem-send.txt; then
 		if [ ${VERBOSE} -ne 0 ]; then
 			printf "Test output does not match input;" 1>&2
