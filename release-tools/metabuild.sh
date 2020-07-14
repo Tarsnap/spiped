@@ -38,8 +38,8 @@ copyvar() {
 
 add_makefile_prog() {
 	if [ "$(${MAKEBSD} -V NOINST)" = "1" ]; then
-		cat ${SUBDIR_DEPTH}/Makefile.prog |		\
-		    perl -0pe 's/(install:.*?)\n\n//s' >> $OUT
+		perl -0pe 's/(install:.*?)\n\n//s'	\
+		    ${SUBDIR_DEPTH}/Makefile.prog >> $OUT
 	else
 		cat ${SUBDIR_DEPTH}/Makefile.prog >> $OUT
 	fi
