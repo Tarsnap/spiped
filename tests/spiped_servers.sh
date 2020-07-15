@@ -11,18 +11,18 @@
 check_leftover_servers() {
 	# Find old nc-server on ${dst_sock}.
 	if [ -n "${nc_server_binary+set}" ]; then
-		if $( has_pid "${nc_server_binary} ${dst_sock}" ); then
+		if has_pid "${nc_server_binary} ${dst_sock}" ; then
 			echo "Error: Left-over nc-server from previous run."
 			exit 1
 		fi
 	fi
 
 	# Find old spiped {-d, -e} servers on {${mid_sock}, ${src_sock}}.
-	if $( has_pid "spiped -d -s ${mid_sock}" ); then
+	if has_pid "spiped -d -s ${mid_sock}" ; then
 		echo "Error: Left-over spiped -d from previous run."
 		exit 1
 	fi
-	if $( has_pid "spiped -e -s ${src_sock}" ); then
+	if has_pid "spiped -e -s ${src_sock}" ; then
 		echo "Error: Left-over spiped -e from previous run."
 		exit 1
 	fi
@@ -90,11 +90,11 @@ setup_spiped_encryption_server () {
 servers_stop() {
 	# Signal spiped servers to stop
 	if [ -e ${s_basename}-spiped-e.pid ]; then
-		kill `cat ${s_basename}-spiped-e.pid`
+		kill "`cat ${s_basename}-spiped-e.pid`"
 		rm ${s_basename}-spiped-e.pid
 	fi
 	if [ -e ${s_basename}-spiped-d.pid ]; then
-		kill `cat ${s_basename}-spiped-d.pid`
+		kill "`cat ${s_basename}-spiped-d.pid`"
 		rm ${s_basename}-spiped-d.pid
 	fi
 
@@ -102,20 +102,20 @@ servers_stop() {
 	sleep 1
 
 	# Waiting for servers to stop
-	while $( has_pid "spiped -e -s ${src_sock}" ); do
+	while has_pid "spiped -e -s ${src_sock}" ; do
 		if [ ${VERBOSE} -ne 0 ]; then
 			echo "Waiting to stop: spiped -e"
 		fi
 		sleep 1
 	done
-	while $( has_pid "spiped -d -s ${mid_sock}" ); do
+	while has_pid "spiped -d -s ${mid_sock}" ; do
 		if [ ${VERBOSE} -ne 0 ]; then
 			echo "Waiting to stop: spiped -d"
 		fi
 		sleep 1
 	done
 	if [ -n "${nc_server_binary+set}" ]; then
-		while $( has_pid "${nc_server_binary} ${dst_sock}" ); do
+		while has_pid "${nc_server_binary} ${dst_sock}" ; do
 			if [ ${VERBOSE} -ne 0 ]; then
 				echo "Waiting to stop: ncat"
 			fi

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ### Find script directory and load helper functions.
-scriptdir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+scriptdir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
 . ${scriptdir}/shared_test_functions.sh
 
 
@@ -11,9 +11,9 @@ out="${bindir}/tests-output"
 out_valgrind="${bindir}/tests-valgrind"
 
 # This test script requires three sockets.
-src_sock=[127.0.0.1]:8001
-mid_sock=[127.0.0.1]:8002
-dst_sock=[127.0.0.1]:8003
+src_sock="[127.0.0.1]:8001"
+mid_sock="[127.0.0.1]:8002"
+dst_sock="[127.0.0.1]:8003"
 
 # Find relative spiped binary paths.
 spiped_binary=${scriptdir}/../spiped/spiped
