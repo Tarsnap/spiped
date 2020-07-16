@@ -19,7 +19,7 @@ enum {
  *     callback_dead, cookie):
  * Create a connection with one end at ${s} and the other end connecting to
  * the target addresses ${sas}.  If ${decr} is 0, encrypt the outgoing data;
- * if ${decr} is nonzero, decrypt the outgoing data.  If ${nopfs} is non-zero,
+ * if ${decr} is nonzero, decrypt the incoming data.  If ${nopfs} is non-zero,
  * don't use perfect forward secrecy.  If ${requirepfs} is non-zero, drop
  * the connection if the other end tries to disable perfect forward secrecy.
  * Enable transport layer keep-alives (if applicable) on both sockets if and
