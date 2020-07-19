@@ -26,6 +26,8 @@ scenario_cmd() {
 	# Wait for server(s) to quit.
 	servers_stop
 
+	# Check output.  This must be after nc-server has stopped, to
+	# ensure that no data is buffered and not yet written to disk.
 	setup_check_variables "spipe send output"
 	if ! cmp -s ${ncat_output} ${scriptdir}/lorem-send.txt; then
 		if [ ${VERBOSE} -ne 0 ]; then
