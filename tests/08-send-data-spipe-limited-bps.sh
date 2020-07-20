@@ -10,10 +10,11 @@ echo_limited_output="${s_basename}-echo-limited-output.txt"
 
 ### Actual command
 scenario_cmd() {
-	# Send a file through a rate-limited echo server.  Echo
-	# server is limited to 1000 bytes per second.
-	setup_check_variables "spipe send rate-limited"
+	# Set up an echo server, limited to 1000 bytes per second.
 	setup_spiped_decryption_server /dev/null 0 1 1000
+
+	# Send a file through the rate-limited echo server.
+	setup_check_variables "spipe send rate-limited"
 	cat ${scriptdir}/lorem-send.txt				\
 		| ${c_valgrind_cmd}				\
 		${spipe_binary} -t ${mid_sock} -k /dev/null	\
