@@ -71,8 +71,17 @@ callback_graceful_shutdown(void * cookie)
 	 */
 	for (i = 0; i < 2; i++) {
 		if ((rc = pthread_cancel(ET->threads[i])) != 0) {
-			warn0("pthread_cancel: %s", strerror(rc));
-			goto err0;
+			/*
+			 * According to the POSIX standard, a Thread ID should
+			 * still be valid after pthread_exit has been invoked
+			 * by the thread if pthread_join() has not yet been
+			 * called.  However, many platforms return ESRCH in
+			 * this situation.
+			 */
+			if (rc != ESRCH) {
+				warn0("pthread_cancel: %s", strerror(rc));
+				goto err0;
+			}
 		}
 		if ((rc = pthread_join(ET->threads[i], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
