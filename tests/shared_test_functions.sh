@@ -134,10 +134,23 @@ check_optional_valgrind() {
 			printf "valgrind not found\n" 1>&2
 			exit 1
 		fi
+
+		# Check the version.
+		version=$(valgrind --version | cut -d "-" -f 2)
+		major=$(echo "${version}" | cut -d "." -f 1)
+		minor=$(echo "${version}" | cut -d "." -f 2)
+		if [ "${major}" -lt "3" ]; then
+			printf "valgrind must be at least version 3.13\n" 1>&2
+			exit 1;
+		fi
+		if [ "${major}" -eq "3" ] && [ "${minor}" -lt "13" ]; then
+			printf "valgrind must be at least version 3.13\n" 1>&2
+			exit 1;
+		fi
 	fi
 }
 
-## ensure_valgrind_suppresssion (potential_memleaks_binary):
+## ensure_valgrind_suppression (potential_memleaks_binary):
 # Run the ${potential_memleaks_binary} through valgrind, keeping
 # track of any apparent memory leak in order to suppress reporting
 # those leaks when testing other binaries.
@@ -191,40 +204,48 @@ ensure_valgrind_suppression() {
 	printf "done.\n"
 }
 
-## setup_check_variables (description):
+## setup_check_variables (description, check_prev=1):
 # Set up the "check" variables ${c_exitfile} and ${c_valgrind_cmd}, the
 # latter depending on the previously-defined ${c_valgrind_min}.
 # Advances the number of checks ${s_count} so that the next call to this
 # function will set up new filenames.  Write ${description} into a
-# file.
+# file.  If ${check_prev} is non-zero, check that the previous
+# ${c_exitfile} exists.
 setup_check_variables() {
 	description=$1
+	check_prev=${2:-1}
+
+	# Should we check for the previous exitfile?
+	if [ "${c_exitfile}" != "${NO_EXITFILE}" ] &&			\
+	    [ "${check_prev}" -gt 0 ] ; then
+		# Check for the file.
+		if [ ! -f "${c_exitfile}" ] ; then
+			# We should have written the result of the
+			# previous test to this file.
+			echo "PROGRAMMING FAILURE"
+			echo "We should already have ${c_exitfile}"
+			exit 1
+		fi
+	fi
 
 	# Set up the "exit" file.
-	c_exitfile="${s_basename}-`printf %02d ${s_count}`.exit"
+	count_str=$(printf "%02d" "${s_count}")
+	c_exitfile="${s_basename}-${count_str}.exit"
 
 	# Write the "description" file.
 	printf "${description}\n" >				\
-		"${s_basename}-`printf %02d ${s_count}`.desc"
+		"${s_basename}-${count_str}.desc"
 
 	# Set up the valgrind command if $USE_VALGRIND is greater
 	# than or equal to ${valgrind_min}; otherwise, produce an
-	# empty string.  Using --error-exitcode means that if
-	# there is a serious problem (such that scrypt calls
-	# exit(1)) *and* a memory leak, the test suite reports an
-	# exit value of ${valgrind_exit_code}.  However, if there
-	# is a serious problem but no memory leak, we still
-	# receive a non-zero exit code.  The most important thing
-	# is that we only receive an exit code of 0 if both the
-	# program and valgrind are happy.
+	# empty string.
 	if [ "$USE_VALGRIND" -ge "${c_valgrind_min}" ]; then
-		val_logfilename=${s_val_basename}-`printf %02d ${s_count}`.log
+		val_logfilename="${s_val_basename}-${count_str}-%p.log"
 		c_valgrind_cmd="valgrind \
 			--log-file=${val_logfilename} \
 			--leak-check=full --show-leak-kinds=all \
 			--errors-for-leak-kinds=all \
-			--suppressions=${valgrind_suppressions} \
-			--error-exitcode=${valgrind_exit_code} "
+			--suppressions=${valgrind_suppressions}"
 	else
 		c_valgrind_cmd=""
 	fi
@@ -233,13 +254,14 @@ setup_check_variables() {
 	s_count=$((s_count + 1))
 }
 
-## get_val_logfile (val_basename, exitfile):
-# Return the valgrind logfile corresponding to ${exitfile}.
-get_val_logfile() {
+## get_val_basename (val_basename, exitfile):
+# Return the filename without ".log" of the valgrind logfile corresponding to
+# ${exitfile}.
+get_val_basename() {
 	val_basename=$1
 	exitfile=$2
 	num=`echo "${exitfile}" | rev | cut -c 1-7 | rev | cut -c 1-2 `
-	echo "${val_basename}-${num}.log"
+	echo "${val_basename}-${num}"
 }
 
 ## expected_exitcode (expected, exitcode):
@@ -259,12 +281,96 @@ expected_exitcode() {
 	fi
 }
 
+## check_valgrind_logfile(logfile)
+# Check for any (unsuppressed) memory leaks recorded in a valgrind logfile.
+# Echo the filename if there's a leak; otherwise, echo nothing.
+check_valgrind_logfile() {
+	logfile=$1
+
+	# Bytes in use at exit.
+	in_use=$(grep "in use at exit:" "${logfile}" | awk '{print $6}')
+
+	# Sanity check.
+	if [ $(echo "${in_use}" | wc -w) -ne "1" ]; then
+		echo "Programmer error: invalid number valgrind outputs" 1>&2
+		exit 1
+	fi
+
+	# Check for any leaks.  Use string comparison, because valgrind formats
+	# the number with commas, and sh can't convert strings like "1,000"
+	# into an integer.
+	if [ "${in_use}" != "0" ] ; then
+		# Check if all of the leaked bytes are suppressed.  The extra
+		# whitespace in " suppressed" is necessary to distinguish
+		# between two instances of "suppressed" in the log file.  Use
+		# string comparison due to the format of the number.
+		suppressed=$(grep " suppressed:" "${logfile}" |	\
+		    awk '{print $3}')
+		if [ "${in_use}" != "${suppressed}" ]; then
+			# There is an unsuppressed leak.
+			echo "${logfile}"
+		fi
+	fi
+}
+
+## check_valgrind_basenames (exitfile):
+# Check for any memory leaks recorded in valgrind logfiles associated with a
+# test exitfile.  Return the filename if there's a leak; otherwise return an
+# empty string.
+check_valgrind_basenames() {
+	exitfile="$1"
+	val_basename=$( get_val_basename ${val_log_basename} ${exitfile} )
+
+	# Get list of files to check.  (Yes, the star goes outside the quotes.)
+	logfiles=$(ls "${val_basename}"* 2>/dev/null)
+	num_logfiles=$(echo "${logfiles}" | wc -w)
+
+	# Bail if we don't have any valgrind logfiles to check.
+	# Use numberic comparsion, because wc leaves a tab in the output.
+	if [ "${num_logfiles}" -eq "0" ] ; then
+		return
+	fi
+
+	# Check a single file.
+	if [ "${num_logfiles}" -eq "1" ]; then
+		check_valgrind_logfile "${logfiles}"
+		return
+	fi
+
+	# If there's two files, there's a fork() -- likely within
+	# daemonize() -- so only pay attention to the child.
+	if [ "${num_logfiles}" -eq "2" ]; then
+		# Find both pids.
+		val_pids=""
+		for logfile in ${logfiles} ; do
+			val_pid=$(head -n 1 "${logfile}" | cut -d "=" -f 3)
+			val_pids="${val_pids} ${val_pid}"
+		done
+
+		# Find the logfile which has a parent in the list of pids.
+		for logfile in ${logfiles} ; do
+			val_parent_pid=$(grep "Parent PID:" "${logfile}" | \
+			    awk '{ print $4 }')
+			if [ "${val_pids#*$val_parent_pid}" !=		\
+			    "${val_pids}" ]; then
+				check_valgrind_logfile "${logfile}"
+				return "$?"
+			fi
+		done
+	fi
+
+	# Programmer error; hard bail.
+	echo "Programmer error: wrong number of valgrind logfiles!" 1>&2
+	exit 1
+}
+
 ## notify_success_or_fail (log_basename, val_log_basename):
 # Examine all "exit code" files beginning with ${log_basename} and
-# print "SUCCESS!" or "FAILED!" as appropriate.  If the test failed
-# with the code ${valgrind_exit_code}, output the appropriate
-# valgrind logfile to stdout.  If the test failed and ${VERBOSE}
-# is non-zero, print the description to stderr.
+# print "SUCCESS!", "FAILED!", "SKIP!", or "PARTIAL SUCCESS / SKIP!"
+# as appropriate.  Check any valgrind log files associated with the
+# test and print "FAILED!" if appropriate, along with the valgrind
+# logfile.  If the test failed and ${VERBOSE} is non-zero, print
+# the description to stderr.
 notify_success_or_fail() {
 	log_basename=$1
 	val_log_basename=$2
@@ -288,9 +394,9 @@ notify_success_or_fail() {
 		if [ "${ret}" -lt 0 ]; then
 			skip_exitfiles=$(( skip_exitfiles + 1 ))
 		fi
+		# Check for test failure.
 		if [ "${ret}" -gt 0 ]; then
 			echo "FAILED!"
-			retval=${ret}
 			if [ ${VERBOSE} -ne 0 ]; then
 				printf "File ${exitfile} contains exit" 1>&2
 				printf " code ${ret}.\n" 1>&2
@@ -298,16 +404,21 @@ notify_success_or_fail() {
 				printf "Test description: " 1>&2
 				cat ${descfile} 1>&2
 			fi
-			if [ "${ret}" -eq "${valgrind_exit_code}" ]; then
-				val_logfilename=$( get_val_logfile \
-					${val_log_basename} ${exitfile} )
-				cat ${val_logfilename}
-			fi
 			s_retval=${ret}
+			return
+		fi
+
+		# Check valgrind logfile(s).
+		val_failed="$(check_valgrind_basenames "${exitfile}")"
+		if [ -n "${val_failed}" ]; then
+			echo "FAILED!"
+			s_retval="${valgrind_exit_code}"
+			cat "${val_failed}"
 			return
 		fi
 	done
 
+	# Notify about skip or success.
 	if [ ${skip_exitfiles} -gt 0 ]; then
 		if [ ${skip_exitfiles} -eq ${total_exitfiles} ]; then
 			echo "SKIP!"

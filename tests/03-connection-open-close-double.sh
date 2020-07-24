@@ -27,7 +27,8 @@ scenario_cmd() {
 	) &
 
 	# Open another connection (before the first has closed).
-	setup_check_variables "multi open close"
+	# Don't check that we've already finished the previous test.
+	setup_check_variables "multi open close" 0
 	(
 		echo "" | ${nc_client_binary} ${src_sock}
 		echo $? > ${c_exitfile}

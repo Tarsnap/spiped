@@ -69,6 +69,7 @@ setup_spiped_decryption_server () {
 		-t ${dst_sock}			\
 		-p ${s_basename}-spiped-d.pid	\
 		-k /dev/null -o 1
+	echo "$?" > "${c_exitfile}"
 }
 
 ## setup_spiped_decryption_server(basename):
@@ -83,6 +84,7 @@ setup_spiped_encryption_server () {
 		-t ${mid_sock}			\
 		-p ${s_basename}-spiped-e.pid	\
 		-k /dev/null -o 1
+	echo "$?" > "${c_exitfile}"
 }
 
 ## servers_stop():
