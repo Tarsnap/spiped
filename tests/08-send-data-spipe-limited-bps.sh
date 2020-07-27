@@ -15,9 +15,9 @@ scenario_cmd() {
 
 	# Send a file through the rate-limited echo server.
 	setup_check_variables "spipe send rate-limited"
-	cat ${scriptdir}/lorem-send.txt				\
-		| ${c_valgrind_cmd}				\
+	${c_valgrind_cmd}					\
 		${spipe_binary} -t ${mid_sock} -k /dev/null	\
+		< ${scriptdir}/lorem-send.txt			\
 		> ${echo_limited_output}
 	echo $? > ${c_exitfile}
 
