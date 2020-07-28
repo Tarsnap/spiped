@@ -12,7 +12,7 @@ if ! [ ${PATH} = "$1" ]; then
 fi
 
 # Find directory of this script and the source files
-D=`dirname $0`
+D=$(dirname $0)
 
 if ! ${CC} -O2 $D/posix-cflags-filter.c 2>/dev/null; then
 	if ${CC} $D/posix-cflags-filter.c 2>/dev/null; then
