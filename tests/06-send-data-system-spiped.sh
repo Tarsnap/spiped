@@ -28,8 +28,7 @@ scenario_cmd() {
 	# Open and close a connection.
 	setup_check_variables "system spiped"
 	(
-		cat ${scriptdir}/lorem-send.txt |	\
-			${nc_client_binary} ${src_sock}
+		${nc_client_binary} ${src_sock} < ${scriptdir}/lorem-send.txt
 		echo $? > ${c_exitfile}
 	)
 

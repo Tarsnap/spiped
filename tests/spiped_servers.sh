@@ -92,11 +92,11 @@ setup_spiped_encryption_server () {
 servers_stop() {
 	# Signal spiped servers to stop
 	if [ -e ${s_basename}-spiped-e.pid ]; then
-		kill "`cat ${s_basename}-spiped-e.pid`"
+		kill "$(cat ${s_basename}-spiped-e.pid)"
 		rm ${s_basename}-spiped-e.pid
 	fi
 	if [ -e ${s_basename}-spiped-d.pid ]; then
-		kill "`cat ${s_basename}-spiped-d.pid`"
+		kill "$(cat ${s_basename}-spiped-d.pid)"
 		rm ${s_basename}-spiped-d.pid
 	fi
 

@@ -17,9 +17,9 @@ scenario_cmd() {
 	# Send data.
 	setup_check_variables "spipe send"
 	(
-		cat ${scriptdir}/lorem-send.txt | 		\
-			${c_valgrind_cmd} ${spipe_binary}	\
-			-t ${mid_sock} -k /dev/null
+		${c_valgrind_cmd} ${spipe_binary}		\
+			-t ${mid_sock} -k /dev/null		\
+			< ${scriptdir}/lorem-send.txt
 		echo $? > ${c_exitfile}
 	)
 
