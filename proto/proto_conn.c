@@ -137,7 +137,7 @@ err0:
 
 /**
  * proto_conn_drop(conn_cookie, reason):
- * Drop connection and frees memory associated with ${conn_cookie}, due to
+ * Drop connection and free memory associated with ${conn_cookie}, due to
  * ${reason}.  Return success or failure.
  */
 int
