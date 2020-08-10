@@ -84,7 +84,8 @@ workthread(void * cookie)
 /**
  * pushbits(in, out, thr):
  * Create a thread which copies data from ${in} to ${out} and
- * store the thread ID in ${thr}.
+ * store the thread ID in ${thr}.  If ${out} is a socket, disable
+ * writing to it after the thread exits.
  */
 int
 pushbits(int in, int out, pthread_t * thr)

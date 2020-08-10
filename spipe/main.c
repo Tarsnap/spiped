@@ -253,8 +253,9 @@ main(int argc, char * argv[])
 		goto err2;
 	}
 
-	/* sas_t is now owned by proto_conn. */
+	/* sas_t and s[1] are now owned by proto_conn. */
 	sas_t = NULL;
+	s[1] = -1;
 
 	/* Push bits from the socket to stdout. */
 	if (pushbits(s[0], STDOUT_FILENO, &ET.threads[1])) {
