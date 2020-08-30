@@ -27,7 +27,7 @@ usage(void)
 	    "-t <target socket> -k <key file>\n"
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
-	    "    [-p <pidfile>] [-r <rtime> | -R]\n"
+	    "    [-p <pidfile>] [-r <rtime> | -R] [--syslog]\n"
 	    "    [-u {<username> | <:groupname> | <username:groupname>}]\n"
 	    "       spiped -v\n");
 	exit(1);
@@ -80,6 +80,7 @@ main(int argc, char * argv[])
 	int opt_r_set = 0;
 	double opt_r = 0.0;
 	int opt_R = 0;
+	int opt_syslog = 0;
 	const char * opt_s = NULL;
 	const char * opt_t = NULL;
 	const char * opt_u = NULL;
@@ -177,6 +178,11 @@ main(int argc, char * argv[])
 				usage();
 			opt_s = optarg;
 			break;
+		GETOPT_OPT("--syslog"):
+			if (opt_syslog)
+				usage();
+			opt_syslog = 1;
+			break;
 		GETOPT_OPTARG("-t"):
 			if (opt_t)
 				usage();
@@ -257,9 +263,15 @@ main(int argc, char * argv[])
 	}
 
 	/* Daemonize early if we're going to wait for DNS to be ready. */
-	if (opt_D && !opt_F && daemonize(pidfilename)) {
-		warnp("Failed to daemonize");
-		goto err1;
+	if (opt_D && !opt_F) {
+		if (daemonize(pidfilename)) {
+			warnp("Failed to daemonize");
+			goto err1;
+		}
+
+		/* Send to syslog (if applicable). */
+		if (opt_syslog)
+			warnp_syslog(1);
 	}
 
 	/* Resolve source address. */
@@ -302,9 +314,14 @@ main(int argc, char * argv[])
 		goto err4;
 
 	/* Daemonize and write pid. */
-	if (!opt_D && !opt_F && daemonize(pidfilename)) {
-		warnp("Failed to daemonize");
-		goto err4;
+	if (!opt_D && !opt_F) {
+		if (daemonize(pidfilename)) {
+			warnp("Failed to daemonize");
+			goto err4;
+		}
+		/* Send to syslog (if applicable). */
+		if (opt_syslog)
+			warnp_syslog(1);
 	}
 
 	/* Drop privileges (if applicable). */
