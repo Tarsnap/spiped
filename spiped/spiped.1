@@ -38,6 +38,7 @@ spiped - secure pipe daemon
 .br
 [\-p <pidfile>]
 [\-r <rtime> | \-R]
+[\-\-syslog]
 .br
 [\-u <username> | <:groupname> | <username:groupname>]
 .br
@@ -154,6 +155,10 @@ Defaults to re-resolution every 60 seconds.
 .TP
 .B \-R
 Disable target address re-resolution.
+.TP
+.B \-\-syslog
+After daemonizing, send warnings to syslog instead of stderr.  Has
+no effect if -F (run in foreground) is used.
 .TP
 .B \-u <username> | <:groupname> | <username:groupname>
 After binding a socket, change the user to
