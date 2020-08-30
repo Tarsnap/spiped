@@ -103,16 +103,16 @@ if [ -n "$(${MAKEBSD} -V SRCS)" ]; then
 fi
 
 # Add test (if applicable)
-if grep -q "test:" Makefile.BSD ; then
+if grep -q "^test:" Makefile.BSD ; then
 	printf "\n" >> $OUT
-	awk '/test:/, /^$/' Makefile.BSD |			\
+	awk '/^test:/, /^$/' Makefile.BSD |			\
 	    awk '$1' >> $OUT
 fi
 
 # Add all_extra (if applicable)
-if grep -q "all_extra:" Makefile.BSD ; then
+if grep -q "^all_extra:" Makefile.BSD ; then
 	printf "\n" >> $OUT
-	awk '/all_extra:/, /^$/' Makefile.BSD |		\
+	awk '/^all_extra:/, /^$/' Makefile.BSD |		\
 	    awk '$1' >> $OUT
 	sed -e 's/${MAKE} ${PROG}/${MAKE} ${PROG} all_extra/'	\
 	    Makefile > Makefile.new
@@ -120,11 +120,11 @@ if grep -q "all_extra:" Makefile.BSD ; then
 fi
 
 # Add clean_extra (if applicable)
-if grep -q "clean_extra:" Makefile.BSD ; then
+if grep -q "^clean_extra:" Makefile.BSD ; then
 	printf "\n" >> $OUT
-	awk '/clean_extra:/, /^$/' Makefile.BSD |		\
+	awk '/^clean_extra:/, /^$/' Makefile.BSD |		\
 	    awk '$1' >> $OUT
-	awk '/clean:/ {print $0 "\tclean_extra";next}{print}'	\
+	awk '/^clean:/ {print $0 "\tclean_extra";next}{print}'	\
 	    Makefile > Makefile.new
 	mv Makefile.new Makefile
 fi
