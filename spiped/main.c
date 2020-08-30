@@ -257,9 +257,11 @@ main(int argc, char * argv[])
 	}
 
 	/* Daemonize early if we're going to wait for DNS to be ready. */
-	if (opt_D && !opt_F && daemonize(pidfilename)) {
-		warnp("Failed to daemonize");
-		goto err1;
+	if (opt_D && !opt_F) {
+		if (daemonize(pidfilename)) {
+			warnp("Failed to daemonize");
+			goto err1;
+		}
 	}
 
 	/* Resolve source address. */
@@ -302,9 +304,11 @@ main(int argc, char * argv[])
 		goto err4;
 
 	/* Daemonize and write pid. */
-	if (!opt_D && !opt_F && daemonize(pidfilename)) {
-		warnp("Failed to daemonize");
-		goto err4;
+	if (!opt_D && !opt_F) {
+		if (daemonize(pidfilename)) {
+			warnp("Failed to daemonize");
+			goto err4;
+		}
 	}
 
 	/* Drop privileges (if applicable). */
