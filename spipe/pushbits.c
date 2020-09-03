@@ -24,9 +24,6 @@ workthread_cleanup(void * cookie)
 {
 	struct push * P = cookie;
 
-	/* Close the descriptor (we either hit EOF, or received a cancel). */
-	close(P->in);
-
 	/*
 	 * Try to shut down the descriptor we're writing to.  Ignore ENOTSOCK,
 	 * since it might, indeed, not be a socket.
