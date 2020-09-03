@@ -317,6 +317,8 @@ err5:
 err4:
 	proto_conn_drop(conn_cookie, PROTO_CONN_CANCELLED);
 err3:
+	if (s[1] != -1)
+		close(s[1]);
 	close(s[0]);
 err2:
 	free(K);
