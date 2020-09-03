@@ -317,7 +317,7 @@ main(int argc, char * argv[])
 	if (!opt_D && !opt_F) {
 		if (daemonize(pidfilename)) {
 			warnp("Failed to daemonize");
-			goto err4;
+			goto err5;
 		}
 		/* Send to syslog (if applicable). */
 		if (opt_syslog)
@@ -327,7 +327,7 @@ main(int argc, char * argv[])
 	/* Drop privileges (if applicable). */
 	if (opt_u && setuidgid(opt_u, SETUIDGID_SGROUP_LEAVE_WARN)) {
 		warnp("Failed to drop privileges");
-		goto err4;
+		goto err5;
 	}
 
 	/* Start accepting connections. */
@@ -335,7 +335,7 @@ main(int argc, char * argv[])
 	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		goto err4;
+		goto err5;
 	}
 
 	/* dispatch is now maintaining sas_t and s. */
@@ -375,6 +375,9 @@ main(int argc, char * argv[])
 
 err6:
 	dispatch_shutdown(dispatch_cookie);
+err5:
+	if (s != -1)
+		close(s);
 err4:
 	free(K);
 err3:
