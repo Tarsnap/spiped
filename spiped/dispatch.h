@@ -29,13 +29,13 @@ void * dispatch_accept(int, const char *, double, struct sock_addr **, int, int,
 
 /**
  * dispatch_shutdown(dispatch_cookie):
- * Stops and frees memory associated with the ${dispatch_cookie}.
+ * Stop the server, free memory, and close the listening socket.
  */
 void dispatch_shutdown(void *);
 
 /**
  * dispatch_request_shutdown(dispatch_cookie):
- * Requests a shutdown: Stop accepting new connections and notify once
+ * Request a shutdown: Stop accepting new connections and notify once
  * every existing connection ended.
  */
 void dispatch_request_shutdown(void *);

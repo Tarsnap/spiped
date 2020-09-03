@@ -338,8 +338,9 @@ main(int argc, char * argv[])
 		goto err4;
 	}
 
-	/* dispatch is now maintaining sas_t. */
+	/* dispatch is now maintaining sas_t and s. */
 	sas_t = NULL;
+	s = -1;
 
 	/* Register a handler for SIGTERM. */
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
