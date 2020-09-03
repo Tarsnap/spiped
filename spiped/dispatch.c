@@ -298,7 +298,7 @@ err0:
 
 /**
  * dispatch_shutdown(dispatch_cookie):
- * Stops and frees memory associated with the ${dispatch_cookie}.
+ * Stop the server, free memory, and close the listening socket.
  */
 void
 dispatch_shutdown(void * dispatch_cookie)
@@ -321,12 +321,13 @@ dispatch_shutdown(void * dispatch_cookie)
 	if (A->T != NULL)
 		dnsthread_kill(A->T);
 	sock_addr_freelist(A->sas);
+	close(A->s);
 	free(A);
 }
 
 /**
  * dispatch_request_shutdown(dispatch_cookie):
- * Requests a shutdown: Stop accepting new connections and notify once
+ * Request a shutdown: Stop accepting new connections and notify once
  * every existing connection ended.
  */
 void
