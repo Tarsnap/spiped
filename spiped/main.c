@@ -346,7 +346,7 @@ main(int argc, char * argv[])
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
 	    dispatch_cookie)) {
 		warn0("Failed to start graceful_shutdown timer");
-		goto err5;
+		goto err6;
 	}
 
 	/*
@@ -355,7 +355,7 @@ main(int argc, char * argv[])
 	 */
 	if (events_spin(&conndone)) {
 		warnp("Error running event loop");
-		goto err5;
+		goto err6;
 	}
 
 	/* Stop accepting connections and shut down the dispatcher. */
@@ -373,7 +373,7 @@ main(int argc, char * argv[])
 	/* Success! */
 	exit(0);
 
-err5:
+err6:
 	dispatch_shutdown(dispatch_cookie);
 err4:
 	free(K);
