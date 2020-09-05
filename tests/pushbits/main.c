@@ -193,6 +193,20 @@ chain_one(void)
 	}
 	free(buf);
 
+	/* Clean up. */
+	if (close(in[1])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(out[0])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(out[1])) {
+		warnp("close");
+		goto err0;
+	}
+
 	/* Success! */
 	return (0);
 
@@ -294,6 +308,29 @@ chain_two(void)
 		goto err1;
 	}
 	free(buf);
+
+	/* Clean up. */
+	if (close(in[1])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(middle[0])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(middle[1])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(out[0])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(out[1])) {
+		warnp("close");
+		goto err0;
+	}
+
 
 	/* Success! */
 	return (0);
