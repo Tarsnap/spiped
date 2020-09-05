@@ -62,7 +62,7 @@ main(int argc, char ** argv)
 		goto err3;
 	}
 
-	/* Accept connections. */
+	/* Accept a connection. */
 	if ((socket_recv = accept(socket, NULL, NULL)) == -1) {
 		warnp("accept");
 		goto err3;
@@ -77,11 +77,13 @@ main(int argc, char ** argv)
 		goto err4;
 	}
 
-	/* Clean up. */
+	/* Close the connection. */
 	if (close(socket_recv)) {
 		warnp("close");
 		goto err3;
 	}
+
+	/* Clean up. */
 	if (close(socket)) {
 		warnp("close");
 		goto err2;
