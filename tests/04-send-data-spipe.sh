@@ -4,10 +4,12 @@
 # - establish a connection to a spiped server.
 # - send data via spipe
 # - the received file should match lorem-send.txt
+# - also, check that we quit immediately if we can't connect
 
 ### Constants
 c_valgrind_min=1
 ncat_output="${s_basename}-ncat-output.txt"
+bad_target_stderr="${s_basename}-bad-target-stderr.txt"
 
 ### Actual command
 scenario_cmd() {
@@ -40,4 +42,11 @@ scenario_cmd() {
 	else
 		echo 0
 	fi > ${c_exitfile}
+
+	# Should quit immediately if the target fails to connect.
+	setup_check_variables "spipe fail bad target"
+	${c_valgrind_cmd} ${spipe_binary}		\
+		-t /this-is-a-fake.socket -k /dev/null	\
+		2> "${bad_target_stderr}"
+	expected_exitcode 1 $? > ${c_exitfile}
 }
