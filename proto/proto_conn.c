@@ -203,7 +203,7 @@ proto_conn_drop(void * conn_cookie, int reason)
  * connecting to the target takes more than ${timeo} seconds.  When the
  * connection is dropped, invoke ${callback_dead}(${cookie}).  Free ${sas}
  * once it is no longer needed.  Return a cookie which can be passed to
- * proto_conn_drop.  If there is a connection error after this
+ * proto_conn_drop().  If there is a connection error after this
  * function returns, close ${s}.
  */
 void *

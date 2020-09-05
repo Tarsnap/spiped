@@ -70,7 +70,7 @@ handshakefail(struct handshake_cookie * H)
  * ${K}.  Upon completion, invoke ${callback}(${cookie}, f, r), where f
  * contains the keys needed for the forward direction and r contains the keys
  * needed for the reverse direction; or f = r = NULL if the handshake failed.
- * Return a cookie which can be passed to proto_handshake_cancel to cancel the
+ * Return a cookie which can be passed to proto_handshake_cancel() to cancel the
  * handshake.
  */
 void *
@@ -311,7 +311,7 @@ err0:
 
 /**
  * proto_handshake_cancel(cookie):
- * Cancel the handshake for which proto_handshake returned ${cookie}.
+ * Cancel the handshake for which proto_handshake() returned ${cookie}.
  */
 void
 proto_handshake_cancel(void * cookie)

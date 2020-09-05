@@ -10,14 +10,14 @@ struct proto_keys;
  * then use ${k} to decrypt the bytes; otherwise use ${k} to encrypt them.
  * If EOF is read, set ${status} to 0, and if an error is encountered set
  * ${status} to -1; in either case, invoke ${callback}(${cookie}).  Return a
- * cookie which can be passed to proto_pipe_cancel.
+ * cookie which can be passed to proto_pipe_cancel().
  */
 void * proto_pipe(int, int, int, struct proto_keys *, int *,
     int (*)(void *), void *);
 
 /**
  * proto_pipe_cancel(cookie):
- * Shut down the pipe created by proto_pipe for which ${cookie} was returned.
+ * Shut down the pipe created by proto_pipe() for which ${cookie} was returned.
  */
 void proto_pipe_cancel(void *);
 
