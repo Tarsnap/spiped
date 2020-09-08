@@ -64,11 +64,7 @@ callback_graceful_shutdown(void * cookie)
 	int rc;
 	int i;
 
-	/*
-	 * We need to cancel & join these threads in order, because otherwise
-	 * we risk thread[1] closing a socket before thread[0] tries to
-	 * shutdown() that socket.
-	 */
+	/* Cancel the threads. */
 	for (i = 0; i < 2; i++) {
 		if ((rc = pthread_cancel(ET->threads[i])) != 0) {
 			/*
@@ -83,6 +79,10 @@ callback_graceful_shutdown(void * cookie)
 				goto err0;
 			}
 		}
+	}
+
+	/* Wait for the threads to finish. */
+	for (i = 0; i < 2; i++) {
 		if ((rc = pthread_join(ET->threads[i], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
 			goto err0;
