@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <signal.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -110,4 +111,27 @@ graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
 err0:
 	/* Failure! */
 	return (-1);
+}
+
+/**
+ * graceful_shutdown_manual(void):
+ * Shutdown immediately, without needing a SIGTERM.
+ */
+void
+graceful_shutdown_manual(void)
+{
+
+	/* Sanity check: we must be initialized. */
+	assert(begin_shutdown != NULL);
+	assert(caller_cookie != NULL);
+
+	/* Stop the timer. */
+	if (timer_cookie != NULL) {
+		events_timer_cancel(timer_cookie);
+		timer_cookie = NULL;
+	}
+
+	/* Shut down. */
+	should_shutdown = 1;
+	graceful_shutdown(NULL);
 }

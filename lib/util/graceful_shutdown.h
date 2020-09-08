@@ -9,4 +9,10 @@
  */
 int graceful_shutdown_initialize(int (*)(void *), void *);
 
+/**
+ * graceful_shutdown_manual(void):
+ * Shutdown immediately, without needing a SIGTERM.
+ */
+void graceful_shutdown_manual(void);
+
 #endif /* !_GRACEFUL_SHUTDOWN_H_ */
