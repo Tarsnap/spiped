@@ -10,15 +10,15 @@ typedef struct dnsthread_internal * DNSTHREAD;
 /**
  * dnsthread_spawn(void):
  * Spawn a thread for performing address resolution.  Return a token which can
- * be passed to dnsthread_resolveone and dnsthread_kill.
+ * be passed to dnsthread_resolveone() and dnsthread_kill().
  */
 DNSTHREAD dnsthread_spawn(void);
 
 /**
  * dnsthread_resolveone(T, addr, callback, cookie):
- * Using the thread for which ${T} was returned by dnsthread_spawn, resolve
- * the address ${addr}, which must be in one of the forms accepted by the
- * sock_resolve function.  If ${T} is already resolving an address, do not
+ * Using the thread for which ${T} was returned by dnsthread_spawn(), resolve
+ * the address ${addr}, which must be in one of the forms accepted by
+ * sock_resolve().  If ${T} is already resolving an address, do not
  * resolve this address and instead return with errno == EALREADY.  Upon
  * completion, invoke ${callback}(${cookie}, sas), where ${sas} is a
  * NULL-terminated array of pointers to sock_addr structures or NULL on

@@ -230,9 +230,9 @@ err0:
  * perfect forward secrecy.  Enable transport layer keep-alives (if applicable)
  * if and only if ${nokeepalive} is zero.  Drop connections if the handshake or
  * connecting to the target takes more than ${timeo} seconds.  If
- * dispatch_request_shutdown is called then ${conndone} is set to a non-zero
+ * dispatch_request_shutdown() is called then ${conndone} is set to a non-zero
  * value as soon as there are no active connections.  Return a cookie which can
- * be passed to dispatch_shutdown and dispatch_request_shutdown.
+ * be passed to dispatch_shutdown() and dispatch_request_shutdown().
  */
 void *
 dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
