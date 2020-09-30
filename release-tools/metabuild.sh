@@ -109,6 +109,13 @@ if grep -q "^test:" Makefile.BSD ; then
 	    awk '$1' >> $OUT
 fi
 
+# Add perftest (if applicable)
+if grep -q "^perftest:" Makefile.BSD ; then
+	printf "\n" >> $OUT
+	awk '/^perftest:/, /^$/' Makefile.BSD |			\
+	    awk '$1' >> $OUT
+fi
+
 # Add all_extra (if applicable)
 if grep -q "^all_extra:" Makefile.BSD ; then
 	printf "\n" >> $OUT
