@@ -207,58 +207,62 @@ static int
 string_extract_user_group(const char * combined, char ** username_p,
     char ** groupname_p)
 {
-	size_t pos;
-	size_t len;
+	const char * s;
+	size_t username_len;
 
 	/* Sanity check. */
 	assert(combined != NULL);
 
-	/* Search for ":" and get string length. */
-	pos = strcspn(combined, ":");
-	len = strlen(combined);
-
-	/* Reject silly strings. */
-	if (pos == len - 1) {
-		warn0("Empty group name: %s", combined);
-		goto err0;
-	}
-
-	/* String ok, proceed. */
-	if (pos == 0) {
-		/* Groupname only; duplicate string. */
-		if ((*groupname_p = strdup(&combined[1])) == NULL) {
-			warnp("strdup()");
+	/* If there's a ':', what follows is the group name. */
+	if ((s = strchr(combined, ':')) != NULL) {
+		/* Duplicate the group name. */
+		if ((*groupname_p = strdup(&s[1])) == NULL) {
+			warnp("strdup");
 			goto err0;
-		}
-		*username_p = NULL;
-	} else if (pos != len) {
-		/* Extract username. */
-		if ((*username_p = malloc(pos + 1)) == NULL) {
-			warnp("Failed to allocate memory");
-			goto err0;
-		}
-		memcpy(*username_p, combined, pos);
-		(*username_p)[pos] = '\0';
-
-		/* Extract groupname. */
-		if ((*groupname_p = strdup(&combined[pos + 1])) == NULL) {
-			warnp("strdup()");
-			goto err1;
 		}
 	} else {
-		/* Duplicate string. */
-		if ((*username_p = strdup(combined)) == NULL) {
-			warnp("strdup()");
-			goto err0;
-		}
+		/* No group name. */
 		*groupname_p = NULL;
+
+		/* User name includes everything prior to terminating NUL. */
+		s = &combined[strlen(combined)];
+	}
+
+	/* Anything prior to the ':' or terminating NUL is the user name. */
+	if (s > combined) {
+		username_len = (size_t)(s - combined);
+
+		/* Duplicate the user name. */
+		if ((*username_p = malloc(username_len + 1)) == NULL) {
+			warnp("malloc");
+			goto err1;
+		}
+		memcpy(*username_p, combined, username_len);
+		(*username_p)[username_len] = '\0';
+	} else {
+		/* No user name. */
+		*username_p = NULL;
+	}
+
+	/* Reject empty group names. */
+	if ((*groupname_p != NULL) && (strlen(*groupname_p) == 0)) {
+		warn0("Empty group name: \"%s\"", combined);
+		goto err2;
+	}
+
+	/* Reject strings with neither user nor group. */
+	if ((*groupname_p == NULL) && (*username_p == NULL)) {
+		warn0("Need to specify user and/or group: \"%s\"", combined);
+		goto err2;
 	}
 
 	/* Success! */
 	return (0);
 
-err1:
+err2:
 	free(*username_p);
+err1:
+	free(*groupname_p);
 err0:
 	/* Failure! */
 	return (-1);
