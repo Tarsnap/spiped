@@ -1,44 +1,3 @@
-/* We use non-POSIX functionality in this file. */
-#undef _POSIX_C_SOURCE
-#undef _XOPEN_SOURCE
-
-/*
- * There is no setgroups() in the POSIX standard, so if we want to drop
- * supplementary groups, we need to use platform-specific code.  This must
- * happen before the regular includes, as in some cases we need to define other
- * symbols before including the relevant header.
- */
-#if defined(__linux__)
-/* setgroups() includes for Linux. */
-#define _BSD_SOURCE 1
-#define _DEFAULT_SOURCE 1
-
-#include <grp.h>
-
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-/* setgroups() includes for FreeBSD, NetBSD, MacOS X. */
-#include <sys/param.h>
-#include <unistd.h>
-
-#elif defined(__OpenBSD__) || defined(__osf__)
-/* setgroups() includes for OpenBSD. */
-#include <sys/types.h>
-#include <unistd.h>
-
-#elif defined(__sun) || defined(__hpux)
-/* setgroups() includes for Solaris. */
-#include <unistd.h>
-
-#elif defined(_AIX)
-/* setgroups() includes for AIX. */
-#include <grp.h>
-
-#else
-/* Unknown OS; we don't know how to get setgroups(). */
-#define NO_SETGROUPS
-
-#endif /* end includes for setgroups() */
-
 #include <assert.h>
 #include <errno.h>
 #include <grp.h>
@@ -49,34 +8,18 @@
 #include <unistd.h>
 
 #include "parsenum.h"
+#include "setgroups_none.h"
 #include "warnp.h"
 
 #include "setuidgid.h"
 
 /* Function prototypes related to supplementary groups. */
-static int setgroups_none(void);
 static int check_supplementary_groups_none(void);
 
 /* Function prototypes related to uid and gid. */
 static int set_group(const char *);
 static int set_user(const char *);
 static int string_extract_user_group(const char *, char **, char **);
-
-/**
- * setgroups_none(void):
- * Attempt to leave all supplementary groups.  If we do not know how to do this
- * on the platform, return 0 anyway.
- */
-static int
-setgroups_none(void)
-{
-
-#ifdef NO_SETGROUPS
-	return (0);
-#else
-	return (setgroups(0, NULL));
-#endif
-}
 
 /* Check if we're in any supplementary groups. */
 static int
