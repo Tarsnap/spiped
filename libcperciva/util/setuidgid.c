@@ -71,21 +71,11 @@ static int
 setgroups_none(void)
 {
 
-#ifndef NO_SETGROUPS
-	if (setgroups(0, NULL)) {
-		/* We handle EPERM separately; keep it in errno. */
-		if (errno != EPERM)
-			warnp("setgroups()");
-		goto err0;
-	}
-#endif
-
-	/* Success! */
+#ifdef NO_SETGROUPS
 	return (0);
-
-err0:
-	/* Failure! */
-	return (-1);
+#else
+	return (setgroups(0, NULL));
+#endif
 }
 
 /* Check if we're in any supplementary groups. */
@@ -300,6 +290,12 @@ setuidgid(const char * user_group_string, int leave_suppgrp)
 	if (leave_suppgrp != SETUIDGID_SGROUP_IGNORE) {
 		/* Attempt to leave all supplementary groups. */
 		if (setgroups_none()) {
+			if (errno != EPERM) {
+				warnp("setgroups()");
+				goto err1;
+			}
+
+			/* We handle EPERM separately; keep it in errno. */
 			if (leave_suppgrp == SETUIDGID_SGROUP_LEAVE_ERROR)
 				goto err1;
 		}
