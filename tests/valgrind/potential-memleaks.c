@@ -64,15 +64,25 @@ main(int argc, char * argv[])
 	if (argc == 2) {
 		/* Run the relevant function. */
 		for (i = 0; i < num_tests; i++) {
-			if ((strcmp(argv[1], tests[i].name)) == 0)
+			if ((strcmp(argv[1], tests[i].name)) == 0) {
 				tests[i].func();
+				goto success;
+			}
 		}
+
+		/* We didn't find the desired function name. */
+		goto err0;
 	} else {
 		/* Print test names. */
 		for (i = 0; i < num_tests; i++)
 			printf("%s\n", tests[i].name);
 	}
 
+success:
 	/* Success! */
 	exit(0);
+
+err0:
+	/* Failure! */
+	exit(1);
 }
