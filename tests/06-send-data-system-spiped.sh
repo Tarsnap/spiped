@@ -14,7 +14,7 @@ ncat_output="${s_basename}-ncat-output.txt"
 ### Actual command
 scenario_cmd() {
 	if [ ! -n "${system_spiped_binary}" ]; then
-		printf "no system spiped, or it is too old... "
+		printf "no system spiped, or it is too old... " 1>&2
 		# Suppress warning
 		setup_check_variables "system spiped skip"
 		echo "-1" > ${c_exitfile}
