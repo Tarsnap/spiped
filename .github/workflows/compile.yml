@@ -1,0 +1,63 @@
+name: Compile & test
+
+# Run whenever we push to any branch without a "/", other than [coverity-scan].
+on:
+  push:
+    branches:
+    - '*'
+    - '!coverity-scan'
+
+# Some projects need -std=c99 to specify library support for ./configure.
+env:
+  CFLAGS_ALL: "-std=c99 -O2"
+
+jobs:
+  Compile-test-Ubuntu:
+    name: Compile on Ubuntu
+    # Ubuntu 16.04 comes with valgrind-3.11, which can't handle RDRAND
+    # instructions.  We need at least Ubuntu 18.04, which has valgrind-3.13.
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Install valgrind
+      run:
+        sudo apt-get install --no-install-recommends valgrind
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Compile with clang
+      env:
+        CC: clang
+        CFLAGS_STRICT: "-Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command"
+        CFLAGS_STRICT_EXTRA: "-Wno-implicit-fallthrough -Wno-thread-safety-analysis -Wno-extra-semi-stmt"
+      run: make CFLAGS="${CFLAGS_ALL} ${CFLAGS_STRICT} ${CFLAGS_STRICT_EXTRA}"
+    - name: Test clang binaries
+      env:
+        USE_VALGRIND: 1
+      run: make test
+    - name: Clean
+      run: make clean
+    - name: Compile with gcc
+      env:
+        CC: gcc
+        CFLAGS_STRICT: "-Wall -Wextra -Werror -Wpedantic -pedantic-errors -Wno-clobbered"
+        CFLAGS: "${CFLAGS_ALL} ${CFLAGS_STRICT}"
+      run: make CFLAGS="${CFLAGS_ALL} ${CFLAGS_STRICT}"
+    - name: Test gcc binaries
+      env:
+        USE_VALGRIND: 1
+      run: make test
+  Compile-test-macOS:
+    name: Compile on macOS
+    runs-on: macOS-10.15
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Compile with clang
+      env:
+        CC: clang
+        CFLAGS_OPENSSL: "-I/usr/local/opt/openssl/include"
+        CFLAGS_STRICT: "-Wall -Wextra -Werror -Weverything -Wno-#warnings -Wno-pedantic -Wno-padded -Wno-format-nonliteral -Wno-disabled-macro-expansion -Wno-missing-noreturn -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command"
+        CFLAGS_STRICT_EXTRA: "-Wno-poison-system-directories"
+        LDADD_EXTRA: "-L/usr/local/opt/openssl/lib"
+      run: make CFLAGS="${CFLAGS_ALL} ${CFLAGS_STRICT} ${CFLAGS_STRICT_EXTRA} ${CFLAGS_OPENSSL}"
+    - name: Tests clang binaries
+      run: make test
