@@ -1,0 +1,25 @@
+name: coverity-scan
+
+# Only trigger on the [coverity-scan] branch.
+on:
+  push:
+    branches:
+      - coverity-scan
+
+# Run coverity scan.  For now, we're re-using the Travis-CI script, which
+# requires us to fake a TRAVIS_BRANCH environment variable.
+jobs:
+  coverity-scan:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Coverity scan
+        env:
+          COVERITY_SCAN_PROJECT_NAME: ${{ github.repository }}
+          COVERITY_SCAN_BRANCH_PATTERN: coverity-scan
+          COVERITY_SCAN_NOTIFICATION_EMAIL: cperciva@tarsnap.com
+          COVERITY_SCAN_BUILD_COMMAND: make all
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          TRAVIS_BRANCH: coverity-scan
+        run: curl -s "https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh" | bash || true
