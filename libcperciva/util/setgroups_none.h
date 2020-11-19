@@ -8,4 +8,4 @@
  */
 int setgroups_none(void);
 
-#endif /* !_SETUPGROUPS_NONE_H_ */
+#endif /* !_SETGROUPS_NONE_H_ */
