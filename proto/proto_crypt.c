@@ -28,8 +28,13 @@ struct proto_keys {
  * mkkeypair(kbuf):
  * Convert the 64 bytes of ${kbuf} into a protocol key structure.
  */
+#ifdef STANDALONE_ENC_TESTING
+struct proto_keys *
+mkkeypair(uint8_t kbuf[64])
+#else
 static struct proto_keys *
 mkkeypair(uint8_t kbuf[64])
+#endif
 {
 	struct proto_keys * k;
 
