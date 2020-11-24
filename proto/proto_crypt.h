@@ -103,4 +103,12 @@ ssize_t proto_crypt_dec(uint8_t[PCRYPT_ESZ], uint8_t *, struct proto_keys *);
  */
 void proto_crypt_free(struct proto_keys *);
 
+#ifdef STANDALONE_ENC_TESTING
+/**
+ * mkkeypair(kbuf):
+ * Convert the 64 bytes of ${kbuf} into a protocol key structure.
+ */
+struct proto_keys * mkkeypair(uint8_t kbuf[64]);
+#endif
+
 #endif /* !_PROTO_CRYPT_H_ */
