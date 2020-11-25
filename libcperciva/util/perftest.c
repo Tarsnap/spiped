@@ -103,7 +103,7 @@ perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
 		speed = (double)nbytes_in_buffer / 1e6 / delta_s[i];
 
 		/* Print output. */
-		printf("%zu blocks of size %zu\t%.06f s\t%.01f MB/s\n",
+		printf("%zu blocks of size %zu\t%.06f s\t%.06f MB/s\n",
 		    num_buffers, buflen, delta_s[i], speed);
 	}
 
