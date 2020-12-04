@@ -109,15 +109,19 @@ proto_crypt_secret(const char * filename)
 	if (f != stdin)
 		fclose(f);
 
-	/* Compute the final hash. */
+	/* Compute the final hash and wipe context state. */
 	SHA256_Final(K->K, &ctx);
 
 	/* Success! */
 	return (K);
 
 err2:
+	/* Close the file if it isn't stdin. */
 	if (f != stdin)
 		fclose(f);
+
+	/* Wipe context state. */
+	SHA256_Final(K->K, &ctx);
 err1:
 	free(K);
 err0:
