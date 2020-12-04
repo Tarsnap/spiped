@@ -98,6 +98,12 @@ void proto_crypt_enc(uint8_t *, size_t, uint8_t[PCRYPT_ESZ],
 ssize_t proto_crypt_dec(uint8_t[PCRYPT_ESZ], uint8_t *, struct proto_keys *);
 
 /**
+ * proto_crypt_secret_free(K):
+ * Free the protocol secret structure ${K}.
+ */
+void proto_crypt_secret_free(struct proto_secret *);
+
+/**
  * proto_crypt_free(k):
  * Free the protocol key structure ${k}.
  */
