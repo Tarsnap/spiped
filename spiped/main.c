@@ -362,7 +362,7 @@ main(int argc, char * argv[])
 	dispatch_shutdown(dispatch_cookie);
 
 	/* Free the protocol secret structure. */
-	free(K);
+	proto_crypt_secret_free(K);
 
 	/* Free arrays of resolved addresses. */
 	sock_addr_freelist(sas_s);
@@ -379,7 +379,7 @@ err5:
 	if (s != -1)
 		close(s);
 err4:
-	free(K);
+	proto_crypt_secret_free(K);
 err3:
 	sock_addr_freelist(sas_t);
 err2:
