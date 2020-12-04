@@ -44,21 +44,24 @@ pl_freebsd_printf_space_newline(void)
 
 /* Part of the pthread init. */
 static void *
-do_nothing(void * cookie)
+pl_workthread_nothing(void * cookie)
 {
 
-	(void)cookie;
+	(void)cookie; /* UNUSED */
 	return (NULL);
 }
 
 /* Problem with FreeBSD 11.0 and creating/freeing a thread. */
 static void
-pl_freebsd_pthread(void)
+pl_freebsd_pthread_nothing(void)
 {
-	pthread_t thread;
+	pthread_t thr;
+	int rc;
 
-	pthread_create(&thread, NULL, do_nothing, NULL);
-	pthread_join(thread, NULL);
+	if ((rc = pthread_create(&thr, NULL, pl_workthread_nothing, NULL)))
+		fprintf(stderr, "pthread_create: %s", strerror(rc));
+	if ((rc = pthread_join(thr, NULL)))
+		fprintf(stderr, "pthread_join: %s", strerror(rc));
 }
 
 #define MEMLEAKTEST(x) { #x, x }
@@ -70,7 +73,7 @@ static const struct memleaktest {
 	MEMLEAKTEST(pl_freebsd_strlen),
 	MEMLEAKTEST(pl_freebsd_printf_space),
 	MEMLEAKTEST(pl_freebsd_printf_space_newline),
-	MEMLEAKTEST(pl_freebsd_pthread)
+	MEMLEAKTEST(pl_freebsd_pthread_nothing)
 };
 static const int num_tests = sizeof(tests) / sizeof(tests[0]);
 
