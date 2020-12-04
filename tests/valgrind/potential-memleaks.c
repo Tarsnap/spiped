@@ -26,6 +26,22 @@ pl_freebsd_strlen(void)
 	(void)len;
 }
 
+/* Problem with FreeBSD 12.1 and printf(). */
+static void
+pl_freebsd_printf_space(void)
+{
+ 
+	printf(" ");
+}
+
+/* Problem with FreeBSD 12.1 and printf(). */
+static void
+pl_freebsd_printf_space_newline(void)
+{
+
+	printf(" \n");
+}
+
 /* Part of the pthread init. */
 static void *
 do_nothing(void * cookie)
@@ -52,6 +68,8 @@ static const struct memleaktest {
 } tests[] = {
 	MEMLEAKTEST(pl_freebsd_link_lrt),
 	MEMLEAKTEST(pl_freebsd_strlen),
+	MEMLEAKTEST(pl_freebsd_printf_space),
+	MEMLEAKTEST(pl_freebsd_printf_space_newline),
 	MEMLEAKTEST(pl_freebsd_pthread)
 };
 static const int num_tests = sizeof(tests) / sizeof(tests[0]);
