@@ -300,7 +300,7 @@ main(int argc, char * argv[])
 
 	/* Clean up. */
 	close(s[0]);
-	free(K);
+	proto_crypt_secret_free(K);
 
 	/* Handle a connection error. */
 	if (ET.connection_error)
@@ -326,7 +326,7 @@ err3:
 		close(s[1]);
 	close(s[0]);
 err2:
-	free(K);
+	proto_crypt_secret_free(K);
 err1:
 	sock_addr_freelist(sas_t);
 err0:

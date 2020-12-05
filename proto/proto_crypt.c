@@ -8,6 +8,7 @@
 #include "crypto_aes.h"
 #include "crypto_aesctr.h"
 #include "crypto_verify_bytes.h"
+#include "insecure_memzero.h"
 #include "sha256.h"
 #include "sysendian.h"
 #include "warnp.h"
@@ -109,17 +110,21 @@ proto_crypt_secret(const char * filename)
 	if (f != stdin)
 		fclose(f);
 
-	/* Compute the final hash. */
+	/* Compute the final hash and wipe context state. */
 	SHA256_Final(K->K, &ctx);
 
 	/* Success! */
 	return (K);
 
 err2:
+	/* Close the file if it isn't stdin. */
 	if (f != stdin)
 		fclose(f);
+
+	/* Wipe context state. */
+	SHA256_Final(K->K, &ctx);
 err1:
-	free(K);
+	proto_crypt_secret_free(K);
 err0:
 	/* Failure! */
 	return (NULL);
@@ -390,6 +395,25 @@ proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
 
 	/* Return the decrypted length. */
 	return ((ssize_t)len);
+}
+
+/**
+ * proto_crypt_secret_free(K):
+ * Free the protocol secret structure ${K}.
+ */
+void
+proto_crypt_secret_free(struct proto_secret * K)
+{
+
+	/* Be compatible with free(NULL). */
+	if (K == NULL)
+		return;
+
+	/* Clear secret from the memory. */
+	insecure_memzero(K, sizeof(struct proto_secret));
+
+	/* Free the key structure. */
+	free(K);
 }
 
 /**
