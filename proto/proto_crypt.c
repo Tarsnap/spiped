@@ -21,6 +21,7 @@ struct proto_secret {
 
 struct proto_keys {
 	struct crypto_aes_key * k_aes;
+	HMAC_SHA256_CTX ctx_init;
 	uint8_t k_hmac[32];
 	uint64_t pnum;
 };
@@ -49,6 +50,9 @@ mkkeypair(uint8_t kbuf[64])
 
 	/* Fill in HMAC key. */
 	memcpy(k->k_hmac, &kbuf[32], 32);
+
+	/* Initialize the HMAC_SHA256 context. */
+	HMAC_SHA256_Init(&k->ctx_init, k->k_hmac, 32);
 
 	/* The first packet will be packet number zero. */
 	k->pnum = 0;
@@ -342,9 +346,11 @@ proto_crypt_enc(uint8_t * ibuf, size_t len, uint8_t obuf[PCRYPT_ESZ],
 	/* Encrypt the buffer in-place. */
 	crypto_aesctr_buf(k->k_aes, k->pnum, obuf, obuf, PCRYPT_MAXDSZ + 4);
 
+	/* Copy the original (initialized) context. */
+	memcpy(&ctx, &k->ctx_init, sizeof(HMAC_SHA256_CTX));
+
 	/* Append an HMAC. */
 	be64enc(pnum_exp, k->pnum);
-	HMAC_SHA256_Init(&ctx, k->k_hmac, 32);
 	HMAC_SHA256_Update(&ctx, obuf, PCRYPT_MAXDSZ + 4);
 	HMAC_SHA256_Update(&ctx, pnum_exp, 8);
 	HMAC_SHA256_Final(&obuf[PCRYPT_MAXDSZ + 4], &ctx);
@@ -368,9 +374,11 @@ proto_crypt_dec(uint8_t ibuf[PCRYPT_ESZ], uint8_t * obuf,
 	uint8_t pnum_exp[8];
 	size_t len;
 
+	/* Copy the original (initialized) context. */
+	memcpy(&ctx, &k->ctx_init, sizeof(HMAC_SHA256_CTX));
+
 	/* Verify HMAC. */
 	be64enc(pnum_exp, k->pnum);
-	HMAC_SHA256_Init(&ctx, k->k_hmac, 32);
 	HMAC_SHA256_Update(&ctx, ibuf, PCRYPT_MAXDSZ + 4);
 	HMAC_SHA256_Update(&ctx, pnum_exp, 8);
 	HMAC_SHA256_Final(hbuf, &ctx);
