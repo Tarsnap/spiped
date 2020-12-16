@@ -22,7 +22,6 @@ struct proto_secret {
 struct proto_keys {
 	struct crypto_aes_key * k_aes;
 	HMAC_SHA256_CTX ctx_init;
-	uint8_t k_hmac[32];
 	uint64_t pnum;
 };
 
@@ -48,11 +47,8 @@ mkkeypair(uint8_t kbuf[64])
 	if ((k->k_aes = crypto_aes_key_expand(&kbuf[0], 32)) == NULL)
 		goto err1;
 
-	/* Fill in HMAC key. */
-	memcpy(k->k_hmac, &kbuf[32], 32);
-
 	/* Initialize the HMAC_SHA256 context. */
-	HMAC_SHA256_Init(&k->ctx_init, k->k_hmac, 32);
+	HMAC_SHA256_Init(&k->ctx_init, &kbuf[32], 32);
 
 	/* The first packet will be packet number zero. */
 	k->pnum = 0;
