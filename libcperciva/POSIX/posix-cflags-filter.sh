@@ -1,5 +1,7 @@
-# Should be sourced by `command -p sh posix-cflags-filter.sh "$PATH"` from within a Makefile
-# Produces a file to be sourced which edits CFLAGS
+# Should be sourced by
+#     command -p sh posix-cflags-filter.sh "$PATH"
+# from within a Makefile.
+# Produces a file to be sourced which edits CFLAGS.
 
 # Sanity check environment variables
 if [ -z "${CC}" ]; then
