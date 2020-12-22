@@ -43,6 +43,11 @@ scenario_cmd() {
 		echo 0
 	fi > ${c_exitfile}
 
+	# Disable normal valgrind use: the "spipe fail bad target" test
+	# invokes an exit(1); in pushbits.c, which does not attempt to
+	# clean up after itself.
+	c_valgrind_min=2
+
 	# Should quit immediately if the target fails to connect.
 	setup_check_variables "spipe fail bad target"
 	${c_valgrind_cmd} ${spipe_binary}		\
