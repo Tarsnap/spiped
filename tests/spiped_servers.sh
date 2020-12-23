@@ -12,18 +12,18 @@ check_leftover_servers() {
 	# Find old nc-server on ${dst_sock}.
 	if [ -n "${nc_server_binary+set}" ]; then
 		if has_pid "${nc_server_binary} ${dst_sock}" ; then
-			echo "Error: Left-over nc-server from previous run."
+			echo "Error: Left-over nc-server from previous run." 1>&2
 			exit 1
 		fi
 	fi
 
 	# Find old spiped {-d, -e} servers on {${mid_sock}, ${src_sock}}.
 	if has_pid "spiped -d -s ${mid_sock}" ; then
-		echo "Error: Left-over spiped -d from previous run."
+		echo "Error: Left-over spiped -d from previous run." 1>&2
 		exit 1
 	fi
 	if has_pid "spiped -e -s ${src_sock}" ; then
-		echo "Error: Left-over spiped -e from previous run."
+		echo "Error: Left-over spiped -e from previous run." 1>&2
 		exit 1
 	fi
 }
@@ -106,22 +106,31 @@ servers_stop() {
 	# Waiting for servers to stop
 	while has_pid "spiped -e -s ${src_sock}" ; do
 		if [ ${VERBOSE} -ne 0 ]; then
-			echo "Waiting to stop: spiped -e"
+			echo "Waiting to stop: spiped -e" 1>&2
 		fi
 		sleep 1
 	done
 	while has_pid "spiped -d -s ${mid_sock}" ; do
 		if [ ${VERBOSE} -ne 0 ]; then
-			echo "Waiting to stop: spiped -d"
+			echo "Waiting to stop: spiped -d" 1>&2
 		fi
 		sleep 1
 	done
 	if [ -n "${nc_server_binary+set}" ]; then
 		while has_pid "${nc_server_binary} ${dst_sock}" ; do
 			if [ ${VERBOSE} -ne 0 ]; then
-				echo "Waiting to stop: ncat"
+				echo "Waiting to stop: ncat" 1>&2
 			fi
 			sleep 1
 		done
+	fi
+
+	# Give valgrind a chance to finish writing files
+	if [ -n "${c_valgrind_cmd}" ]; then
+		if [ "${VERBOSE}" -ne 0 ]; then
+			printf "Giving extra time for valgrind to write"
+			printf " the logfile\n" 1>&2
+		fi
+		sleep 1
 	fi
 }
