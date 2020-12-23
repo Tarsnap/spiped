@@ -1,7 +1,14 @@
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#include <netinet/in.h>
+
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <netdb.h>
+#include <time.h>
 
 /* Problem with FreeBSD 11.0 merely linking with -lrt. */
 static void
@@ -26,23 +33,111 @@ pl_freebsd_strlen(void)
 	(void)len;
 }
 
-/* Part of the pthread init. */
-static void *
-do_nothing(void * cookie)
+/* Problem with FreeBSD 12.1 and printf(). */
+static void
+pl_freebsd_printf_space(void)
+{
+ 
+	printf(" ");
+}
+
+/* Problem with FreeBSD 12.1 and printf(). */
+static void
+pl_freebsd_printf_space_newline(void)
 {
 
-	(void)cookie;
+	printf(" \n");
+}
+
+/* Part of the pthread init. */
+static void *
+pl_workthread_nothing(void * cookie)
+{
+
+	(void)cookie; /* UNUSED */
 	return (NULL);
 }
 
 /* Problem with FreeBSD 11.0 and creating/freeing a thread. */
 static void
-pl_freebsd_pthread(void)
+pl_freebsd_pthread_nothing(void)
 {
-	pthread_t thread;
+	pthread_t thr;
+	int rc;
 
-	pthread_create(&thread, NULL, do_nothing, NULL);
-	pthread_join(thread, NULL);
+	if ((rc = pthread_create(&thr, NULL, pl_workthread_nothing, NULL)))
+		fprintf(stderr, "pthread_create: %s", strerror(rc));
+	if ((rc = pthread_join(thr, NULL)))
+		fprintf(stderr, "pthread_join: %s", strerror(rc));
+}
+
+/* Problem with FreeBSD and pthread with strerror and localtime_r. */
+static void *
+pl_workthread_strerror_localtime(void * cookie)
+{
+	char * str = strerror(1);
+	time_t now;
+	struct tm tm;
+
+	(void)cookie; /* UNUSED */
+	(void)str; /* UNUSED */
+
+	time(&now);
+	localtime_r(&now, &tm);
+
+	return (NULL);
+}
+
+static void
+pl_freebsd_pthread_strerror_localtime(void)
+{
+	pthread_t thr;
+	int rc;
+
+	if ((rc = pthread_create(&thr, NULL,
+	    pl_workthread_strerror_localtime, NULL)))
+		fprintf(stderr, "pthread_create: %s", strerror(rc));
+	if ((rc = pthread_join(thr, NULL)))
+		fprintf(stderr, "pthread_join: %s", strerror(rc));
+}
+
+/* Problem with FreeBSD and pthread with getaddrinfo. */
+static void *
+pl_workthread_getaddrinfo(void * cookie)
+{
+	struct addrinfo hints;
+	struct addrinfo * res;
+	const char * addr = "localhost";
+	const char * ports = "80";
+	int error;
+
+	(void)cookie; /* UNUSED */
+
+	/* Create hints structure. */
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	/* Perform DNS lookup. */
+	if ((error = getaddrinfo(addr, ports, &hints, &res)) != 0)
+		fprintf(stderr, "Error looking up %s: %s", addr,
+		    gai_strerror(error));
+
+	return (NULL);
+}
+
+static void
+pl_freebsd_pthread_getaddrinfo(void)
+{
+	pthread_t thr;
+	int rc;
+
+	if ((rc = pthread_create(&thr, NULL,
+	    pl_workthread_getaddrinfo, NULL)))
+		fprintf(stderr, "pthread_create: %s", strerror(rc));
+	if ((rc = pthread_join(thr, NULL)))
+		fprintf(stderr, "pthread_join: %s", strerror(rc));
 }
 
 #define MEMLEAKTEST(x) { #x, x }
@@ -52,7 +147,11 @@ static const struct memleaktest {
 } tests[] = {
 	MEMLEAKTEST(pl_freebsd_link_lrt),
 	MEMLEAKTEST(pl_freebsd_strlen),
-	MEMLEAKTEST(pl_freebsd_pthread)
+	MEMLEAKTEST(pl_freebsd_printf_space),
+	MEMLEAKTEST(pl_freebsd_printf_space_newline),
+	MEMLEAKTEST(pl_freebsd_pthread_nothing),
+	MEMLEAKTEST(pl_freebsd_pthread_strerror_localtime),
+	MEMLEAKTEST(pl_freebsd_pthread_getaddrinfo)
 };
 static const int num_tests = sizeof(tests) / sizeof(tests[0]);
 
