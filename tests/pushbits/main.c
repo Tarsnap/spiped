@@ -212,9 +212,11 @@ chain_one(void)
 	return (0);
 
 err3:
-	pthread_cancel(thread);
+	if ((rc = pthread_cancel(thread)) != 0)
+		warn0("pthread_cancel: %s", strerror(rc));
 err2:
-	pthread_join(thread, NULL);
+	if ((rc = pthread_join(thread, NULL)) != 0)
+		warn0("pthread_join: %s", strerror(rc));
 err1:
 	free(buf);
 err0:
@@ -337,11 +339,15 @@ chain_two(void)
 	return (0);
 
 err3:
-	pthread_cancel(thread[0]);
-	pthread_join(thread[0], NULL);
+	if ((rc = pthread_cancel(thread[0])) != 0)
+		warn0("pthread_cancel: %s", strerror(rc));
+	if ((rc = pthread_join(thread[0], NULL)) != 0)
+		warn0("pthread_join: %s", strerror(rc));
 err2:
-	pthread_cancel(thread[1]);
-	pthread_join(thread[1], NULL);
+	if ((rc = pthread_cancel(thread[1])) != 0)
+		warn0("pthread_cancel: %s", strerror(rc));
+	if ((rc = pthread_join(thread[1], NULL)) != 0)
+		warn0("pthread_join: %s", strerror(rc));
 err1:
 	free(buf);
 err0:
