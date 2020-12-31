@@ -124,6 +124,9 @@ pl_workthread_getaddrinfo(void * cookie)
 		fprintf(stderr, "Error looking up %s: %s", addr,
 		    gai_strerror(error));
 
+	/* Clean up. */
+	freeaddrinfo(res);
+
 	return (NULL);
 }
 

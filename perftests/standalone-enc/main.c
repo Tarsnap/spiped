@@ -194,7 +194,7 @@ aesctr_hmac_init(void * cookie, uint8_t * buf, size_t buflen)
 
 	/* (Re-)Initialize the context. */
 	memset(kbuf, 0, 32);
-	HMAC_SHA256_Init(ahc->ctx, &kbuf[32], 32);
+	HMAC_SHA256_Init(ahc->ctx, kbuf, 32);
 
 	/* Set the input. */
 	for (i = 0; i < buflen; i++)
