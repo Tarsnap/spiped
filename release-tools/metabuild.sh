@@ -23,10 +23,17 @@ fi
 # Set up directories
 cd ${D}
 SUBDIR_DEPTH=$(${MAKEBSD} -V SUBDIR_DEPTH)
+LIBCPERCIVA_DIR=$(${MAKEBSD} -V LIBCPERCIVA_DIR)
 
-# Set up *-config.h so that we don't have missing headers
-rm -f ${SUBDIR_DEPTH}/cpusupport-config.h
-touch ${SUBDIR_DEPTH}/cpusupport-config.h
+# Set up *-config.h so that we don't have missing headers.  If we don't
+# have a LIBCPERCIVA_DIR, then we assume that we don't have cpusupport.
+if [ -n "${LIBCPERCIVA_DIR}" ]; then
+	if [ -e "${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh" ]; then
+		command -p sh						\
+		    ${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh	\
+		    "${PATH}" --all > ${SUBDIR_DEPTH}/cpusupport-config.h
+	fi
+fi
 
 copyvar() {
 	var=$1
