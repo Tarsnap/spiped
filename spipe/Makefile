@@ -54,7 +54,7 @@ graceful_shutdown.o: ../lib/util/graceful_shutdown.c ../libcperciva/events/event
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../lib/util/graceful_shutdown.c -o graceful_shutdown.o
 sha256.o: ../libcperciva/alg/sha256.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h ../libcperciva/util/insecure_memzero.h ../libcperciva/alg/sha256_shani.h ../libcperciva/util/sysendian.h ../libcperciva/util/warnp.h ../libcperciva/alg/sha256.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/alg/sha256.c -o sha256.o
-sha256_shani.o: ../libcperciva/alg/sha256_shani.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h
+sha256_shani.o: ../libcperciva/alg/sha256_shani.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h ../libcperciva/alg/sha256_shani.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" ${CFLAGS_X86_SHANI} ${CFLAGS_X86_SSSE3} -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/alg/sha256_shani.c -o sha256_shani.o
 elasticarray.o: ../libcperciva/datastruct/elasticarray.c ../libcperciva/datastruct/elasticarray.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/datastruct/elasticarray.c -o elasticarray.o
@@ -104,9 +104,9 @@ network_write.o: ../libcperciva/network/network_write.c ../libcperciva/events/ev
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/network/network_write.c -o network_write.o
 crypto_aes.o: ../libcperciva/crypto/crypto_aes.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h ../libcperciva/crypto/crypto_aes_aesni.h ../libcperciva/util/insecure_memzero.h ../libcperciva/util/warnp.h ../libcperciva/crypto/crypto_aes.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/crypto/crypto_aes.c -o crypto_aes.o
-crypto_aes_aesni.o: ../libcperciva/crypto/crypto_aes_aesni.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h
+crypto_aes_aesni.o: ../libcperciva/crypto/crypto_aes_aesni.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h ../libcperciva/util/align_ptr.h ../libcperciva/util/insecure_memzero.h ../libcperciva/util/warnp.h ../libcperciva/crypto/crypto_aes_aesni.h ../libcperciva/crypto/crypto_aes_aesni_m128i.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" ${CFLAGS_X86_AESNI} -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/crypto/crypto_aes_aesni.c -o crypto_aes_aesni.o
-crypto_aesctr.o: ../libcperciva/crypto/crypto_aesctr.c ../libcperciva/crypto/crypto_aes.h ../libcperciva/util/insecure_memzero.h ../libcperciva/util/sysendian.h ../libcperciva/crypto/crypto_aesctr.h
+crypto_aesctr.o: ../libcperciva/crypto/crypto_aesctr.c ../libcperciva/crypto/crypto_aes.h ../libcperciva/util/insecure_memzero.h ../libcperciva/util/sysendian.h ../libcperciva/crypto/crypto_aesctr.h ../libcperciva/crypto/crypto_aesctr_shared.c
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/crypto/crypto_aesctr.c -o crypto_aesctr.o
 crypto_dh.o: ../libcperciva/crypto/crypto_dh.c ../libcperciva/util/warnp.h ../libcperciva/crypto/crypto_dh_group14.h ../libcperciva/crypto/crypto_entropy.h ../libcperciva/crypto/crypto_dh.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/crypto/crypto_dh.c -o crypto_dh.o
@@ -114,7 +114,7 @@ crypto_dh_group14.o: ../libcperciva/crypto/crypto_dh_group14.c ../libcperciva/cr
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/crypto/crypto_dh_group14.c -o crypto_dh_group14.o
 crypto_entropy.o: ../libcperciva/crypto/crypto_entropy.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h ../libcperciva/crypto/crypto_entropy_rdrand.h ../libcperciva/util/entropy.h ../libcperciva/util/insecure_memzero.h ../libcperciva/alg/sha256.h ../libcperciva/crypto/crypto_entropy.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/crypto/crypto_entropy.c -o crypto_entropy.o
-crypto_entropy_rdrand.o: ../libcperciva/crypto/crypto_entropy_rdrand.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h
+crypto_entropy_rdrand.o: ../libcperciva/crypto/crypto_entropy_rdrand.c ../libcperciva/cpusupport/cpusupport.h ../cpusupport-config.h ../libcperciva/crypto/crypto_entropy_rdrand.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" ${CFLAGS_X86_RDRAND} -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/crypto/crypto_entropy_rdrand.c -o crypto_entropy_rdrand.o
 crypto_verify_bytes.o: ../libcperciva/crypto/crypto_verify_bytes.c ../libcperciva/crypto/crypto_verify_bytes.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/crypto/crypto_verify_bytes.c -o crypto_verify_bytes.o
