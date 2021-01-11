@@ -38,6 +38,7 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/cpusupport
 SRCS	+=	crypto_aes.c
 SRCS	+=	crypto_aes_aesni.c
 SRCS	+=	crypto_aesctr.c
+SRCS	+=	crypto_aesctr_aesni.c
 SRCS	+=	crypto_dh.c
 SRCS	+=	crypto_dh_group14.c
 SRCS	+=	crypto_entropy.c
@@ -57,6 +58,9 @@ SRCS	+=	warnp.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 cflags-crypto_aes_aesni.o:
+	@echo '$${CFLAGS_X86_AESNI}'
+
+cflags-crypto_aesctr_aesni.o:
 	@echo '$${CFLAGS_X86_AESNI}'
 
 cflags-crypto_entropy_rdrand.o:
