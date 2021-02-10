@@ -76,7 +76,10 @@ add_object_files() {
 	# Generate build instructions for each object
 	for F in $OBJ; do
 		S=$(${MAKEBSD} source-${F})
-		CF=$(get_cpusupport_cflags ${S})
+		CF_MANUAL=$(${MAKEBSD} cflags-${F})
+		CF_CPUSUPPORT=$(get_cpusupport_cflags ${S})
+		CF=$(echo "${CF_CPUSUPPORT} ${CF_MANUAL}" |	\
+		    sed 's/^ //' | sed 's/ $//')
 		IDIRS=$(${MAKEBSD} -V IDIRS)
 		# Get the build instructions, then remove newlines, condense
 		# multiple spaces, remove line continuations, and replace the
