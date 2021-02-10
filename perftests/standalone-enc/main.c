@@ -23,12 +23,16 @@ static const size_t nbytes_warmup = 10000000;		/* 10 MB */
 static void
 print_hardware(const char * str)
 {
-	int use_hardware_shani = 0;
+	int use_hardware_sha256 = 0;
 	int use_hardware_aesni = 0;
 
 #if defined(CPUSUPPORT_X86_SHANI) && defined(CPUSUPPORT_X86_SSSE3)
 	if (cpusupport_x86_shani() && cpusupport_x86_ssse3())
-		use_hardware_shani = 1;
+		use_hardware_sha256 = 1;
+#endif
+#if defined(CPUSUPPORT_X86_SSE2)
+	if (cpusupport_x86_sse2())
+		use_hardware_sha256 = 2;
 #endif
 #if defined(CPUSUPPORT_X86_AESNI)
 	if (cpusupport_x86_aesni())
@@ -37,8 +41,10 @@ print_hardware(const char * str)
 
 	/* Inform the user. */
 	printf("%s", str);
-	if (use_hardware_shani)
+	if (use_hardware_sha256 == 1)
 		printf(" using hardware SHANI");
+	else if (use_hardware_sha256 == 2)
+		printf(" using hardware SSE2");
 	else
 		printf(" using software SHA");
 	if (use_hardware_aesni)
