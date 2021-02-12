@@ -52,6 +52,16 @@ add_makefile_prog() {
 	fi
 }
 
+get_cpusupport_cflags() {
+	src=$1
+
+	str=$(grep 'CPUSUPPORT CFLAGS:' ${src} | cut -f 2- -d :)
+	# ${str} must be unquoted.
+	for X in ${str}; do
+		printf " \${CFLAGS_%s}" "$X"
+	done | sed 's/^ //'
+}
+
 add_object_files() {
 	# Set up useful variables
 	OBJ=$(${MAKEBSD} -V SRCS |				\
@@ -66,7 +76,10 @@ add_object_files() {
 	# Generate build instructions for each object
 	for F in $OBJ; do
 		S=$(${MAKEBSD} source-${F})
-		CF=$(${MAKEBSD} cflags-${F})
+		CF_MANUAL=$(${MAKEBSD} cflags-${F})
+		CF_CPUSUPPORT=$(get_cpusupport_cflags ${S})
+		CF=$(echo "${CF_CPUSUPPORT} ${CF_MANUAL}" |	\
+		    sed 's/^ //' | sed 's/ $//')
 		IDIRS=$(${MAKEBSD} -V IDIRS)
 		# Get the build instructions, then remove newlines, condense
 		# multiple spaces, remove line continuations, and replace the
