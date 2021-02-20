@@ -35,6 +35,7 @@ IDIRS	+=	-I${LIB_DIR}/util
 # Fundamental algorithms
 .PATH.c	:	${LIBCPERCIVA_DIR}/alg
 SRCS	+=	sha256.c
+SRCS	+=	sha256_arm.c
 SRCS	+=	sha256_shani.c
 SRCS	+=	sha256_sse2.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/alg
@@ -60,6 +61,7 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 # CPU features detection
 .PATH.c	:	${LIBCPERCIVA_DIR}/cpusupport
+SRCS	+=	cpusupport_arm_sha256.c
 SRCS	+=	cpusupport_x86_aesni.c
 SRCS	+=	cpusupport_x86_rdrand.c
 SRCS	+=	cpusupport_x86_shani.c
