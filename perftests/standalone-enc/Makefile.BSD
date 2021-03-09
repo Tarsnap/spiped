@@ -14,8 +14,9 @@ PROTO_DIR	=	../../proto
 # Main test code
 SRCS	=	main.c
 
-# spipe protocol
-SRCS	+=	${PROTO_DIR}/proto_crypt.c
+# spipe protocol; we need to use special CFLAGS for proto_crypt.c
+.PATH.c	:	${PROTO_DIR}
+SRCS	+=	proto_crypt.c
 IDIRS	+=	-I${PROTO_DIR}
 
 # Fundamental algorithms
