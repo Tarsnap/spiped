@@ -62,11 +62,8 @@ SRCS	+=	warnp.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 # Special test-only defines.
-cflags-proto_crypt.o:
-	@echo '-DSTANDALONE_ENC_TESTING'
-
-cflags-main.o:
-	@echo '-DSTANDALONE_ENC_TESTING'
+CFLAGS.proto_crypt.c= -DSTANDALONE_ENC_TESTING
+CFLAGS.main.c= -DSTANDALONE_ENC_TESTING
 
 # This depends on "all", but we don't want to see any output from that.
 perftest:
