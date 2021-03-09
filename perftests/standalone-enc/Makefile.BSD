@@ -15,50 +15,45 @@ PROTO_DIR	=	../../proto
 SRCS	=	main.c
 
 # spipe protocol
-.PATH.c	:	${PROTO_DIR}
-SRCS	+=	proto_crypt.c
+SRCS	+=	${PROTO_DIR}/proto_crypt.c
 IDIRS	+=	-I${PROTO_DIR}
 
 # Fundamental algorithms
-.PATH.c	:	${LIBCPERCIVA_DIR}/alg
-SRCS	+=	sha256.c
-SRCS	+=	sha256_arm.c
-SRCS	+=	sha256_shani.c
-SRCS	+=	sha256_sse2.c
+SRCS	+=	${LIBCPERCIVA_DIR}/alg/sha256.c
+SRCS	+=	${LIBCPERCIVA_DIR}/alg/sha256_arm.c
+SRCS	+=	${LIBCPERCIVA_DIR}/alg/sha256_shani.c
+SRCS	+=	${LIBCPERCIVA_DIR}/alg/sha256_sse2.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/alg
 
 # CPU features detection
-.PATH.c	:	${LIBCPERCIVA_DIR}/cpusupport
-SRCS	+=	cpusupport_arm_sha256.c
-SRCS	+=	cpusupport_x86_aesni.c
-SRCS	+=	cpusupport_x86_rdrand.c
-SRCS	+=	cpusupport_x86_shani.c
-SRCS	+=	cpusupport_x86_sse2.c
-SRCS	+=	cpusupport_x86_ssse3.c
+SRCS	+=	${LIBCPERCIVA_DIR}/cpusupport/cpusupport_arm_sha256.c
+SRCS	+=	${LIBCPERCIVA_DIR}/cpusupport/cpusupport_x86_aesni.c
+SRCS	+=	${LIBCPERCIVA_DIR}/cpusupport/cpusupport_x86_rdrand.c
+SRCS	+=	${LIBCPERCIVA_DIR}/cpusupport/cpusupport_x86_shani.c
+SRCS	+=	${LIBCPERCIVA_DIR}/cpusupport/cpusupport_x86_sse2.c
+SRCS	+=	${LIBCPERCIVA_DIR}/cpusupport/cpusupport_x86_ssse3.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/cpusupport
 
 # Crypto code
-.PATH.c	:	${LIBCPERCIVA_DIR}/crypto
-SRCS	+=	crypto_aes.c
-SRCS	+=	crypto_aes_aesni.c
-SRCS	+=	crypto_aesctr.c
-SRCS	+=	crypto_aesctr_aesni.c
-SRCS	+=	crypto_dh.c
-SRCS	+=	crypto_dh_group14.c
-SRCS	+=	crypto_entropy.c
-SRCS	+=	crypto_entropy_rdrand.c
-SRCS	+=	crypto_verify_bytes.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_aes.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_aes_aesni.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_aesctr.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_aesctr_aesni.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_dh.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_dh_group14.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_entropy.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_entropy_rdrand.c
+SRCS	+=	${LIBCPERCIVA_DIR}/crypto/crypto_verify_bytes.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/crypto
 
 # Utility functions
-.PATH.c	:	${LIBCPERCIVA_DIR}/util
-SRCS	+=	entropy.c
-SRCS	+=	getopt.c
-SRCS	+=	insecure_memzero.c
-SRCS	+=	monoclock.c
-SRCS	+=	perftest.c
-SRCS	+=	sock.c
-SRCS	+=	warnp.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/entropy.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/getopt.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/insecure_memzero.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/monoclock.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/perftest.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/sock.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/warnp.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 # Special test-only defines.

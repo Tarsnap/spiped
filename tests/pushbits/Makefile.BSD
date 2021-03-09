@@ -15,15 +15,13 @@ SPIPE_DIR	=	../../spipe
 SRCS	=	main.c
 
 # Utility functions
-.PATH.c	:	${LIBCPERCIVA_DIR}/util
-SRCS	+=	getopt.c
-SRCS	+=	noeintr.c
-SRCS	+=	warnp.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/getopt.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/noeintr.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/warnp.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 # Pushbits
-.PATH.c	:	${SPIPE_DIR}
-SRCS	+=	pushbits.c
+SRCS	+=	${SPIPE_DIR}/pushbits.c
 IDIRS	+=	-I${SPIPE_DIR}
 
 .include <bsd.prog.mk>

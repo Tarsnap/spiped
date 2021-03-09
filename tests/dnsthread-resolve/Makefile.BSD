@@ -15,41 +15,36 @@ LIB_DIR	=	../../lib
 SRCS	=	main.c
 
 # Data structures
-.PATH.c	:	${LIBCPERCIVA_DIR}/datastruct
-SRCS	+=	elasticarray.c
-SRCS	+=	ptrheap.c
-SRCS	+=	timerqueue.c
+SRCS	+=	${LIBCPERCIVA_DIR}/datastruct/elasticarray.c
+SRCS	+=	${LIBCPERCIVA_DIR}/datastruct/ptrheap.c
+SRCS	+=	${LIBCPERCIVA_DIR}/datastruct/timerqueue.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/datastruct
 
 # Event loop
-.PATH.c	:	${LIBCPERCIVA_DIR}/events
-SRCS	+=	events_immediate.c
-SRCS	+=	events_network.c
-SRCS	+=	events_network_selectstats.c
-SRCS	+=	events_timer.c
-SRCS	+=	events.c
+SRCS	+=	${LIBCPERCIVA_DIR}/events/events_immediate.c
+SRCS	+=	${LIBCPERCIVA_DIR}/events/events_network.c
+SRCS	+=	${LIBCPERCIVA_DIR}/events/events_network_selectstats.c
+SRCS	+=	${LIBCPERCIVA_DIR}/events/events_timer.c
+SRCS	+=	${LIBCPERCIVA_DIR}/events/events.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
 
 # Event-driven networking
-.PATH.c	:	${LIBCPERCIVA_DIR}/network
-SRCS	+=	network_connect.c
-SRCS	+=	network_read.c
-SRCS	+=	network_write.c
+SRCS	+=	${LIBCPERCIVA_DIR}/network/network_connect.c
+SRCS	+=	${LIBCPERCIVA_DIR}/network/network_read.c
+SRCS	+=	${LIBCPERCIVA_DIR}/network/network_write.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/network
 
 # Utility functions
-.PATH.c	:	${LIBCPERCIVA_DIR}/util
-SRCS	+=	asprintf.c
-SRCS	+=	monoclock.c
-SRCS	+=	noeintr.c
-SRCS	+=	sock.c
-SRCS	+=	sock_util.c
-SRCS	+=	warnp.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/asprintf.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/monoclock.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/noeintr.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/sock.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/sock_util.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/warnp.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 # Dnsthread functions
-.PATH.c	:	${LIB_DIR}/dnsthread
-SRCS	+=	dnsthread.c
+SRCS	+=	${LIB_DIR}/dnsthread/dnsthread.c
 IDIRS	+=	-I${LIB_DIR}/dnsthread
 
 .include <bsd.prog.mk>

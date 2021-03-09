@@ -11,10 +11,9 @@ LIBCPERCIVA_DIR	=	../../libcperciva
 SRCS	=	main.c
 
 # Utility functions
-.PATH.c	:	${LIBCPERCIVA_DIR}/util
-SRCS	+=	monoclock.c
-SRCS	+=	sock.c
-SRCS	+=	warnp.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/monoclock.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/sock.c
+SRCS	+=	${LIBCPERCIVA_DIR}/util/warnp.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 .include <bsd.prog.mk>
