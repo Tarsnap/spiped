@@ -4,7 +4,6 @@ LIB	=	all
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../libcperciva
 LIB_DIR		=	../lib
-PROTO_DIR	=	../proto
 
 # Fundamental algorithms
 .PATH.c	:	${LIBCPERCIVA_DIR}/alg
@@ -83,17 +82,17 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 SRCS	+=	dnsthread.c
 IDIRS	+=	-I${LIB_DIR}/dnsthread
 
-# spiped utility functions
-.PATH.c	:	${LIB_DIR}/util
-SRCS	+=	graceful_shutdown.c
-IDIRS	+=	-I${LIB_DIR}/util
-
 # spiped protocol
-.PATH.c	:	${PROTO_DIR}
+.PATH.c	:	${LIB_DIR}/proto
 SRCS	+=	proto_conn.c
 SRCS	+=	proto_crypt.c
 SRCS	+=	proto_handshake.c
 SRCS	+=	proto_pipe.c
-IDIRS	+=	-I${PROTO_DIR}
+IDIRS	+=	-I${LIB_DIR}/proto
+
+# spiped utility functions
+.PATH.c	:	${LIB_DIR}/util
+SRCS	+=	graceful_shutdown.c
+IDIRS	+=	-I${LIB_DIR}/util
 
 .include <bsd.lib.mk>

@@ -13,7 +13,6 @@ LDADD_REQ	+=	-lpthread
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../libcperciva
 LIB_DIR	=	../lib
-PROTO_DIR	=	../proto
 
 # spipe code
 SRCS	=	main.c
@@ -25,7 +24,7 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
 # spiped includes
+IDIRS	+=	-I${LIB_DIR}/proto
 IDIRS	+=	-I${LIB_DIR}/util
-IDIRS	+=	-I${PROTO_DIR}
 
 .include <bsd.prog.mk>

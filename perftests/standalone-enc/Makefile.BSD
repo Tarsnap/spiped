@@ -9,15 +9,15 @@ LDADD_REQ	=	-lcrypto
 
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../../libcperciva
-PROTO_DIR	=	../../proto
+LIB_DIR	=	../../lib
 
 # Main test code
 SRCS	=	main.c
 
 # spiped protocol, with an extra -DSTANDALONE_ENC_TESTING to enable mkkeypair()
-.PATH.c	:	${PROTO_DIR}
+.PATH.c	:	${LIB_DIR}/proto
 SRCS	+=	proto_crypt.c
-IDIRS	+=	-I${PROTO_DIR}
+IDIRS	+=	-I${LIB_DIR}/proto
 
 # libcperciva includes
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/alg
