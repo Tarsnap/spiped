@@ -4,6 +4,9 @@ PROG	=	potential-memleaks
 # Don't install it.
 NOINST	=	1
 
+# Don't link to liball.a
+NOLIBALL	=	1
+
 # Library code required
 LDADD_REQ	=	-lcrypto
 LDADD_REQ	+=	-lpthread
