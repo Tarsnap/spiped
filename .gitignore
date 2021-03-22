@@ -3,6 +3,7 @@ cpusupport-config.h
 posix-flags.sh
 # Other directories
 *.o
+liball/liball.a
 spipe/spipe
 spiped/spiped
 perftests/send-zeros/send-zeros

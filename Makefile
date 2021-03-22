@@ -12,7 +12,7 @@ TEST_CMD=	tests/test_spiped.sh
 
 ### Shared code between Tarsnap projects.
 
-all:	cflags-filter.sh cpusupport-config.h posix-flags.sh
+all:	cflags-filter.sh cpusupport-config.h posix-flags.sh liball
 	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
@@ -23,12 +23,21 @@ all:	cflags-filter.sh cpusupport-config.h posix-flags.sh
 	done
 
 # For "loop-back" building of a subdirectory
-buildsubdir: cflags-filter.sh cpusupport-config.h posix-flags.sh
+buildsubdir: cflags-filter.sh cpusupport-config.h posix-flags.sh liball
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
 	. ./cflags-filter.sh;				\
 	export HAVE_BUILD_FLAGS=1;			\
 	cd ${BUILD_SUBDIR} && ${MAKE} ${BUILD_TARGET}
+
+# For "loop-back" building of the library
+.PHONY: liball
+liball: cflags-filter.sh cpusupport-config.h posix-flags.sh
+	. ./posix-flags.sh;				\
+	. ./cpusupport-config.h;			\
+	. ./cflags-filter.sh;				\
+	export HAVE_BUILD_FLAGS=1;			\
+	( cd liball && make all ) || exit 2;
 
 posix-flags.sh:
 	if [ -d ${LIBCPERCIVA_DIR}/POSIX/ ]; then			\
@@ -75,7 +84,7 @@ install:	all
 
 clean:
 	rm -f cflags-filter.sh cpusupport-config.h posix-flags.sh
-	for D in ${PROGS} ${TESTS}; do				\
+	for D in liball ${PROGS} ${TESTS}; do			\
 		( cd $${D} && ${MAKE} clean ) || exit 2;	\
 	done
 
