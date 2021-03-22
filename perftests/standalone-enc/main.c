@@ -38,6 +38,11 @@ print_hardware(const char * str)
 		printf(" using hardware SSE2");
 	else
 #endif
+#if defined(CPUSUPPORT_ARM_SHA256)
+	if (cpusupport_arm_sha256())
+		printf(" using hardware SHA256");
+	else
+#endif
 		printf(" using software SHA");
 
 #if defined(CPUSUPPORT_X86_AESNI)
