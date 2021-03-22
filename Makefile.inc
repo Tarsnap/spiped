@@ -14,6 +14,13 @@ IDIRS	:=	${IDIRS}
 # Default is no man pages
 MAN	=
 
+.if !defined(NOLIBALL)
+# Link everything to liball.a, unless they specifically ask not to use it.
+LIBALL	=	${SUBDIR_DEPTH}/liball/liball.a
+LDADD	+=	${LIBALL}
+DPADD	+=	${LIBALL}
+.endif
+
 # Lines below this point are only relevant if running
 #     make -f Makefile.BSD
 # in a subdirectory; they have no influence on the generated Makefiles.

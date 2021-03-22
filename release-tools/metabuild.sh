@@ -61,6 +61,12 @@ add_makefile_prog() {
 		mv prog.tmp1 prog.tmp
 	fi
 
+	# Remove " ${LIBALL}" (if applicable)
+	if [ "$(${MAKEBSD} -V NOLIBALL)" = "1" ]; then
+		perl -0pe 's/ \$\{LIBALL\}//g' prog.tmp > prog.tmp1
+		mv prog.tmp1 prog.tmp
+	fi
+
 	# Add the (adjusted) Makefile.prog to the Makefile, and clean up
 	cat prog.tmp >> $OUT
 	rm prog.tmp
@@ -132,6 +138,7 @@ printf "RELATIVE_DIR=$D\n" >> $OUT
 if [ -n "$(${MAKEBSD} -V LIB)" ]; then
 	cat ${SUBDIR_DEPTH}/release-tools/Makefile.lib >> $OUT
 elif [ -n "$(${MAKEBSD} -V SRCS)" ]; then
+	copyvar LIBALL
 	add_makefile_prog
 else
 	printf "\nall:\n\ttrue\n\nclean:\n\ttrue\n" >> $OUT
