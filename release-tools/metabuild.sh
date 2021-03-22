@@ -44,12 +44,18 @@ copyvar() {
 }
 
 add_makefile_prog() {
+	# Get a copy of the default Makefile.prog
+	cp ${SUBDIR_DEPTH}/release-tools/Makefile.prog prog.tmp
+
+	# Remove the "install:" (if applicable)
 	if [ "$(${MAKEBSD} -V NOINST)" = "1" ]; then
-		perl -0pe 's/(install:.*?)\n\n//s'	\
-		    ${SUBDIR_DEPTH}/Makefile.prog >> $OUT
-	else
-		cat ${SUBDIR_DEPTH}/Makefile.prog >> $OUT
+		perl -0pe 's/(install:.*?)\n\n//s' prog.tmp > prog.tmp1
+		mv prog.tmp1 prog.tmp
 	fi
+
+	# Add the (adjusted) Makefile.prog to the Makefile, and clean up
+	cat prog.tmp >> $OUT
+	rm prog.tmp
 }
 
 get_cpusupport_cflags() {
