@@ -12,7 +12,7 @@ TEST_CMD=	tests/test_spiped.sh
 
 ### Shared code between Tarsnap projects.
 
-all:	cflags-filter.sh cpusupport-config.h posix-flags.sh liball
+all:	toplevel
 	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
@@ -22,8 +22,12 @@ all:	cflags-filter.sh cpusupport-config.h posix-flags.sh liball
 		( cd $${D} && ${MAKE} all ) || exit 2;	\
 	done
 
+.PHONY:	toplevel
+toplevel:	cflags-filter.sh cpusupport-config.h	\
+		liball posix-flags.sh
+
 # For "loop-back" building of a subdirectory
-buildsubdir: cflags-filter.sh cpusupport-config.h posix-flags.sh liball
+buildsubdir: toplevel
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
 	. ./cflags-filter.sh;				\
