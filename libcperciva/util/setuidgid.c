@@ -248,10 +248,10 @@ setuidgid(const char * user_group_string, int leave_suppgrp)
 			if (leave_suppgrp == SETUIDGID_SGROUP_LEAVE_ERROR) {
 				warn0("Failed to leave supplementary groups");
 				goto err1;
-			} else {
-				warn0("Warning: Failed to leave supplementary "
-				    "groups");
 			}
+
+			/* Print warning, but don't indicate an error. */
+			warn0("Warning: Failed to leave supplementary groups");
 		}
 	}
 
