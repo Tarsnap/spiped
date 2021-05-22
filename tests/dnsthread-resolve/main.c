@@ -17,7 +17,7 @@ found(void * cookie, struct sock_addr ** sas)
 	char * addr;
 	int i;
 
-	(void)cookie;	/* UNUSED */
+	(void)cookie; /* UNUSED */
 
 	/* Sanity check. */
 	if (sas == NULL)
