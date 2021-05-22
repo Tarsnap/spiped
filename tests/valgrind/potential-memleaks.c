@@ -3,11 +3,11 @@
 
 #include <netinet/in.h>
 
+#include <netdb.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <netdb.h>
 #include <time.h>
 
 /* Problem with FreeBSD 11.0 merely linking with -lrt. */
@@ -37,7 +37,7 @@ pl_freebsd_strlen(void)
 static void
 pl_freebsd_printf_space(void)
 {
- 
+
 	printf(" ");
 }
 
