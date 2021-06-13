@@ -15,6 +15,7 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/alg
 
 # CPU features detection
 .PATH.c	:	${LIBCPERCIVA_DIR}/cpusupport
+SRCS	+=	cpusupport_arm_aes.c
 SRCS	+=	cpusupport_arm_sha256.c
 SRCS	+=	cpusupport_x86_aesni.c
 SRCS	+=	cpusupport_x86_rdrand.c
@@ -27,8 +28,10 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/cpusupport
 .PATH.c	:	${LIBCPERCIVA_DIR}/crypto
 SRCS	+=	crypto_aes.c
 SRCS	+=	crypto_aes_aesni.c
+SRCS	+=	crypto_aes_arm.c
 SRCS	+=	crypto_aesctr.c
 SRCS	+=	crypto_aesctr_aesni.c
+SRCS	+=	crypto_aesctr_arm.c
 SRCS	+=	crypto_dh.c
 SRCS	+=	crypto_dh_group14.c
 SRCS	+=	crypto_entropy.c
