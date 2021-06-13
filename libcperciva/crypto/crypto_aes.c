@@ -37,8 +37,8 @@ static struct aes_test {
 	const uint8_t key[32];
 	const size_t len;
 	const uint8_t ptext[16];
-	const uint8_t ctext[32];
-} testcase[] = { {
+	const uint8_t ctext[16];
+} testcases[] = { {
 	/* NIST FIPS 179, Appendix C - Example Vectors, AES-128, p. 35. */
 	.key = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
 		 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f},
@@ -61,31 +61,72 @@ static struct aes_test {
 	}
 };
 
-/* Test hardware intrinsics against test vectors. */
+/* Test a function against test vectors. */
 static int
-hwtest(struct aes_test * knowngood)
+functest(int(* func)(const uint8_t *, size_t, const uint8_t[16], uint8_t[16]))
 {
-	void * kexp_hw;
-	uint8_t ctext_hw[16];
+	struct aes_test * knowngood;
+	uint8_t ctext[16];
+	size_t i;
 
-	/* Sanity-check. */
-	assert((knowngood->len == 16) || (knowngood->len == 32));
+	for (i = 0; i < sizeof(testcases) / sizeof(testcases[0]); i++) {
+		knowngood = &testcases[i];
 
-	/* Expand the key and encrypt with hardware intrinsics. */
-#if defined(CPUSUPPORT_X86_AESNI)
-	if ((kexp_hw = crypto_aes_key_expand_aesni(knowngood->key,
-	    knowngood->len)) == NULL)
-		goto err0;
-	crypto_aes_encrypt_block_aesni(knowngood->ptext, ctext_hw, kexp_hw);
-	crypto_aes_key_free_aesni(kexp_hw);
-#endif
+		/* Sanity-check. */
+		assert((knowngood->len == 16) || (knowngood->len == 32));
 
-	/* Do the outputs match? */
-	return (memcmp(knowngood->ctext, ctext_hw, 16));
+		/* Expand the key and encrypt with the provided function. */
+		if (func(knowngood->key, knowngood->len, knowngood->ptext,
+		    ctext))
+			goto err0;
+
+		/* Does the output match the known good value? */
+		if (memcmp(knowngood->ctext, ctext, 16))
+			goto err0;
+	}
+
+	/* Success! */
+	return (0);
 
 err0:
 	/* Failure! */
 	return (-1);
+}
+
+#if defined(CPUSUPPORT_X86_AESNI)
+static int
+x86_aesni_oneshot(const uint8_t * key, size_t len, const uint8_t ptext[16],
+    uint8_t ctext[16])
+{
+	void * kexp_hw;
+
+	/* Expand the key and encrypt with hardware intrinsics. */
+	if ((kexp_hw = crypto_aes_key_expand_aesni(key, len)) == NULL)
+		goto err0;
+	crypto_aes_encrypt_block_aesni(ptext, ctext, kexp_hw);
+	crypto_aes_key_free_aesni(kexp_hw);
+
+	/* Success! */
+	return (0);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
+#endif
+
+static int
+openssl_oneshot(const uint8_t * key, size_t len, const uint8_t ptext[16],
+    uint8_t * ctext)
+{
+	AES_KEY kexp;
+
+	/* Expand the key, encrypt, and clean up. */
+	AES_set_encrypt_key(key, (int)(len * 8), &kexp);
+	AES_encrypt(ptext, ctext, &kexp);
+	insecure_memzero(&kexp, sizeof(AES_KEY));
+
+	return (0);
 }
 
 /* Which type of hardware acceleration should we use, if any? */
@@ -102,17 +143,27 @@ hwaccel_init(void)
 
 #if defined(CPUSUPPORT_X86_AESNI)
 	CPUSUPPORT_VALIDATE(hwaccel, HW_X86_AESNI, cpusupport_x86_aesni(),
-	    hwtest(&testcase[0]) || hwtest(&testcase[1]));
+	    functest(x86_aesni_oneshot));
 #endif
+
+	/*
+	 * If we're here, we're not using any intrinsics.  Test OpenSSL; if
+	 * there's an error, print a warning and abort.
+	 */
+	if (functest(openssl_oneshot)) {
+		warn0("OpenSSL gives incorrect AES values.");
+		abort();
+	}
 }
 #endif /* HWACCEL */
 
 /**
- * crypto_aes_use_x86_aesni(void):
- * Return non-zero if AESNI operations are available.
+ * crypto_aes_can_use_intrinsics(void):
+ * Test whether hardware intrinsics are safe to use.  Return 1 if x86 ASENI
+ * operations are available, or 0 if none are available.
  */
 int
-crypto_aes_use_x86_aesni(void)
+crypto_aes_can_use_intrinsics(void)
 {
 
 #ifdef HWACCEL
