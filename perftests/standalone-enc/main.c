@@ -108,7 +108,7 @@ hmac_perftest(void)
 
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
-	    nbytes_warmup, hmac_init, hmac_func, &ctx)) {
+	    nbytes_warmup, hmac_init, hmac_func, NULL, &ctx)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
@@ -172,7 +172,7 @@ aesctr_perftest(void)
 
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
-	    nbytes_warmup, aesctr_init, aesctr_func, k_aes)) {
+	    nbytes_warmup, aesctr_init, aesctr_func, NULL, k_aes)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
@@ -259,7 +259,7 @@ aesctr_hmac_perftest(void)
 
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
-	    nbytes_warmup, aesctr_hmac_init, aesctr_hmac_func, ahc)) {
+	    nbytes_warmup, aesctr_hmac_init, aesctr_hmac_func, NULL, ahc)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
@@ -287,8 +287,7 @@ pce_init(void * cookie, uint8_t * buf, size_t buflen)
 	uint8_t kbuf[64];
 	size_t i;
 
-	/* Clean up any previous keys, and set up new ones. */
-	proto_crypt_free(pce->k);
+	/* Set up encryption key. */
 	memset(kbuf, 0, 64);
 	if ((pce->k = mkkeypair(kbuf)) == NULL)
 		goto err0;
@@ -321,6 +320,18 @@ pce_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 }
 
 static int
+pce_cleanup(void * cookie)
+{
+	struct pce * pce = cookie;
+
+	/* Clean up. */
+	proto_crypt_free(pce->k);
+
+	/* Success! */
+	return (0);
+}
+
+static int
 pce_perftest(void)
 {
 	struct pce pce_actual;
@@ -329,18 +340,12 @@ pce_perftest(void)
 	/* Report what we're doing. */
 	printf("Testing proto_crypt_enc()\n");
 
-	/* We don't have any keys yet. */
-	pce->k = NULL;
-
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
-	    nbytes_warmup, pce_init, pce_func, pce)) {
+	    nbytes_warmup, pce_init, pce_func, pce_cleanup, pce)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
-
-	/* Free allocated buffer. */
-	proto_crypt_free(pce->k);
 
 	/* Success! */
 	return (0);
