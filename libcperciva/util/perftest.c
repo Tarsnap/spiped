@@ -10,11 +10,12 @@
 #include "perftest.h"
 
 /**
- * perftest_buffers(nbytes, sizes, nsizes, nbytes_warmup, init_func, func,
- *     clean_func, cookie):
+ * perftest_buffers(nbytes, sizes, nsizes, nbytes_warmup, cputime,
+ *     init_func, func, clean_func, cookie):
  * Time using ${func} to process ${nbytes} bytes in blocks of ${sizes}.
  * Before timing any block sizes, process ${nbytes_warmup} bytes with the
- * maximum size in ${sizes}.  Invoke callback functions as:
+ * maximum size in ${sizes}.  If ${cputime} is non-zero, attempt to use
+ * cpu time rather than wall-clock time.  Invoke callback functions as:
  *     init_func(cookie, buffer, buflen)
  *     func(cookie, buffer, buflen, nbuffers)
  *     clean_func(cookie)
@@ -25,7 +26,7 @@
  */
 int
 perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
-    size_t nbytes_warmup,
+    size_t nbytes_warmup, int cputime,
     int init_func(void * cookie, uint8_t * buf, size_t buflen),
     int func(void * cookie, uint8_t * buf, size_t buflen, size_t num_buffers),
     int clean_func(void * cookie), void * cookie)
@@ -79,9 +80,16 @@ perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
 			goto err2;
 
 		/* Get beginning time. */
-		if (monoclock_get_cputime(&begin)) {
-			warnp("monoclock_get_cputime()");
-			goto err3;
+		if (cputime) {
+			if (monoclock_get_cputime(&begin)) {
+				warnp("monoclock_get_cputime()");
+				goto err3;
+			}
+		} else {
+			if (monoclock_get(&begin)) {
+				warnp("monoclock_get()");
+				goto err3;
+			}
 		}
 
 		/* Time actual code. */
@@ -89,9 +97,16 @@ perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
 			goto err3;
 
 		/* Get ending time. */
-		if (monoclock_get_cputime(&end)) {
-			warnp("monoclock_get_cputime()");
-			goto err3;
+		if (cputime) {
+			if (monoclock_get_cputime(&end)) {
+				warnp("monoclock_get_cputime()");
+				goto err3;
+			}
+		} else {
+			if (monoclock_get(&end)) {
+				warnp("monoclock_get()");
+				goto err3;
+			}
 		}
 
 		/* Store time. */
