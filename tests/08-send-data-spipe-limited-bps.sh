@@ -7,7 +7,7 @@
 ### Constants
 c_valgrind_min=1
 echo_limited_output="${s_basename}-echo-limited-output.txt"
-sendfile=${scriptdir}/lorem-send.txt
+sendfile=${scriptdir}/shared_test_functions.sh
 
 ### Actual command
 scenario_cmd() {

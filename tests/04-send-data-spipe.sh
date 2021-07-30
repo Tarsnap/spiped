@@ -10,7 +10,7 @@
 c_valgrind_min=1
 ncat_output="${s_basename}-ncat-output.txt"
 bad_target_stderr="${s_basename}-bad-target-stderr.txt"
-sendfile=${scriptdir}/lorem-send.txt
+sendfile=${scriptdir}/shared_test_functions.sh
 
 ### Actual command
 scenario_cmd() {
