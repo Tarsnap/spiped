@@ -4,12 +4,13 @@
 # - create a pair of spiped servers (encryption, decryption), where
 #   the decryption server uses the system-installed spiped binary
 # - establish a connection to the encryption spiped server
-# - open one connection, send lorem-send.txt, close the connection
-# - the received file should match lorem-send.txt
+# - open one connection, send a file, close the connection
+# - the received file should match the original one
 
 ### Constants
 c_valgrind_min=1
 ncat_output="${s_basename}-ncat-output.txt"
+sendfile=${scriptdir}/shared_test_functions.sh
 
 ### Actual command
 scenario_cmd() {
@@ -28,7 +29,7 @@ scenario_cmd() {
 	# Open and close a connection.
 	setup_check_variables "system spiped"
 	(
-		${nc_client_binary} ${src_sock} < ${scriptdir}/lorem-send.txt
+		${nc_client_binary} ${src_sock} < ${sendfile}
 		echo $? > ${c_exitfile}
 	)
 
@@ -36,7 +37,7 @@ scenario_cmd() {
 	servers_stop
 
 	setup_check_variables "system spiped output"
-	if ! cmp -s ${ncat_output} ${scriptdir}/lorem-send.txt; then
+	if ! cmp -s ${ncat_output} ${sendfile}; then
 		if [ ${VERBOSE} -ne 0 ]; then
 			printf "Test output does not match input;" 1>&2
 			printf -- " output is:\n----\n" 1>&2

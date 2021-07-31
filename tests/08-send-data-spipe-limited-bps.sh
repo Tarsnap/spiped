@@ -7,6 +7,7 @@
 ### Constants
 c_valgrind_min=1
 echo_limited_output="${s_basename}-echo-limited-output.txt"
+sendfile=${scriptdir}/shared_test_functions.sh
 
 ### Actual command
 scenario_cmd() {
@@ -17,12 +18,12 @@ scenario_cmd() {
 	setup_check_variables "spipe send rate-limited"
 	${c_valgrind_cmd}					\
 		${spipe_binary} -t ${mid_sock} -k /dev/null	\
-		< ${scriptdir}/lorem-send.txt			\
+		< ${sendfile}					\
 		> ${echo_limited_output}
 	echo $? > ${c_exitfile}
 
 	setup_check_variables "spipe send rate-limited output"
-	cmp -s ${scriptdir}/lorem-send.txt ${echo_limited_output}
+	cmp -s ${sendfile} ${echo_limited_output}
 	echo $? > ${c_exitfile}
 
 	# Clean up

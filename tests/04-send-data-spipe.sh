@@ -3,13 +3,14 @@
 # Goal of this test:
 # - establish a connection to a spiped server.
 # - send data via spipe
-# - the received file should match lorem-send.txt
+# - the received file should match the original one
 # - also, check that we quit immediately if we can't connect
 
 ### Constants
 c_valgrind_min=1
 ncat_output="${s_basename}-ncat-output.txt"
 bad_target_stderr="${s_basename}-bad-target-stderr.txt"
+sendfile=${scriptdir}/shared_test_functions.sh
 
 ### Actual command
 scenario_cmd() {
@@ -21,7 +22,7 @@ scenario_cmd() {
 	(
 		${c_valgrind_cmd} ${spipe_binary}		\
 			-t ${mid_sock} -k /dev/null		\
-			< ${scriptdir}/lorem-send.txt
+			< ${sendfile}
 		echo $? > ${c_exitfile}
 	)
 
@@ -31,7 +32,7 @@ scenario_cmd() {
 	# Check output.  This must be after nc-server has stopped, to
 	# ensure that no data is buffered and not yet written to disk.
 	setup_check_variables "spipe send output"
-	if ! cmp -s ${ncat_output} ${scriptdir}/lorem-send.txt; then
+	if ! cmp -s ${ncat_output} ${sendfile}; then
 		if [ ${VERBOSE} -ne 0 ]; then
 			printf "Test output does not match input;" 1>&2
 			printf -- " output is:\n----\n" 1>&2

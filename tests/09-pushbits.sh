@@ -5,17 +5,18 @@
 
 ### Constants
 c_valgrind_min=1
+sendfile=${scriptdir}/shared_test_functions.sh
 
 ### Actual command
 scenario_cmd() {
 	# Copy a file
 	setup_check_variables "test_pushbits 1"
 	${c_valgrind_cmd} ${scriptdir}/pushbits/test_pushbits		\
-		-i ${scriptdir}/lorem-send.txt -o ${s_basename}-copy 1
+		-i ${sendfile} -o ${s_basename}-copy 1
 	echo $? > ${c_exitfile}
 
 	setup_check_variables "test_pushbits 1 output"
-	cmp -s ${scriptdir}/lorem-send.txt ${s_basename}-copy
+	cmp -s ${sendfile} ${s_basename}-copy
 	echo $? > ${c_exitfile}
 
 	# Echo stdin to stdout
