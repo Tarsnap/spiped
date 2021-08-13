@@ -4,6 +4,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "monoclock.h"
 #include "parsenum.h"
 #include "warnp.h"
 
@@ -14,7 +15,7 @@
 
 struct nc_cookie {
 	FILE * out;
-	size_t bps;
+	size_t bps;		/* Average bytes per second to send. */
 };
 
 /* Wait duration can be interrupted by signals. */
@@ -35,14 +36,35 @@ static int
 write_bps(int sock, uint8_t * buf, size_t buflen, size_t bps)
 {
 	size_t remaining = buflen;
-	size_t bp_cs = bps / 100;	/* bytes per centi-second. */
+	size_t goal_send;
+	size_t actual_sent = 0;
 	size_t to_send;
+	struct timeval orig, now;
+
+	/* Get initial time. */
+	if (monoclock_get(&orig)) {
+		warn0("monoclock_get");
+		goto err0;
+	}
 
 	do {
-		/* How much data should we send? */
-		if (remaining >= bp_cs)
-			to_send = bp_cs;
-		else
+		/* Wait 10ms. */
+		wait_ms(10);
+
+		/* How much data should we have sent by now? */
+		if (monoclock_get(&now)) {
+			warn0("monoclock_get");
+			goto err0;
+		}
+		goal_send = (size_t)((double)bps * timeval_diff(orig, now));
+
+		/* If clocks did something really weird, loop again. */
+		if (goal_send <= actual_sent)
+			continue;
+
+		/* How data should we send to reach the time-based goal? */
+		to_send = goal_send - actual_sent;
+		if (to_send > remaining)
 			to_send = remaining;
 
 		/* Send a burst. */
@@ -54,9 +76,7 @@ write_bps(int sock, uint8_t * buf, size_t buflen, size_t bps)
 		/* Record effect of sending. */
 		remaining -= to_send;
 		buf += to_send;
-
-		/* Wait 10ms. */
-		wait_ms(10);
+		actual_sent += to_send;
 	} while (remaining > 0);
 
 err0:
