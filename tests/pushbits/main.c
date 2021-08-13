@@ -75,7 +75,13 @@ echo_stdin_stdout(void)
 		goto err0;
 	}
 
-	/* Wait a short while, then cancel the thread. */
+	/*
+	 * Wait a short while, then cancel the thread.  Note that if stdin
+	 * returned an EOF, the thread might have already stopped, and
+	 * certainly will not be running after a second.  This is particularly
+	 * relevant if running the tests inside a virtualization or container
+	 * framework.
+	 */
 	sleep(1);
 	if ((rc = pthread_cancel(thread)) != 0) {
 		/*
