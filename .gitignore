@@ -9,13 +9,15 @@ posix-flags.sh
 liball/liball.a
 spipe/spipe
 spiped/spiped
+# Test binaries
+perftests/recv-zeros/recv-zeros
 perftests/send-zeros/send-zeros
 perftests/standalone-enc/test_standalone_enc
-perftests/recv-zeros/recv-zeros
 tests/dnsthread-resolve/dnsthread-resolve
 tests/nc-client/nc-client
 tests/nc-server/nc-server
 tests/pushbits/test_pushbits
 tests/valgrind/potential-memleaks
+# Test output
 tests-output/
 tests-valgrind/

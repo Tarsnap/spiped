@@ -1,10 +1,15 @@
 .POSIX:
 
-PROGS=		spiped spipe
-TESTS=		tests/dnsthread-resolve tests/nc-client tests/nc-server	\
-		tests/pushbits tests/valgrind				\
-		perftests/recv-zeros perftests/send-zeros		\
-		perftests/standalone-enc
+PROGS=	spipe 					\
+	spiped
+TESTS=	perftests/recv-zeros			\
+	perftests/send-zeros			\
+	perftests/standalone-enc		\
+	tests/dnsthread-resolve			\
+	tests/nc-client				\
+	tests/nc-server				\
+	tests/pushbits				\
+	tests/valgrind
 BINDIR_DEFAULT=	/usr/local/bin
 CFLAGS_DEFAULT=	-O2
 LIBCPERCIVA_DIR=	libcperciva
