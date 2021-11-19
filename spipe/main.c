@@ -288,10 +288,14 @@ main(int argc, char * argv[])
 
 	/* Wait for threads to finish (if necessary) */
 	if (ET.stopped == 0) {
+		if ((rc = pthread_cancel(ET.threads[0])) != 0)
+			warn0("pthread_cancel: %s", strerror(rc));
 		if ((rc = pthread_join(ET.threads[0], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
 			goto err2;
 		}
+		if ((rc = pthread_cancel(ET.threads[1])) != 0)
+			warn0("pthread_cancel: %s", strerror(rc));
 		if ((rc = pthread_join(ET.threads[1], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
 			goto err2;
