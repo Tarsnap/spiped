@@ -16,6 +16,7 @@ perftests/standalone-enc/test_standalone_enc
 tests/dnsthread-resolve/dnsthread-resolve
 tests/nc-client/nc-client
 tests/nc-server/nc-server
+tests/pthread_create_blocking_np/test_pthread_create_blocking_np
 tests/pushbits/test_pushbits
 tests/valgrind/potential-memleaks
 # Test output

@@ -1,5 +1,5 @@
 PKG=	spiped
-PROGS=	spipe 					\
+PROGS=	spipe					\
 	spiped
 TESTS=	perftests/recv-zeros			\
 	perftests/send-zeros			\
@@ -7,6 +7,7 @@ TESTS=	perftests/recv-zeros			\
 	tests/dnsthread-resolve			\
 	tests/nc-client				\
 	tests/nc-server				\
+	tests/pthread_create_blocking_np	\
 	tests/pushbits				\
 	tests/valgrind
 SUBST_VERSION_FILES=    spipe/spipe.1 spiped/spiped.1 spipe/main.c spiped/main.c

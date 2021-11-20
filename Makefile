@@ -1,6 +1,6 @@
 .POSIX:
 
-PROGS=	spipe 					\
+PROGS=	spipe					\
 	spiped
 TESTS=	perftests/recv-zeros			\
 	perftests/send-zeros			\
@@ -8,6 +8,7 @@ TESTS=	perftests/recv-zeros			\
 	tests/dnsthread-resolve			\
 	tests/nc-client				\
 	tests/nc-server				\
+	tests/pthread_create_blocking_np	\
 	tests/pushbits				\
 	tests/valgrind
 BINDIR_DEFAULT=	/usr/local/bin

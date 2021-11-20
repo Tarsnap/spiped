@@ -1,0 +1,24 @@
+# Program name.
+PROG	=	test_pthread_create_blocking_np
+
+# Don't install it.
+NOINST	=	1
+
+# Library code required
+LDADD_REQ	=	-lpthread
+
+# Useful relative directories
+LIBCPERCIVA_DIR	=	../../libcperciva
+LIB_DIR		=	../../lib
+
+# Main test code
+SRCS	=	main.c
+SRCS	+=	timing.c
+
+# libcperciva includes
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
+
+# spiped includes
+IDIRS	+=	-I${LIB_DIR}/util
+
+.include <bsd.prog.mk>
