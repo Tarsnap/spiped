@@ -361,6 +361,60 @@ err0:
 	return (-1);
 }
 
+static int
+start_stop(void)
+{
+	pthread_t thread;
+	int in[2];
+	int rc;
+
+	/* Create socket pair for the input. */
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, in)) {
+		warnp("socketpair");
+		goto err0;
+	}
+
+	/* Start echoing. */
+	if (pushbits(in[1], STDOUT_FILENO, &thread)) {
+		warnp("pushbits");
+		goto err1;
+	}
+
+	/* Cancel the thread immediately. */
+	if ((rc = pthread_cancel(thread)) != 0) {
+		warn0("pthread_cancel: %s", strerror(rc));
+		goto err1;
+	}
+
+	/* Wait for thread to finish. */
+	if ((rc = pthread_join(thread, NULL)) != 0) {
+		warn0("pthread_join: %s", strerror(rc));
+		goto err1;
+	}
+
+	/* Clean up. */
+	if (close(in[0])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(in[1])) {
+		warnp("close");
+		goto err0;
+	}
+
+	/* Success! */
+	return (0);
+
+err1:
+	if (close(in[0]))
+		warnp("close");
+	if (close(in[1]))
+		warnp("close");
+err0:
+	/* Failure! */
+	return (-1);
+}
+
 static void
 usage(void)
 {
@@ -402,7 +456,7 @@ main(int argc, char ** argv)
 	/* We should have processed all the arguments except for one. */
 	if (argc != 1)
 		usage();
-	if (PARSENUM(&desired_test, argv[0], 1, 4)) {
+	if (PARSENUM(&desired_test, argv[0], 1, 5)) {
 		warnp("parsenum");
 		goto err0;
 	}
@@ -425,6 +479,10 @@ main(int argc, char ** argv)
 		break;
 	case 4:
 		if (chain_two())
+			goto err0;
+		break;
+	case 5:
+		if (start_stop())
 			goto err0;
 		break;
 	default:

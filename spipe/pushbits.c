@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "noeintr.h"
+#include "pthread_create_blocking_np.h"
 #include "warnp.h"
 
 #include "pushbits.h"
@@ -81,8 +82,9 @@ workthread(void * cookie)
 /**
  * pushbits(in, out, thr):
  * Create a thread which copies data from ${in} to ${out} and
- * store the thread ID in ${thr}.  If ${out} is a socket, disable
- * writing to it after the thread exits.
+ * store the thread ID in ${thr}.  Wait until ${thr} has started.
+ * If ${out} is a socket, disable writing to it after the thread
+ * exits.
  */
 int
 pushbits(int in, int out, pthread_t * thr)
@@ -97,8 +99,8 @@ pushbits(int in, int out, pthread_t * thr)
 	P->out = out;
 
 	/* Create thread. */
-	if ((rc = pthread_create(thr, NULL, workthread, P)) != 0) {
-		warn0("pthread_create: %s", strerror(rc));
+	if ((rc = pthread_create_blocking_np(thr, NULL, workthread, P)) != 0) {
+		warn0("pthread_create_blocking_np: %s", strerror(rc));
 		goto err1;
 	}
 
