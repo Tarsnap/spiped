@@ -108,7 +108,7 @@ hmac_perftest(void)
 
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
-	    nbytes_warmup, 1, hmac_init, hmac_func, NULL, &ctx)) {
+	    nbytes_warmup, 0, hmac_init, hmac_func, NULL, &ctx)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
@@ -172,7 +172,7 @@ aesctr_perftest(void)
 
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
-	    nbytes_warmup, 1, aesctr_init, aesctr_func, NULL, k_aes)) {
+	    nbytes_warmup, 0, aesctr_init, aesctr_func, NULL, k_aes)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
@@ -259,7 +259,7 @@ aesctr_hmac_perftest(void)
 
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
-	    nbytes_warmup, 1, aesctr_hmac_init, aesctr_hmac_func, NULL, ahc)) {
+	    nbytes_warmup, 0, aesctr_hmac_init, aesctr_hmac_func, NULL, ahc)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
@@ -342,7 +342,7 @@ pce_perftest(void)
 
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
-	    nbytes_warmup, 1, pce_init, pce_func, pce_cleanup, pce)) {
+	    nbytes_warmup, 0, pce_init, pce_func, pce_cleanup, pce)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
