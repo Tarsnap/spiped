@@ -75,15 +75,9 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 	}
 
 	/* Start reading. */
-	if (P->decr) {
-		if ((P->read_cookie = network_read(P->s_in, P->inbuf,
-		    P->full_buflen, P->minread, callback_pipe_read, P)) == NULL)
-			goto err1;
-	} else {
-		if ((P->read_cookie = network_read(P->s_in, P->inbuf,
-		    P->full_buflen, P->minread, callback_pipe_read, P)) == NULL)
-			goto err1;
-	}
+	if ((P->read_cookie = network_read(P->s_in, P->inbuf, P->full_buflen,
+	    P->minread, callback_pipe_read, P)) == NULL)
+		goto err1;
 
 	/* Success! */
 	return (P);
@@ -126,17 +120,10 @@ callback_pipe_read(void * cookie, ssize_t len)
 	}
 
 	/* Write the encrypted or decrypted data. */
-	if (P->decr) {
-		if ((P->write_cookie = network_write(P->s_out, P->outbuf,
-		    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
-		    P)) == NULL)
-			goto err0;
-	} else {
-		if ((P->write_cookie = network_write(P->s_out, P->outbuf,
-		    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
-		    P)) == NULL)
-			goto err0;
-	}
+	if ((P->write_cookie = network_write(P->s_out, P->outbuf,
+	    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
+	    P)) == NULL)
+		goto err0;
 
 	/* Success! */
 	return (0);
@@ -176,15 +163,9 @@ callback_pipe_write(void * cookie, ssize_t len)
 		goto fail;
 
 	/* Launch another read. */
-	if (P->decr) {
-		if ((P->read_cookie = network_read(P->s_in, P->inbuf,
-		    P->full_buflen, P->minread, callback_pipe_read, P)) == NULL)
-			goto err0;
-	} else {
-		if ((P->read_cookie = network_read(P->s_in, P->inbuf,
-		    P->full_buflen, P->minread, callback_pipe_read, P)) == NULL)
-			goto err0;
-	}
+	if ((P->read_cookie = network_read(P->s_in, P->inbuf, P->full_buflen,
+	    P->minread, callback_pipe_read, P)) == NULL)
+		goto err0;
 
 	/* Success! */
 	return (0);
