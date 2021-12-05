@@ -24,6 +24,7 @@ struct pipe_cookie {
 	void * write_cookie;
 	ssize_t wlen;
 	size_t minread;
+	size_t full_buflen;
 };
 
 static int callback_pipe_read(void *, ssize_t);
@@ -59,14 +60,17 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 	/* Set the minimum number of bytes to read. */
 	P->minread = P->decr ? PCRYPT_ESZ : 1;
 
+	/* Set the number of bytes in a full buffer. */
+	P->full_buflen = P->decr ? PCRYPT_ESZ : PCRYPT_MAXDSZ;
+
 	/* Start reading. */
 	if (P->decr) {
 		if ((P->read_cookie = network_read(P->s_in, P->ebuf,
-		    PCRYPT_ESZ, P->minread, callback_pipe_read, P)) == NULL)
+		    P->full_buflen, P->minread, callback_pipe_read, P)) == NULL)
 			goto err1;
 	} else {
 		if ((P->read_cookie = network_read(P->s_in, P->dbuf,
-		    PCRYPT_MAXDSZ, P->minread, callback_pipe_read, P)) == NULL)
+		    P->full_buflen, P->minread, callback_pipe_read, P)) == NULL)
 			goto err1;
 	}
 
@@ -163,11 +167,11 @@ callback_pipe_write(void * cookie, ssize_t len)
 	/* Launch another read. */
 	if (P->decr) {
 		if ((P->read_cookie = network_read(P->s_in, P->ebuf,
-		    PCRYPT_ESZ, P->minread, callback_pipe_read, P)) == NULL)
+		    P->full_buflen, P->minread, callback_pipe_read, P)) == NULL)
 			goto err0;
 	} else {
 		if ((P->read_cookie = network_read(P->s_in, P->dbuf,
-		    PCRYPT_MAXDSZ, P->minread, callback_pipe_read, P)) == NULL)
+		    P->full_buflen, P->minread, callback_pipe_read, P)) == NULL)
 			goto err0;
 	}
 
