@@ -20,9 +20,13 @@ struct pipe_cookie {
 	struct proto_keys * k;
 	uint8_t dbuf[PCRYPT_MAXDSZ];
 	uint8_t ebuf[PCRYPT_ESZ];
+	uint8_t * inbuf;
+	uint8_t * outbuf;
 	void * read_cookie;
 	void * write_cookie;
 	ssize_t wlen;
+	size_t minread;
+	size_t full_buflen;
 };
 
 static int callback_pipe_read(void *, ssize_t);
@@ -55,16 +59,25 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 	P->read_cookie = NULL;
 	P->write_cookie = NULL;
 
-	/* Start reading. */
+	/* Set the minimum number of bytes to read. */
+	P->minread = P->decr ? PCRYPT_ESZ : 1;
+
+	/* Set the number of bytes in a full buffer. */
+	P->full_buflen = P->decr ? PCRYPT_ESZ : PCRYPT_MAXDSZ;
+
+	/* Set up pointers to buffers. */
 	if (P->decr) {
-		if ((P->read_cookie = network_read(P->s_in, P->ebuf,
-		    PCRYPT_ESZ, PCRYPT_ESZ, callback_pipe_read, P)) == NULL)
-			goto err1;
+		P->inbuf = P->ebuf;
+		P->outbuf = P->dbuf;
 	} else {
-		if ((P->read_cookie = network_read(P->s_in, P->dbuf,
-		    PCRYPT_MAXDSZ, 1, callback_pipe_read, P)) == NULL)
-			goto err1;
+		P->inbuf = P->dbuf;
+		P->outbuf = P->ebuf;
 	}
+
+	/* Start reading. */
+	if ((P->read_cookie = network_read(P->s_in, P->inbuf, P->full_buflen,
+	    P->minread, callback_pipe_read, P)) == NULL)
+		goto err1;
 
 	/* Success! */
 	return (P);
@@ -99,25 +112,18 @@ callback_pipe_read(void * cookie, ssize_t len)
 
 	/* Encrypt or decrypt the data. */
 	if (P->decr) {
-		if ((P->wlen = proto_crypt_dec(P->ebuf, P->dbuf, P->k)) == -1)
+		if ((P->wlen = proto_crypt_dec(P->inbuf, P->outbuf, P->k)) == -1)
 			goto fail;
 	} else {
-		proto_crypt_enc(P->dbuf, (size_t)len, P->ebuf, P->k);
+		proto_crypt_enc(P->inbuf, (size_t)len, P->outbuf, P->k);
 		P->wlen = PCRYPT_ESZ;
 	}
 
 	/* Write the encrypted or decrypted data. */
-	if (P->decr) {
-		if ((P->write_cookie = network_write(P->s_out, P->dbuf,
-		    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
-		    P)) == NULL)
-			goto err0;
-	} else {
-		if ((P->write_cookie = network_write(P->s_out, P->ebuf,
-		    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
-		    P)) == NULL)
-			goto err0;
-	}
+	if ((P->write_cookie = network_write(P->s_out, P->outbuf,
+	    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
+	    P)) == NULL)
+		goto err0;
 
 	/* Success! */
 	return (0);
@@ -157,15 +163,9 @@ callback_pipe_write(void * cookie, ssize_t len)
 		goto fail;
 
 	/* Launch another read. */
-	if (P->decr) {
-		if ((P->read_cookie = network_read(P->s_in, P->ebuf,
-		    PCRYPT_ESZ, PCRYPT_ESZ, callback_pipe_read, P)) == NULL)
-			goto err0;
-	} else {
-		if ((P->read_cookie = network_read(P->s_in, P->dbuf,
-		    PCRYPT_MAXDSZ, 1, callback_pipe_read, P)) == NULL)
-			goto err0;
-	}
+	if ((P->read_cookie = network_read(P->s_in, P->inbuf, P->full_buflen,
+	    P->minread, callback_pipe_read, P)) == NULL)
+		goto err0;
 
 	/* Success! */
 	return (0);
