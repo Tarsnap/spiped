@@ -55,6 +55,11 @@ SRCS	+=	events_network_selectstats.c
 SRCS	+=	events_timer.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
 
+# Buffered networking
+.PATH.c	:	${LIBCPERCIVA_DIR}/netbuf
+SRCS	+=	netbuf_read.c
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/netbuf
+
 # Event-driven networking
 .PATH.c	:	${LIBCPERCIVA_DIR}/network
 SRCS	+=	network_accept.c
