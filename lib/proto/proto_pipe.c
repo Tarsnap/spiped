@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "netbuf.h"
 #include "network.h"
 
 #include "proto_crypt.h"
@@ -21,18 +22,15 @@ struct pipe_cookie {
 	int s_out;
 	int decr;
 	struct proto_keys * k;
-	uint8_t dbuf[PCRYPT_MAXDSZ];
-	uint8_t ebuf[PCRYPT_ESZ];
-	uint8_t * inbuf;
 	uint8_t outbuf[OUTBUFSIZE];
-	void * read_cookie;
+	struct netbuf_read * R;
 	void * write_cookie;
 	ssize_t wlen;
 	size_t minread;
 	size_t full_buflen;
 };
 
-static int callback_pipe_read(void *, ssize_t);
+static int callback_pipe_read(void *, int);
 static int callback_pipe_write(void *, ssize_t);
 
 /**
@@ -59,8 +57,11 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 	P->s_out = s_out;
 	P->decr = decr;
 	P->k = k;
-	P->read_cookie = NULL;
 	P->write_cookie = NULL;
+
+	/* Initialize reader. */
+	if ((P->R = netbuf_read_init(P->s_in)) == NULL)
+		goto err1;
 
 	/* Set the minimum number of bytes to read. */
 	P->minread = P->decr ? PCRYPT_ESZ : 1;
@@ -68,17 +69,15 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 	/* Set the number of bytes in a full buffer. */
 	P->full_buflen = P->decr ? PCRYPT_ESZ : PCRYPT_MAXDSZ;
 
-	/* Set up input pointer. */
-	P->inbuf = P->decr ? P->ebuf : P->dbuf;
-
 	/* Start reading. */
-	if ((P->read_cookie = network_read(P->s_in, P->inbuf, P->full_buflen,
-	    P->minread, callback_pipe_read, P)) == NULL)
-		goto err1;
+	if (netbuf_read_wait(P->R, P->minread, callback_pipe_read, P))
+		goto err2;
 
 	/* Success! */
 	return (P);
 
+err2:
+	netbuf_read_free(P->R);
 err1:
 	free(P);
 err0:
@@ -88,7 +87,7 @@ err0:
 
 /* Some data has been read. */
 static int
-callback_pipe_read(void * cookie, ssize_t slen)
+callback_pipe_read(void * cookie, int status)
 {
 	struct pipe_cookie * P = cookie;
 	uint8_t * inbuf;
@@ -98,24 +97,16 @@ callback_pipe_read(void * cookie, ssize_t slen)
 	size_t loop_inlen;
 	ssize_t loop_outlen;
 
-	/* This read is no longer in progress. */
-	P->read_cookie = NULL;
-
 	/* Did we read EOF? */
-	if (slen == 0)
+	if (status == 1)
 		goto eof;
 
 	/* Did the read fail? */
-	if (slen == -1)
+	if (status == -1)
 		goto fail;
-
-	/* Sanity check and convert length. */
-	if (slen < 0)
-		goto fail;
-	inlen = (size_t)slen;
 
 	/* Get data. */
-	inbuf = &P->inbuf[inpos];
+	netbuf_read_peek(P->R, &inbuf, &inlen);
 
 	/* Process as many packets as possible. */
 	while (inlen > 0) {
@@ -149,6 +140,9 @@ callback_pipe_read(void * cookie, ssize_t slen)
 		inpos += loop_inlen;
 		outpos += (size_t)loop_outlen;
 	}
+
+	/* Let netbuf layer know what we've used. */
+	netbuf_read_consume(P->R, inpos);
 
 	/* Write the encrypted or decrypted data. */
 	P->wlen = (ssize_t)outpos;
@@ -195,8 +189,7 @@ callback_pipe_write(void * cookie, ssize_t len)
 		goto fail;
 
 	/* Launch another read. */
-	if ((P->read_cookie = network_read(P->s_in, P->inbuf, P->full_buflen,
-	    P->minread, callback_pipe_read, P)) == NULL)
+	if (netbuf_read_wait(P->R, P->minread, callback_pipe_read, P))
 		goto err0;
 
 	/* Success! */
@@ -224,10 +217,12 @@ proto_pipe_cancel(void * cookie)
 	struct pipe_cookie * P = cookie;
 
 	/* If a read or write is in progress, cancel it. */
-	if (P->read_cookie)
-		network_read_cancel(P->read_cookie);
+	netbuf_read_wait_cancel(P->R);
 	if (P->write_cookie)
 		network_write_cancel(P->write_cookie);
+
+	/* Clean up the buffered reader. */
+	netbuf_read_free(P->R);
 
 	/* Free the cookie. */
 	free(P);
