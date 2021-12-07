@@ -88,23 +88,29 @@ err0:
 
 /* Some data has been read. */
 static int
-callback_pipe_read(void * cookie, ssize_t len)
+callback_pipe_read(void * cookie, ssize_t slen)
 {
 	struct pipe_cookie * P = cookie;
+	size_t inlen;
 
 	/* This read is no longer in progress. */
 	P->read_cookie = NULL;
 
 	/* Did we read EOF? */
-	if (len == 0)
+	if (slen == 0)
 		goto eof;
 
 	/* Did the read fail? */
-	if (len == -1)
+	if (slen == -1)
 		goto fail;
 
+	/* Sanity check and convert length. */
+	if (slen < 0)
+		goto fail;
+	inlen = (size_t)slen;
+
 	/* Did a packet read end prematurely? */
-	if ((P->decr) && (len < PCRYPT_ESZ))
+	if ((P->decr) && (inlen < PCRYPT_ESZ))
 		goto fail;
 
 	/* Encrypt or decrypt the data. */
@@ -112,7 +118,7 @@ callback_pipe_read(void * cookie, ssize_t len)
 		if ((P->wlen = proto_crypt_dec(P->inbuf, P->outbuf, P->k)) == -1)
 			goto fail;
 	} else {
-		proto_crypt_enc(P->inbuf, (size_t)len, P->outbuf, P->k);
+		proto_crypt_enc(P->inbuf, inlen, P->outbuf, P->k);
 		P->wlen = PCRYPT_ESZ;
 	}
 
