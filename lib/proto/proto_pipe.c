@@ -10,6 +10,9 @@
 
 #include "proto_pipe.h"
 
+/* Maximum size of data to output in a single callback_pipe_read() call. */
+#define OUTBUFSIZE (8 * PCRYPT_ESZ)
+
 struct pipe_cookie {
 	int (* callback)(void *);
 	void * cookie;
@@ -21,7 +24,7 @@ struct pipe_cookie {
 	uint8_t dbuf[PCRYPT_MAXDSZ];
 	uint8_t ebuf[PCRYPT_ESZ];
 	uint8_t * inbuf;
-	uint8_t * outbuf;
+	uint8_t outbuf[OUTBUFSIZE];
 	void * read_cookie;
 	void * write_cookie;
 	ssize_t wlen;
@@ -65,14 +68,8 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 	/* Set the number of bytes in a full buffer. */
 	P->full_buflen = P->decr ? PCRYPT_ESZ : PCRYPT_MAXDSZ;
 
-	/* Set up pointers to buffers. */
-	if (P->decr) {
-		P->inbuf = P->ebuf;
-		P->outbuf = P->dbuf;
-	} else {
-		P->inbuf = P->dbuf;
-		P->outbuf = P->ebuf;
-	}
+	/* Set up input pointer. */
+	P->inbuf = P->decr ? P->ebuf : P->dbuf;
 
 	/* Start reading. */
 	if ((P->read_cookie = network_read(P->s_in, P->inbuf, P->full_buflen,
