@@ -91,7 +91,12 @@ static int
 callback_pipe_read(void * cookie, ssize_t slen)
 {
 	struct pipe_cookie * P = cookie;
+	uint8_t * inbuf;
 	size_t inlen;
+	size_t inpos = 0;
+	size_t outpos = 0;
+	size_t loop_inlen;
+	ssize_t loop_outlen;
 
 	/* This read is no longer in progress. */
 	P->read_cookie = NULL;
@@ -109,20 +114,44 @@ callback_pipe_read(void * cookie, ssize_t slen)
 		goto fail;
 	inlen = (size_t)slen;
 
-	/* Did a packet read end prematurely? */
-	if ((P->decr) && (inlen < PCRYPT_ESZ))
-		goto fail;
+	/* Get data. */
+	inbuf = &P->inbuf[inpos];
 
-	/* Encrypt or decrypt the data. */
-	if (P->decr) {
-		if ((P->wlen = proto_crypt_dec(P->inbuf, P->outbuf, P->k)) == -1)
-			goto fail;
-	} else {
-		proto_crypt_enc(P->inbuf, inlen, P->outbuf, P->k);
-		P->wlen = PCRYPT_ESZ;
+	/* Process as many packets as possible. */
+	while (inlen > 0) {
+		/* Stop processing if we don't have space for more output. */
+		if (outpos + P->full_buflen > OUTBUFSIZE)
+			break;
+
+		/* How many bytes should we process this time? */
+		loop_inlen = (inlen > P->full_buflen) ? P->full_buflen : inlen;
+
+		/*
+		 * If we don't have enough data to decrypt, leave it until the
+		 * next time callback_pipe_read() is called.
+		 */
+		if ((P->decr) && (loop_inlen < PCRYPT_ESZ))
+			break;
+
+		/* Encrypt or decrypt the data. */
+		if (P->decr) {
+			if ((loop_outlen = proto_crypt_dec(&inbuf[inpos],
+			    &P->outbuf[outpos], P->k)) == -1)
+				goto fail;
+		} else {
+			proto_crypt_enc(&inbuf[inpos], loop_inlen,
+			    &P->outbuf[outpos], P->k);
+			loop_outlen = PCRYPT_ESZ;
+		}
+
+		/* We've processed this data. */
+		inlen -= loop_inlen;
+		inpos += loop_inlen;
+		outpos += (size_t)loop_outlen;
 	}
 
 	/* Write the encrypted or decrypted data. */
+	P->wlen = (ssize_t)outpos;
 	if ((P->write_cookie = network_write(P->s_out, P->outbuf,
 	    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
 	    P)) == NULL)
