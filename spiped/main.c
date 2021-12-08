@@ -40,7 +40,7 @@ callback_graceful_shutdown(void * dispatch_cookie)
 	dispatch_request_shutdown(dispatch_cookie);
 
 	/* Success! */
-	return(0);
+	return (0);
 }
 
 /*

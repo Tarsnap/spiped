@@ -23,7 +23,7 @@ IDIRS	+=	-I${SPIPE_DIR}
 # libcperciva includes
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
-# spipe includes
+# spiped includes
 IDIRS	+=	-I${LIB_DIR}/util
 
 .include <bsd.prog.mk>
