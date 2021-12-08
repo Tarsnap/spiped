@@ -101,7 +101,7 @@ callback_graceful_shutdown(void * cookie)
 	ET->conndone = 1;
 
 	/* Success! */
-	return(0);
+	return (0);
 
 err0:
 	/* Failure! */
