@@ -125,7 +125,7 @@ proto_crypt.o: ../lib/proto/proto_crypt.c ../libcperciva/crypto/crypto_aes.h ../
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../lib/proto/proto_crypt.c -o proto_crypt.o
 proto_handshake.o: ../lib/proto/proto_handshake.c ../libcperciva/crypto/crypto_entropy.h ../libcperciva/network/network.h ../lib/proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h ../lib/proto/proto_handshake.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../lib/proto/proto_handshake.c -o proto_handshake.o
-proto_pipe.o: ../lib/proto/proto_pipe.c ../libcperciva/network/network.h ../lib/proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h ../lib/proto/proto_pipe.h
+proto_pipe.o: ../lib/proto/proto_pipe.c ../libcperciva/netbuf/netbuf.h ../libcperciva/network/network.h ../lib/proto/proto_crypt.h ../libcperciva/crypto/crypto_dh.h ../lib/proto/proto_pipe.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../lib/proto/proto_pipe.c -o proto_pipe.o
 graceful_shutdown.o: ../lib/util/graceful_shutdown.c ../libcperciva/events/events.h ../libcperciva/util/warnp.h ../lib/util/graceful_shutdown.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../lib/util/graceful_shutdown.c -o graceful_shutdown.o
