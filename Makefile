@@ -92,7 +92,7 @@ install:	all
 		( cd $${D} && ${MAKE} install ) || exit 2;	\
 	done
 
-clean:
+clean:	test-clean
 	rm -f cflags-filter.sh cpusupport-config.h posix-flags.sh
 	for D in liball ${PROGS} ${TESTS}; do			\
 		( cd $${D} && ${MAKE} clean ) || exit 2;	\
