@@ -1,7 +1,7 @@
 (unreleased)
 * Warn if the maximum number of connections is reached in spiped.
 * Add --syslog (spiped) to send warnings to syslog when daemonized.
-* Significantly improve performance of AES-CTR and SHA256 on amd64 and ARM.
+* Significantly improve performance of AES-CTR and SHA256 on amd64 and aarch64.
 * Add ability to suppress POSIX runtime checks during compilation to simplify
   cross-compiling.
 spiped-1.6.1
