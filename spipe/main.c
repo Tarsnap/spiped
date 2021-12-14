@@ -20,6 +20,14 @@
 
 #include "pushbits.h"
 
+#if defined(__gnu_hurd__)
+/*
+ * GNU/Hurd does not implement pthread cancellelation points, so we cannot
+ * cleanly quit the pushbits thread.
+ */
+#define BROKEN_PTHREAD_CANCEL
+#endif
+
 /* Cookie with variables about the event loop and threads. */
 struct events_threads {
 	pthread_t threads[2];
@@ -88,10 +96,12 @@ callback_graceful_shutdown(void * cookie)
 
 	/* Wait for the threads to finish. */
 	for (i = 0; i < 2; i++) {
+#ifndef BROKEN_PTHREAD_CANCEL
 		if ((rc = pthread_join(ET->threads[i], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
 			goto err0;
 		}
+#endif
 	}
 
 	/* We've stopped the threads. */
@@ -287,6 +297,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Wait for threads to finish (if necessary) */
+#ifndef BROKEN_PTHREAD_CANCEL
 	if (ET.stopped == 0) {
 		if ((rc = pthread_join(ET.threads[0], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
@@ -297,6 +308,7 @@ main(int argc, char * argv[])
 			goto err2;
 		}
 	}
+#endif
 
 	/* Clean up. */
 	close(s[0]);

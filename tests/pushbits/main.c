@@ -17,6 +17,14 @@
 
 #include "pushbits.h"
 
+#if defined(__gnu_hurd__)
+/*
+ * GNU/Hurd does not implement pthread cancellelation points, so we cannot
+ * cleanly quit the pushbits thread.
+ */
+#define BROKEN_PTHREAD_CANCEL
+#endif
+
 static int
 basic_copy(const char * filename_in, const char * filename_out)
 {
@@ -98,11 +106,13 @@ echo_stdin_stdout(void)
 		}
 	}
 
+#ifndef BROKEN_PTHREAD_CANCEL
 	/* Wait for thread to finish. */
 	if ((rc = pthread_join(thread, NULL)) != 0) {
 		warn0("pthread_join: %s", strerror(rc));
 		goto err0;
 	}
+#endif
 
 	/* Success! */
 	return (0);
@@ -386,11 +396,13 @@ start_stop(void)
 		goto err1;
 	}
 
+#ifndef BROKEN_PTHREAD_CANCEL
 	/* Wait for thread to finish. */
 	if ((rc = pthread_join(thread, NULL)) != 0) {
 		warn0("pthread_join: %s", strerror(rc));
 		goto err1;
 	}
+#endif
 
 	/* Clean up. */
 	if (close(in[0])) {
