@@ -30,7 +30,11 @@ workthread_cleanup(void * cookie)
 	 * since it might, indeed, not be a socket.
 	 */
 	if (shutdown(P->out, SHUT_WR)) {
-		if (errno != ENOTSOCK) {
+		if ((errno != ENOTSOCK)
+#if defined(__gnu_hurd__)
+		    && (errno != EMIG_BAD_ID)
+#endif
+		    ) {
 			warnp("Error shutting down socket");
 			exit(1);
 		}
