@@ -27,7 +27,7 @@
 /* Smaller buffers are padded, so no point testing smaller values. */
 static const size_t perfsizes[] = {1024};
 static const size_t num_perf = sizeof(perfsizes) / sizeof(perfsizes[0]);
-static const size_t nbytes_perftest = 100000000;	/* 100 MB */
+static size_t nbytes_perftest = 100000000;		/* 100 MB */
 static const size_t nbytes_warmup = 10000000;		/* 10 MB */
 
 /* Print a string, then whether or not we're using hardware instructions. */
@@ -580,17 +580,26 @@ int
 main(int argc, char * argv[])
 {
 	int desired_test;
+	size_t multiplier;
 
 	WARNP_INIT;
 
 	/* Parse command line. */
-	if (argc != 2) {
-		fprintf(stderr, "usage: test_standalone_enc NUM\n");
+	if ((argc < 2) || (argc > 3)) {
+		fprintf(stderr, "usage: test_standalone_enc NUM [MULT]\n");
 		exit(1);
 	}
 	if (PARSENUM(&desired_test, argv[1], 1, 5)) {
 		warnp("parsenum");
 		goto err0;
+	}
+	if (argc == 3) {
+		/* Multiply number of bytes by the user-supplied value. */
+		if (PARSENUM(&multiplier, argv[2], 1, 1000)) {
+			warnp("parsenum");
+			goto err0;
+		}
+		nbytes_perftest *= multiplier;
 	}
 
 	/* Report what we're doing. */
