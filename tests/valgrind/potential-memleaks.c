@@ -101,17 +101,13 @@ pl_freebsd_pthread_strerror_localtime(void)
 		fprintf(stderr, "pthread_join: %s", strerror(rc));
 }
 
-/* Problem with FreeBSD and pthread with getaddrinfo. */
-static void *
-pl_workthread_getaddrinfo(void * cookie)
+static void
+pl_getaddrinfo(const char * addr)
 {
 	struct addrinfo hints;
 	struct addrinfo * res;
-	const char * addr = "localhost";
 	const char * ports = "80";
 	int error;
-
-	(void)cookie; /* UNUSED */
 
 	/* Create hints structure. */
 	memset(&hints, 0, sizeof(hints));
@@ -120,12 +116,27 @@ pl_workthread_getaddrinfo(void * cookie)
 	hints.ai_protocol = IPPROTO_TCP;
 
 	/* Perform DNS lookup. */
-	if ((error = getaddrinfo(addr, ports, &hints, &res)) != 0)
-		fprintf(stderr, "Error looking up %s: %s", addr,
-		    gai_strerror(error));
+	if ((error = getaddrinfo(addr, ports, &hints, &res)) != 0) {
+		/* Only print an error if we're online. */
+		if (error != EAI_AGAIN) {
+			fprintf(stderr, "Error looking up %s: %s", addr,
+			    gai_strerror(error));
+		}
+		return;
+	}
 
 	/* Clean up. */
 	freeaddrinfo(res);
+}
+
+/* Problem with FreeBSD and pthread with getaddrinfo. */
+static void *
+pl_workthread_getaddrinfo(void * cookie)
+{
+
+	(void)cookie; /* UNUSED */
+
+	pl_getaddrinfo("localhost");
 
 	return (NULL);
 }
