@@ -20,5 +20,6 @@ tests/pthread_create_blocking_np/test_pthread_create_blocking_np
 tests/pushbits/test_pushbits
 tests/valgrind/potential-memleaks
 # Test output
+perftests/standalone-enc/bench.*
 tests-output/
 tests-valgrind/
