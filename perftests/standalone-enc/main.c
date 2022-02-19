@@ -109,6 +109,10 @@ hmac_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	return (0);
 }
 
+/**
+ * hmac_perftest(void):
+ * Performance test for HMAC-SHA256.
+ */
 static int
 hmac_perftest(void)
 {
@@ -167,6 +171,10 @@ aesctr_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	return (0);
 }
 
+/**
+ * aesctr_perftest(void):
+ * Performance test for AES-CTR.
+ */
 static int
 aesctr_perftest(void)
 {
@@ -251,6 +259,10 @@ aesctr_hmac_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	return (0);
 }
 
+/**
+ * aesctr_hmac_perftest(void):
+ * Performance test for AES-CTR followed by HMAC-SHA256.
+ */
 static int
 aesctr_hmac_perftest(void)
 {
@@ -342,6 +354,10 @@ pce_cleanup(void * cookie)
 	return (0);
 }
 
+/**
+ * pce_perftest(void):
+ * Performance test for proto_crypt_enc().
+ */
 static int
 pce_perftest(void)
 {
@@ -510,7 +526,7 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	}
 
 	/* We've finished writing stuff. */
-	if (close(pipe->in[0])) {
+	if (shutdown(pipe->in[0], SHUT_WR)) {
 		warnp("close");
 		goto err0;
 	}
@@ -552,6 +568,10 @@ pipe_cleanup(void * cookie)
 	return (0);
 }
 
+/**
+ * pipe_perftest(void):
+ * Performance test for one proto_pipe().
+ */
 static int
 pipe_perftest(void)
 {
@@ -608,19 +628,24 @@ main(int argc, char * argv[])
 	/* Run the desired test. */
 	switch(desired_test) {
 	case 1:
-		hmac_perftest();
+		if (hmac_perftest())
+			goto err0;
 		break;
 	case 2:
-		aesctr_perftest();
+		if (aesctr_perftest())
+			goto err0;
 		break;
 	case 3:
-		aesctr_hmac_perftest();
+		if (aesctr_hmac_perftest())
+			goto err0;
 		break;
 	case 4:
-		pce_perftest();
+		if (pce_perftest())
+			goto err0;
 		break;
 	case 5:
-		pipe_perftest();
+		if (pipe_perftest())
+			goto err0;
 		break;
 	default:
 		warn0("invalid test number");
