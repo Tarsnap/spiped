@@ -8,7 +8,19 @@
 
 set -e -o noclobber -o nounset
 
+# This command must be in the same directory; it will be invoked as "./${cmd}".
+cmd="test_standalone_enc"
+args="5 10"
 outfilename="bench"
+
+# Sanity check: dtrace silently truncates the execname to 19 characters, which
+# this script does not handle.
+numchars="$(printf "%s" "${cmd}" | wc -c)"
+if [ "${numchars}" -gt "19" ]; then
+	printf "%s is %i chars; that's too long for dtrace!\n"	\
+	    "${cmd}" "${numchars}"
+	exit 1
+fi
 
 # Should we keep all the profile data?
 if [ "${1:-}" = "--all" ]; then
@@ -27,17 +39,26 @@ fi
 
 # Clear previous data
 rm -f "${outfilename}.stacks" "${outfilename}.folded" "${outfilename}.svg"
+rm -f "${outfilename}.tmp"
 
 # Get profile data and consolidate it.
 ${DTRACE_CMD}						\
 	-x ustackframes=100				\
-	-n 'profile-997 /execname == "test_standalone_enc" && arg1/ { @[ustack()] = count(); }'	\
+	-n "profile-997					\
+	    /execname == \"${cmd}\" && arg1/		\
+	    { @[ustack()] = count(); }"			\
 	-o "${outfilename}.stacks"			\
-	-c './test_standalone_enc 5 10'
+	-c "./${cmd} ${args}"
 stackcollapse.pl "${outfilename}.stacks" > "${outfilename}.folded"
 
 # Unless otherwise specified, only keep the pipe_enc_thread part.
-if [ "${KEEP_ALL}" -eq "0" ]; then
+# If there's no pipe_enc_thread, don't do any filtering.
+if grep -q pipe_enc_thread "${outfilename}.folded" ; then
+	has_pipe_enc=1
+else
+	has_pipe_enc=0
+fi
+if [ "${KEEP_ALL}" -eq "0" -a "${has_pipe_enc}" -gt "0" ]; then
 	grep pipe_enc_thread "${outfilename}.folded" > "${outfilename}.tmp"
 	mv "${outfilename}.tmp" "${outfilename}.folded"
 fi
