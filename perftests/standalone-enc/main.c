@@ -110,11 +110,12 @@ hmac_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 }
 
 /**
- * hmac_perftest(void):
+ * hmac_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for HMAC-SHA256.
  */
 static int
-hmac_perftest(void)
+hmac_perftest(const size_t * perfsizes, size_t num_perf,
+    size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	HMAC_SHA256_CTX ctx;
 
@@ -172,11 +173,12 @@ aesctr_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 }
 
 /**
- * aesctr_perftest(void):
+ * aesctr_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for AES-CTR.
  */
 static int
-aesctr_perftest(void)
+aesctr_perftest(const size_t * perfsizes, size_t num_perf,
+    size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	struct crypto_aes_key * k_aes;
 	uint8_t kbuf[32];
@@ -260,11 +262,12 @@ aesctr_hmac_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 }
 
 /**
- * aesctr_hmac_perftest(void):
+ * aesctr_hmac_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for AES-CTR followed by HMAC-SHA256.
  */
 static int
-aesctr_hmac_perftest(void)
+aesctr_hmac_perftest(const size_t * perfsizes, size_t num_perf,
+    size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	struct aesctr_hmac_cookie aesctr_hmac_cookie;
 	struct aesctr_hmac_cookie * ahc = &aesctr_hmac_cookie;
@@ -355,11 +358,12 @@ pce_cleanup(void * cookie)
 }
 
 /**
- * pce_perftest(void):
+ * pce_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for proto_crypt_enc().
  */
 static int
-pce_perftest(void)
+pce_perftest(const size_t * perfsizes, size_t num_perf,
+    size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	struct pce pce_actual;
 	struct pce * pce = &pce_actual;
@@ -569,11 +573,12 @@ pipe_cleanup(void * cookie)
 }
 
 /**
- * pipe_perftest(void):
+ * pipe_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for one proto_pipe().
  */
 static int
-pipe_perftest(void)
+pipe_perftest(const size_t * perfsizes, size_t num_perf,
+    size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	struct pipe pipe_actual;
 
@@ -628,23 +633,28 @@ main(int argc, char * argv[])
 	/* Run the desired test. */
 	switch(desired_test) {
 	case 1:
-		if (hmac_perftest())
+		if (hmac_perftest(perfsizes, num_perf,
+		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	case 2:
-		if (aesctr_perftest())
+		if (aesctr_perftest(perfsizes, num_perf,
+		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	case 3:
-		if (aesctr_hmac_perftest())
+		if (aesctr_hmac_perftest(perfsizes, num_perf,
+		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	case 4:
-		if (pce_perftest())
+		if (pce_perftest(perfsizes, num_perf,
+		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	case 5:
-		if (pipe_perftest())
+		if (pipe_perftest(perfsizes, num_perf,
+		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	default:
