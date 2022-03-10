@@ -13,6 +13,11 @@ LIB_DIR	=	../../lib
 
 # Main test code
 SRCS	=	main.c
+SRCS	+=	standalone_aesctr.c
+SRCS	+=	standalone_aesctr_hmac.c
+SRCS	+=	standalone_hmac.c
+SRCS	+=	standalone_pce.c
+SRCS	+=	standalone_pipe.c
 
 # spiped protocol, with an extra -DSTANDALONE_ENC_TESTING to enable mkkeypair()
 .PATH.c	:	${LIB_DIR}/proto
@@ -31,7 +36,8 @@ IDIRS	+=	-I${LIB_DIR}/util
 
 # Special test-only defines.
 CFLAGS.proto_crypt.c= -DSTANDALONE_ENC_TESTING
-CFLAGS.main.c= -DSTANDALONE_ENC_TESTING
+CFLAGS.standalone_pce.c= -DSTANDALONE_ENC_TESTING
+CFLAGS.standalone_pipe.c= -DSTANDALONE_ENC_TESTING
 
 # This depends on "all", but we don't want to see any output from that.
 perftest:
