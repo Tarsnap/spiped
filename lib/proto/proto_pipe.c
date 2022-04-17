@@ -6,6 +6,7 @@
 
 #include "netbuf.h"
 #include "network.h"
+#include "warnp.h"
 
 #include "proto_crypt.h"
 
@@ -163,7 +164,10 @@ fail:
 
 eof:
 	/* We aren't going to write any more. */
-	shutdown(P->s_out, SHUT_WR);
+	if (shutdown(P->s_out, SHUT_WR)) {
+		warnp("shutdown");
+		goto err0;
+	}
 
 	/* Record that we have reached EOF. */
 	*(P->status) = 0;
