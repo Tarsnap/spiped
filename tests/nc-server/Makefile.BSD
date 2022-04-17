@@ -13,6 +13,7 @@ SRCS	+=	simple_server.c
 
 # libcperciva includes
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/external/queue
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/network
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 

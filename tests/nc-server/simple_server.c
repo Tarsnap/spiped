@@ -4,6 +4,7 @@
 
 #include "events.h"
 #include "network.h"
+#include "queue.h"
 #include "sock.h"
 #include "warnp.h"
 
@@ -20,7 +21,7 @@ struct accept_state {
 	size_t nconn;
 	size_t nconn_max;
 	void * accept_cookie;
-	struct conn_list_node * conn_cookies;
+	LIST_HEAD(conn_head, conn_list_node) conn_cookies;
 	void * caller_cookie;
 	int (* callback_nc_message)(void *, uint8_t *, size_t, int);
 };
@@ -28,8 +29,7 @@ struct accept_state {
 /* Doubly linked list. */
 struct conn_list_node {
 	/* General "dispatch"-level info. */
-	struct conn_list_node * prev;
-	struct conn_list_node * next;
+	LIST_ENTRY(conn_list_node) entries;
 	struct accept_state * A;
 
 	/* Reading a network message. */
@@ -73,7 +73,7 @@ conndied(struct conn_list_node * node_ptr)
 	struct accept_state * A = node_ptr->A;
 
 	/* We should always have a non-empty list of conn_cookies. */
-	assert(A->conn_cookies != NULL);
+	assert(!LIST_EMPTY(&A->conn_cookies));
 
 	/* We've lost a connection. */
 	A->nconn -= 1;
@@ -86,18 +86,7 @@ conndied(struct conn_list_node * node_ptr)
 	}
 
 	/* Remove the closed connection from the list of conn_cookies. */
-	if (node_ptr == A->conn_cookies) {
-		/* Closed conn_cookie is first in the list. */
-		A->conn_cookies = node_ptr->next;
-		if (node_ptr->next != NULL)
-			node_ptr->next->prev = NULL;
-	} else {
-		/* Closed conn_cookie is in the middle of list. */
-		assert(node_ptr->prev != NULL);
-		node_ptr->prev->next = node_ptr->next;
-		if (node_ptr->next != NULL)
-			node_ptr->next->prev = node_ptr->prev;
-	}
+	LIST_REMOVE(node_ptr, entries);
 
 	/* Clean up the now-unused node. */
 	free(node_ptr);
@@ -134,8 +123,6 @@ callback_gotconn(void * cookie, int s)
 		warn0("Out of memory");
 		goto err1;
 	}
-	node_new->prev = NULL;
-	node_new->next = NULL;
 	node_new->A = A;
 	node_new->sock_read = s;
 
@@ -146,14 +133,8 @@ callback_gotconn(void * cookie, int s)
 		goto err2;
 	}
 
-	/* Link node_new to the beginning of the conn_cookies list. */
-	if (A->conn_cookies != NULL) {
-		node_new->next = A->conn_cookies;
-		node_new->next->prev = node_new;
-	}
-
 	/* Insert node_new to the beginning of the conn_cookies list. */
-	A->conn_cookies = node_new;
+	LIST_INSERT_HEAD(&A->conn_cookies, node_new, entries);
 
 	/* Accept another connection if we can. */
 	if (doaccept(A)) {
@@ -261,17 +242,16 @@ simple_server_shutdown(void * cookie)
 	 * conndied(), which removes the relevant conn_list_node
 	 * from the list of conn_cookies.
 	 */
-	while (A->conn_cookies != NULL) {
+	while ((node_ptr = LIST_FIRST(&A->conn_cookies)) != NULL) {
 		/* Remove nodes from the list. */
-		node_ptr = A->conn_cookies;
-		if (drop(A->conn_cookies))
+		if (drop(LIST_FIRST(&A->conn_cookies)))
 			warn0("drop");
 
 		/*
 		 * Force the clang static analyzer to realize that
 		 * the A->conn_cookies pointer changed.
 		 */
-		assert(node_ptr != A->conn_cookies);
+		assert(node_ptr != LIST_FIRST(&A->conn_cookies));
 	}
 
 	/* Close socket and free memory. */
@@ -321,9 +301,9 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	A->nconn = 0;
 	A->nconn_max = nconn_max;
 	A->accept_cookie = NULL;
-	A->conn_cookies = NULL;
 	A->callback_nc_message = callback_nc_message;
 	A->caller_cookie = caller_cookie;
+	LIST_INIT(&A->conn_cookies);
 
 	/* Accept a connection. */
 	if (doaccept(A)) {
