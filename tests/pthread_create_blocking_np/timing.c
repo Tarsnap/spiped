@@ -30,7 +30,7 @@ static struct testcase {
 			warn0(#prev " is after " #next);		\
 			goto err0;					\
 		}							\
-	} while(0)
+	} while (0)
 
 /* Each test. */
 struct info {

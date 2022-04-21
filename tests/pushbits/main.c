@@ -462,7 +462,7 @@ main(int argc, char ** argv)
 	}
 
 	/* Run the desired test. */
-	switch(desired_test) {
+	switch (desired_test) {
 	case 1:
 		if ((filename_in == NULL) || (filename_out == NULL))
 			usage();
