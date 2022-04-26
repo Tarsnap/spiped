@@ -81,7 +81,7 @@ main(int argc, char * argv[])
 	print_hardware("Testing spiped speed limits");
 
 	/* Run the desired test. */
-	switch(desired_test) {
+	switch (desired_test) {
 	case 1:
 		if (hmac_perftest(perfsizes, num_perf,
 		    nbytes_perftest, nbytes_warmup))
