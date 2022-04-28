@@ -24,7 +24,7 @@ usage(void)
 
 	fprintf(stderr,
 	    "usage: spiped {-e | -d} -s <source socket> "
-	    "-t <target socket> -k <key file>\n"
+	    "-t <target socket> [-b <bind address>] -k <key file>\n"
 	    "    [-DFj] [-f | -g] [-n <max # connections>] "
 	    "[-o <connection timeout>]\n"
 	    "    [-p <pidfile>] [-r <rtime> | -R] [--syslog]\n"
@@ -64,6 +64,7 @@ int
 main(int argc, char * argv[])
 {
 	/* Command-line parameters. */
+	const char * opt_b = NULL;
 	int opt_d = 0;
 	int opt_D = 0;
 	int opt_e = 0;
@@ -86,6 +87,8 @@ main(int argc, char * argv[])
 	const char * opt_u = NULL;
 
 	/* Working variables. */
+	struct sock_addr * sa_b = NULL;
+	struct sock_addr ** sas_b = NULL;
 	struct sock_addr ** sas_s;
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
@@ -100,6 +103,11 @@ main(int argc, char * argv[])
 	/* Parse the command line. */
 	while ((ch = GETOPT(argc, argv)) != NULL) {
 		GETOPT_SWITCH(ch) {
+		GETOPT_OPTARG("-b"):
+			if (opt_b)
+				usage();
+			opt_b = optarg;
+			break;
 		GETOPT_OPT("-d"):
 			if (opt_d || opt_e)
 				usage();
@@ -274,36 +282,51 @@ main(int argc, char * argv[])
 			warnp_syslog(1);
 	}
 
+	/* Resolve bind address. */
+	if (opt_b) {
+		while ((sas_b = sock_resolve(opt_b)) == NULL) {
+			if (!opt_D) {
+				warnp("Error resolving socket address: %s", opt_b);
+				goto err1;
+			}
+			sleep(1);
+		}
+		if ((sa_b = sas_b[0]) == NULL) {
+			warn0("No address found for %s", opt_b);
+			goto err2;
+		}
+	}
+
 	/* Resolve source address. */
 	while ((sas_s = sock_resolve(opt_s)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_s);
-			goto err1;
+			goto err2;
 		}
 		sleep(1);
 	}
 	if (sas_s[0] == NULL) {
 		warn0("No addresses found for %s", opt_s);
-		goto err2;
+		goto err3;
 	}
 
 	/* Resolve target address. */
 	while ((sas_t = sock_resolve(opt_t)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_t);
-			goto err2;
+			goto err3;
 		}
 		sleep(1);
 	}
 	if (sas_t[0] == NULL) {
 		warn0("No addresses found for %s", opt_t);
-		goto err3;
+		goto err4;
 	}
 
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
-		goto err3;
+		goto err4;
 	}
 
 	/* Create and bind a socket, and mark it as listening. */
@@ -311,13 +334,13 @@ main(int argc, char * argv[])
 		warn0("Listening on first of multiple addresses found for %s",
 		    opt_s);
 	if ((s = sock_listener(sas_s[0])) == -1)
-		goto err4;
+		goto err5;
 
 	/* Daemonize and write pid. */
 	if (!opt_D && !opt_F) {
 		if (daemonize(pidfilename)) {
 			warnp("Failed to daemonize");
-			goto err5;
+			goto err6;
 		}
 		/* Send to syslog (if applicable). */
 		if (opt_syslog)
@@ -327,15 +350,15 @@ main(int argc, char * argv[])
 	/* Drop privileges (if applicable). */
 	if (opt_u && setuidgid(opt_u, SETUIDGID_SGROUP_LEAVE_WARN)) {
 		warnp("Failed to drop privileges");
-		goto err5;
+		goto err6;
 	}
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
+	    sas_t, sa_b, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		goto err5;
+		goto err6;
 	}
 
 	/* dispatch is now maintaining sas_t and s. */
@@ -346,7 +369,7 @@ main(int argc, char * argv[])
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
 	    dispatch_cookie)) {
 		warn0("Failed to start graceful_shutdown timer");
-		goto err6;
+		goto err7;
 	}
 
 	/*
@@ -355,7 +378,7 @@ main(int argc, char * argv[])
 	 */
 	if (events_spin(&conndone)) {
 		warnp("Error running event loop");
-		goto err6;
+		goto err7;
 	}
 
 	/* Stop accepting connections and shut down the dispatcher. */
@@ -366,6 +389,7 @@ main(int argc, char * argv[])
 
 	/* Free arrays of resolved addresses. */
 	sock_addr_freelist(sas_s);
+	sock_addr_freelist(sas_b);
 
 	/* Free pid filename. */
 	free(pidfilename);
@@ -373,17 +397,19 @@ main(int argc, char * argv[])
 	/* Success! */
 	exit(0);
 
-err6:
+err7:
 	dispatch_shutdown(dispatch_cookie);
-err5:
+err6:
 	if (s != -1)
 		close(s);
-err4:
+err5:
 	proto_crypt_secret_free(K);
-err3:
+err4:
 	sock_addr_freelist(sas_t);
-err2:
+err3:
 	sock_addr_freelist(sas_s);
+err2:
+	sock_addr_freelist(sas_b);
 err1:
 	free(pidfilename);
 err0:
