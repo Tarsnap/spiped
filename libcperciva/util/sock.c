@@ -297,6 +297,38 @@ err0:
 }
 
 /**
+ * sock_resolve_required(addr):
+ * Return a NULL-terminated array of pointers to sock_addr structures.
+ * If the array would be empty, print an error and return NULL instead.
+ */
+struct sock_addr **
+sock_resolve_required(const char * addr)
+{
+	struct sock_addr ** sas;
+
+	/* Resolve target address. */
+	if ((sas = sock_resolve(addr)) == NULL) {
+		warnp("Error resolving socket address: %s", addr);
+		goto err0;
+	}
+
+	/* Check that the array is not empty. */
+	if (sas[0] == NULL) {
+		warn0("No addresses found for %s", addr);
+		goto err1;
+	}
+
+	/* Success! */
+	return (sas);
+
+err1:
+	sock_addr_freelist(sas);
+err0:
+	/* Failure! */
+	return (NULL);
+}
+
+/**
  * sock_listener(sa):
  * Create a socket, attempt to set SO_REUSEADDR, bind it to the socket address
  * ${sa}, mark it for listening, and mark it as non-blocking.
