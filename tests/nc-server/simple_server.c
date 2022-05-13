@@ -277,7 +277,7 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	int sock;
 
 	/* Resolve the address. */
-	if ((sas = sock_resolve_required(addr)) == NULL)
+	if ((sas = sock_resolve_required(addr, 0, 0)) == NULL)
 		goto err0;
 
 	/* Create a socket, bind it, mark it as listening. */

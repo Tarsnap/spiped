@@ -297,19 +297,34 @@ err0:
 }
 
 /**
- * sock_resolve_required(addr):
- * Return a NULL-terminated array of pointers to sock_addr structures.
- * If the array would be empty, print an error and return NULL instead.
+ * sock_resolve_required(addr, repeat, suppresswarn):
+ * Return a non-empty NULL-terminated array of pointers to sock_addr
+ * structures by calling sock_resolve().  If the array would be empty, print
+ * an error and return NULL instead.  If ${repeat} is non-zero, keep on
+ * repeating the sock_resolve() call until it returns an array; and in this
+ * case, if ${suppresswarn} is non-zero, don't print any errors arising from
+ * sock_warn (but still warn if that array is empty).
  */
 struct sock_addr **
-sock_resolve_required(const char * addr)
+sock_resolve_required(const char * addr, int repeat, int suppresswarn)
 {
 	struct sock_addr ** sas;
 
 	/* Resolve target address. */
-	if ((sas = sock_resolve(addr)) == NULL) {
-		warnp("Error resolving socket address: %s", addr);
-		goto err0;
+	if (repeat) {
+		while ((sas = sock_resolve(addr)) == NULL) {
+			if (!suppresswarn) {
+				warnp("Error resolving socket address: %s",
+				    addr);
+				goto err0;
+			}
+			sleep(1);
+		}
+	} else {
+		if ((sas = sock_resolve(addr)) == NULL) {
+			warnp("Error resolving socket address: %s", addr);
+			goto err0;
+		}
 	}
 
 	/* Check that the array is not empty. */

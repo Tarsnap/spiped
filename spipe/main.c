@@ -223,7 +223,7 @@ main(int argc, char * argv[])
 	ET.stopped = 0;
 
 	/* Resolve target address. */
-	if ((sas_t = sock_resolve_required(opt_t)) == NULL)
+	if ((sas_t = sock_resolve_required(opt_t, 0, 0)) == NULL)
 		goto err0;
 
 	/* Load the keying data. */

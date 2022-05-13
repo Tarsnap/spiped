@@ -64,7 +64,7 @@ main(int argc, char ** argv)
 	to_send = count;
 
 	/* Resolve target address. */
-	if ((sas_t = sock_resolve_required(addr)) == NULL)
+	if ((sas_t = sock_resolve_required(addr, 0, 0)) == NULL)
 		goto err1;
 
 	/* Connect to target. */
