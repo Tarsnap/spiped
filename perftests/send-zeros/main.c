@@ -64,14 +64,8 @@ main(int argc, char ** argv)
 	to_send = count;
 
 	/* Resolve target address. */
-	if ((sas_t = sock_resolve(addr)) == NULL) {
-		warnp("Error resolving socket address: %s", addr);
+	if ((sas_t = sock_resolve_required(addr)) == NULL)
 		goto err1;
-	}
-	if (sas_t[0] == NULL) {
-		warn0("No addresses found for %s", addr);
-		goto err2;
-	}
 
 	/* Connect to target. */
 	if ((socket = sock_connect(sas_t)) == -1) {

@@ -223,14 +223,8 @@ main(int argc, char * argv[])
 	ET.stopped = 0;
 
 	/* Resolve target address. */
-	if ((sas_t = sock_resolve(opt_t)) == NULL) {
-		warnp("Error resolving socket address: %s", opt_t);
+	if ((sas_t = sock_resolve_required(opt_t)) == NULL)
 		goto err0;
-	}
-	if (sas_t[0] == NULL) {
-		warn0("No addresses found for %s", opt_t);
-		goto err1;
-	}
 
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {

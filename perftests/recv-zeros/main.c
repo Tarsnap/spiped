@@ -44,10 +44,8 @@ main(int argc, char ** argv)
 	}
 
 	/* Resolve the address. */
-	if ((sas = sock_resolve(addr)) == NULL) {
-		warn0("sock_resolve");
+	if ((sas = sock_resolve_required(addr)) == NULL)
 		goto err1;
-	}
 
 	/* Create a socket, bind it, mark it as listening. */
 	if ((socket = sock_listener(sas[0])) == -1) {

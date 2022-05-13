@@ -188,14 +188,8 @@ main(int argc, char ** argv)
 	send->read_cookie = NULL;
 
 	/* Resolve target address. */
-	if ((sas_t = sock_resolve(addr)) == NULL) {
-		warnp("Error resolving socket address: %s", addr);
+	if ((sas_t = sock_resolve_required(addr)) == NULL)
 		goto err1;
-	}
-	if (sas_t[0] == NULL) {
-		warn0("No addresses found for %s", addr);
-		goto err2;
-	}
 
 	/* Connect to target. */
 	if ((send->connect_cookie = network_connect(sas_t, callback_connected,
