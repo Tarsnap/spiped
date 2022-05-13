@@ -275,30 +275,12 @@ main(int argc, char * argv[])
 	}
 
 	/* Resolve source address. */
-	while ((sas_s = sock_resolve(opt_s)) == NULL) {
-		if (!opt_D) {
-			warnp("Error resolving socket address: %s", opt_s);
-			goto err1;
-		}
-		sleep(1);
-	}
-	if (sas_s[0] == NULL) {
-		warn0("No addresses found for %s", opt_s);
-		goto err2;
-	}
+	if ((sas_s = sock_resolve_required(opt_s, 1, opt_D)) == NULL)
+		goto err1;
 
 	/* Resolve target address. */
-	while ((sas_t = sock_resolve(opt_t)) == NULL) {
-		if (!opt_D) {
-			warnp("Error resolving socket address: %s", opt_t);
-			goto err2;
-		}
-		sleep(1);
-	}
-	if (sas_t[0] == NULL) {
-		warn0("No addresses found for %s", opt_t);
-		goto err3;
-	}
+	if ((sas_t = sock_resolve_required(opt_t, 1, opt_D)) == NULL)
+		goto err2;
 
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
