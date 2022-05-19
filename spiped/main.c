@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "asprintf.h"
@@ -87,6 +88,7 @@ main(int argc, char * argv[])
 	const char * opt_u = NULL;
 
 	/* Working variables. */
+	char * bind_addr = NULL;
 	struct sock_addr * sa_b = NULL;
 	struct sock_addr ** sas_b = NULL;
 	struct sock_addr ** sas_s;
@@ -284,16 +286,43 @@ main(int argc, char * argv[])
 
 	/* Resolve bind address. */
 	if (opt_b) {
-		while ((sas_b = sock_resolve(opt_b)) == NULL) {
+		char * a = strchr(opt_b, ':');
+		char * b = strrchr(opt_b, ':');
+		char * c = strrchr(opt_b, ']');
+		/* If there is no ':', it's ipv4 address (or Unix domain socket). */
+		if (b == NULL) {
+			if (asprintf(&bind_addr, "%s:0", opt_b) == -1) {
+			    warnp("asprintf");
+			    goto err2;
+			}
+		}
+		/* If there are two different ':', it's ipv6 address. */
+		else if (a != b) {
+			/* If there is no ']', we need to add '[]' and ':0'. */
+			if (c == NULL) {
+				if (asprintf(&bind_addr, "[%s]:0", opt_b) == -1) {
+				    warnp("asprintf");
+				    goto err2;
+				}
+			}
+			/* If there is nothing after ']', we need to add ':0'. */
+			else if (c[1] == '\0') {
+				if (asprintf(&bind_addr, "%s:0", opt_b) == -1) {
+				    warnp("asprintf");
+				    goto err2;
+				}
+			}
+		}
+		while ((sas_b = sock_resolve(bind_addr)) == NULL) {
 			if (!opt_D) {
-				warnp("Error resolving socket address: %s", opt_b);
-				goto err1;
+				warnp("Error resolving socket address: %s", bind_addr);
+				goto err2;
 			}
 			sleep(1);
 		}
 		if ((sa_b = sas_b[0]) == NULL) {
-			warn0("No address found for %s", opt_b);
-			goto err2;
+			warn0("No address found for %s", bind_addr);
+			goto err3;
 		}
 	}
 
@@ -301,32 +330,32 @@ main(int argc, char * argv[])
 	while ((sas_s = sock_resolve(opt_s)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_s);
-			goto err2;
+			goto err3;
 		}
 		sleep(1);
 	}
 	if (sas_s[0] == NULL) {
 		warn0("No addresses found for %s", opt_s);
-		goto err3;
+		goto err4;
 	}
 
 	/* Resolve target address. */
 	while ((sas_t = sock_resolve(opt_t)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_t);
-			goto err3;
+			goto err4;
 		}
 		sleep(1);
 	}
 	if (sas_t[0] == NULL) {
 		warn0("No addresses found for %s", opt_t);
-		goto err4;
+		goto err5;
 	}
 
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
-		goto err4;
+		goto err5;
 	}
 
 	/* Create and bind a socket, and mark it as listening. */
@@ -334,13 +363,13 @@ main(int argc, char * argv[])
 		warn0("Listening on first of multiple addresses found for %s",
 		    opt_s);
 	if ((s = sock_listener(sas_s[0])) == -1)
-		goto err5;
+		goto err6;
 
 	/* Daemonize and write pid. */
 	if (!opt_D && !opt_F) {
 		if (daemonize(pidfilename)) {
 			warnp("Failed to daemonize");
-			goto err6;
+			goto err7;
 		}
 		/* Send to syslog (if applicable). */
 		if (opt_syslog)
@@ -350,7 +379,7 @@ main(int argc, char * argv[])
 	/* Drop privileges (if applicable). */
 	if (opt_u && setuidgid(opt_u, SETUIDGID_SGROUP_LEAVE_WARN)) {
 		warnp("Failed to drop privileges");
-		goto err6;
+		goto err7;
 	}
 
 	/* Start accepting connections. */
@@ -358,7 +387,7 @@ main(int argc, char * argv[])
 	    sas_t, sa_b, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		goto err6;
+		goto err7;
 	}
 
 	/* dispatch is now maintaining sas_t and s. */
@@ -369,7 +398,7 @@ main(int argc, char * argv[])
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
 	    dispatch_cookie)) {
 		warn0("Failed to start graceful_shutdown timer");
-		goto err7;
+		goto err8;
 	}
 
 	/*
@@ -378,7 +407,7 @@ main(int argc, char * argv[])
 	 */
 	if (events_spin(&conndone)) {
 		warnp("Error running event loop");
-		goto err7;
+		goto err8;
 	}
 
 	/* Stop accepting connections and shut down the dispatcher. */
@@ -391,25 +420,30 @@ main(int argc, char * argv[])
 	sock_addr_freelist(sas_s);
 	sock_addr_freelist(sas_b);
 
+	/* Free bind address. */
+	free(bind_addr);
+
 	/* Free pid filename. */
 	free(pidfilename);
 
 	/* Success! */
 	exit(0);
 
-err7:
+err8:
 	dispatch_shutdown(dispatch_cookie);
-err6:
+err7:
 	if (s != -1)
 		close(s);
-err5:
+err6:
 	proto_crypt_secret_free(K);
-err4:
+err5:
 	sock_addr_freelist(sas_t);
-err3:
+err4:
 	sock_addr_freelist(sas_s);
-err2:
+err3:
 	sock_addr_freelist(sas_b);
+err2:
+	free(bind_addr);
 err1:
 	free(pidfilename);
 err0:
