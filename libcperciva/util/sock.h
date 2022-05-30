@@ -44,9 +44,9 @@ int sock_connect_nb(const struct sock_addr *);
 /**
  * sock_connect_bind_nb(sa, sa_b):
  * Create a socket, mark it as non-blocking, and attempt to connect to the
- * address ${sa}.  If ${sa_b} is not NULL, then bind the socket to ${sa_b}.
- * Return the socket (connected or in the process of connecting) or -1 on
- * error.
+ * address ${sa}.  If ${sa_b} is not NULL, bind the socket to ${sa_b}
+ * immediately after creating it.  Return the socket (connected or in the
+ * process of connecting) or -1 on error.
  */
 int sock_connect_bind_nb(const struct sock_addr *, const struct sock_addr *);
 
