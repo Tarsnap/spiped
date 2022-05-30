@@ -273,17 +273,17 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
     void * caller_cookie)
 {
 	struct accept_state * A;
-	struct sock_addr ** sas;
+	struct sock_addr * sa;
 	int sock;
 
 	/* Resolve the address. */
-	if ((sas = sock_resolve(addr)) == NULL) {
-		warn0("sock_resolve");
+	if ((sa = sock_resolve_one(addr)) == NULL) {
+		warn0("sock_resolve_one");
 		goto err0;
 	}
 
 	/* Create a socket, bind it, mark it as listening. */
-	if ((sock = sock_listener(sas[0])) == -1) {
+	if ((sock = sock_listener(sa)) == -1) {
 		warn0("sock_listener");
 		goto err1;
 	}
@@ -318,7 +318,7 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	}
 
 	/* Clean up. */
-	sock_addr_freelist(sas);
+	sock_addr_free(sa);
 	simple_server_shutdown(A);
 
 	/* Success! */
@@ -332,7 +332,7 @@ err3:
 err2:
 	close(sock);
 err1:
-	sock_addr_freelist(sas);
+	sock_addr_free(sa);
 err0:
 	/* Failure! */
 	return (-1);

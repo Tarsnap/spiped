@@ -86,7 +86,7 @@ main(int argc, char * argv[])
 	const char * opt_u = NULL;
 
 	/* Working variables. */
-	struct sock_addr ** sas_s;
+	struct sock_addr * sa_s;
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
 	const char * ch;
@@ -275,16 +275,12 @@ main(int argc, char * argv[])
 	}
 
 	/* Resolve source address. */
-	while ((sas_s = sock_resolve(opt_s)) == NULL) {
+	while ((sa_s = sock_resolve_one(opt_s)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_s);
 			goto err1;
 		}
 		sleep(1);
-	}
-	if (sas_s[0] == NULL) {
-		warn0("No addresses found for %s", opt_s);
-		goto err2;
 	}
 
 	/* Resolve target address. */
@@ -307,10 +303,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Create and bind a socket, and mark it as listening. */
-	if (sas_s[1] != NULL)
-		warn0("Listening on first of multiple addresses found for %s",
-		    opt_s);
-	if ((s = sock_listener(sas_s[0])) == -1)
+	if ((s = sock_listener(sa_s)) == -1)
 		goto err4;
 
 	/* Daemonize and write pid. */
@@ -365,7 +358,7 @@ main(int argc, char * argv[])
 	proto_crypt_secret_free(K);
 
 	/* Free arrays of resolved addresses. */
-	sock_addr_freelist(sas_s);
+	sock_addr_free(sa_s);
 
 	/* Free pid filename. */
 	free(pidfilename);
@@ -383,7 +376,7 @@ err4:
 err3:
 	sock_addr_freelist(sas_t);
 err2:
-	sock_addr_freelist(sas_s);
+	sock_addr_free(sa_s);
 err1:
 	free(pidfilename);
 err0:
