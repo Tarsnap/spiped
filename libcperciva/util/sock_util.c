@@ -5,11 +5,13 @@
 
 #include <arpa/inet.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "asprintf.h"
 #include "sock.h"
+#include "warnp.h"
 
 #include "sock_internal.h"
 #include "sock_util.h"
@@ -275,4 +277,75 @@ sock_addr_prettyprint(const struct sock_addr * sa)
 	default:
 		return (strdup("Unknown address"));
 	}
+}
+
+/**
+ * sock_util_ensure_port(addr):
+ * Allocate a new string to serve as the address for sock_resolve.
+ * If ${addr} contains a port number or is the address of a Unix domain
+ * socket, duplicate that string; if not, add a port number of ":0".
+ */
+char *
+sock_util_ensure_port(const char * addr)
+{
+	char * bind_addr;
+	char * a;
+	char * b;
+	char * c;
+
+	/* Sanity check. */
+	assert(addr != NULL);
+
+	/* Get info about $addr. */
+	a = strchr(addr, ':');
+	b = strrchr(addr, ':');
+	c = strrchr(addr, ']');
+
+	/* Figure out what type of address $addr is. */
+	if (addr[0] == '/') {
+		/* If the address starts with '/', it's a Unix domain socket. */
+		return (strdup(addr));
+	} else if (a == NULL) {
+		/* If there is no ':', it's an ipv4 addr that needs a ":0". */
+		if (asprintf(&bind_addr, "%s:0", addr) == -1) {
+			warnp("asprintf");
+			goto err0;
+		}
+	} else if (a == b) {
+		/*
+		 * If there's a single ':', then it's an ipv4 addr which already
+		 * contains a port.
+		 */
+		return (strdup(addr));
+	} else {
+		/* If there are two different ':', it's ipv6 address. */
+
+		/* If there is no ']', we need to add "[]" and ":0". */
+		if (c == NULL) {
+			if (asprintf(&bind_addr, "[%s]:0", addr) == -1) {
+				warnp("asprintf");
+				goto err0;
+			}
+		}
+		/* If there is nothing after ']', we need to add ":0". */
+		else if (c[1] == '\0') {
+			if (asprintf(&bind_addr, "%s:0", addr) == -1) {
+			    warnp("asprintf");
+			    goto err0;
+			}
+		} else {
+			/*
+			 * Otherwise, it's an ipv6 address which already has a
+			 * port number.
+			 */
+			return (strdup(addr));
+		}
+	}
+
+	/* Success! */
+	return (bind_addr);
+
+err0:
+	/* Failure! */
+	return (NULL);
 }
