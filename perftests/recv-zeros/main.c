@@ -18,7 +18,7 @@ main(int argc, char ** argv)
 	ssize_t buflen;
 
 	/* Working variables. */
-	struct sock_addr ** sas;
+	struct sock_addr * sa;
 	int socket;
 	int socket_recv;
 	char * buffer;
@@ -44,13 +44,13 @@ main(int argc, char ** argv)
 	}
 
 	/* Resolve the address. */
-	if ((sas = sock_resolve(addr)) == NULL) {
-		warn0("sock_resolve");
+	if ((sa = sock_resolve_one(addr)) == NULL) {
+		warn0("sock_resolve_one");
 		goto err1;
 	}
 
 	/* Create a socket, bind it, mark it as listening. */
-	if ((socket = sock_listener(sas[0])) == -1) {
+	if ((socket = sock_listener(sa)) == -1) {
 		warn0("sock_listener");
 		goto err2;
 	}
@@ -88,7 +88,7 @@ main(int argc, char ** argv)
 		warnp("close");
 		goto err2;
 	}
-	sock_addr_freelist(sas);
+	sock_addr_free(sa);
 	free(buffer);
 
 	/* Success! */
@@ -99,7 +99,7 @@ err4:
 err3:
 	close(socket);
 err2:
-	sock_addr_freelist(sas);
+	sock_addr_free(sa);
 err1:
 	free(buffer);
 err0:
