@@ -280,13 +280,13 @@ sock_addr_prettyprint(const struct sock_addr * sa)
 }
 
 /**
- * sock_util_ensure_port(addr):
+ * sock_addr_ensure_port(addr):
  * Allocate a new string to serve as the address for sock_resolve.
  * If ${addr} contains a port number or is the address of a Unix domain
  * socket, duplicate that string; if not, add a port number of ":0".
  */
 char *
-sock_util_ensure_port(const char * addr)
+sock_addr_ensure_port(const char * addr)
 {
 	char * bind_addr;
 	char * a;
