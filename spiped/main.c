@@ -14,6 +14,7 @@
 #include "parsenum.h"
 #include "setuidgid.h"
 #include "sock.h"
+#include "sock_util.h"
 #include "warnp.h"
 
 #include "dispatch.h"
@@ -286,32 +287,9 @@ main(int argc, char * argv[])
 
 	/* Resolve bind address. */
 	if (opt_b) {
-		char * a = strchr(opt_b, ':');
-		char * b = strrchr(opt_b, ':');
-		char * c = strrchr(opt_b, ']');
-		/* If there is no ':', it's ipv4 address (or Unix domain socket). */
-		if (b == NULL) {
-			if (asprintf(&bind_addr, "%s:0", opt_b) == -1) {
-			    warnp("asprintf");
-			    goto err2;
-			}
-		}
-		/* If there are two different ':', it's ipv6 address. */
-		else if (a != b) {
-			/* If there is no ']', we need to add '[]' and ':0'. */
-			if (c == NULL) {
-				if (asprintf(&bind_addr, "[%s]:0", opt_b) == -1) {
-				    warnp("asprintf");
-				    goto err2;
-				}
-			}
-			/* If there is nothing after ']', we need to add ':0'. */
-			else if (c[1] == '\0') {
-				if (asprintf(&bind_addr, "%s:0", opt_b) == -1) {
-				    warnp("asprintf");
-				    goto err2;
-				}
-			}
+		if ((bind_addr = sock_addr_ensure_port(opt_b))  == NULL) {
+			warnp("Failed to get bind address");
+			goto err2;
 		}
 		while ((sas_b = sock_resolve(bind_addr)) == NULL) {
 			if (!opt_D) {
