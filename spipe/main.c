@@ -13,6 +13,7 @@
 #include "graceful_shutdown.h"
 #include "parsenum.h"
 #include "sock.h"
+#include "sock_util.h"
 #include "warnp.h"
 
 #include "proto_conn.h"
@@ -140,6 +141,7 @@ main(int argc, char * argv[])
 	const char * opt_t = NULL;
 
 	/* Working variables. */
+	char * bind_addr = NULL;
 	struct events_threads ET;
 	struct sock_addr * sa_b = NULL;
 	struct sock_addr ** sas_b = NULL;
@@ -232,12 +234,16 @@ main(int argc, char * argv[])
 
 	/* Resolve bind address. */
 	if (opt_b) {
-		if ((sas_b = sock_resolve(opt_b)) == NULL) {
-			warnp("Error resolving socket address: %s", opt_b);
+		if ((bind_addr = sock_addr_ensure_port(opt_b))  == NULL) {
+			warnp("Failed to get bind address");
+			goto err0;
+		}
+		if ((sas_b = sock_resolve(bind_addr)) == NULL) {
+			warnp("Error resolving socket address: %s", bind_addr);
 			goto err0;
 		}
 		if ((sa_b = sas_b[0]) == NULL) {
-			warn0("No address found for %s", opt_b);
+			warn0("No address found for %s", bind_addr);
 			goto err1;
 		}
 	}
@@ -354,5 +360,6 @@ err1:
 	sock_addr_freelist(sas_b);
 err0:
 	/* Failure! */
+	free(bind_addr);
 	exit(1);
 }
