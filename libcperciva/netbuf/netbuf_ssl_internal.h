@@ -1,6 +1,12 @@
 #ifndef _NETBUF_SSL_H_
 #define _NETBUF_SSL_H_
 
+#include <stdint.h>
+#include <unistd.h>
+
+/* Opaque type. */
+struct network_ssl_ctx;
+
 /*
  * Function pointers defined in netbuf_read and netbuf_write; we set them
  * from our _init functions in order to avoid unnecessary linkage.

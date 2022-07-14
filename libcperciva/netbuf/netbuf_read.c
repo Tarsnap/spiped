@@ -283,6 +283,10 @@ void
 netbuf_read_free(struct netbuf_read * R)
 {
 
+        /* Behave consistently with free(NULL). */
+	if (R == NULL)
+		return;
+
 	/* Can't free a reader which is busy. */
 	assert(R->read_cookie == NULL);
 	assert(R->immediate_cookie == NULL);
