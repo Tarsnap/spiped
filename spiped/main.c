@@ -275,7 +275,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Resolve source address. */
-	while ((sa_s = sock_resolve_one(opt_s)) == NULL) {
+	while ((sa_s = sock_resolve_one(opt_s, 0)) == NULL) {
 		if (!opt_D) {
 			warnp("Error resolving socket address: %s", opt_s);
 			goto err1;

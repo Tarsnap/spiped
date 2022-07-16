@@ -44,7 +44,7 @@ main(int argc, char ** argv)
 	}
 
 	/* Resolve the address. */
-	if ((sa = sock_resolve_one(addr)) == NULL) {
+	if ((sa = sock_resolve_one(addr, 0)) == NULL) {
 		warn0("sock_resolve_one");
 		goto err1;
 	}

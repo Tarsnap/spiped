@@ -277,7 +277,7 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	int sock;
 
 	/* Resolve the address. */
-	if ((sa = sock_resolve_one(addr)) == NULL) {
+	if ((sa = sock_resolve_one(addr, 0)) == NULL) {
 		warn0("sock_resolve_one");
 		goto err0;
 	}
