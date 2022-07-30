@@ -191,11 +191,12 @@ proto_conn_drop(void * conn_cookie, int reason)
 }
 
 /**
- * proto_conn_create(s, sas, decr, nopfs, requirepfs, nokeepalive, K, timeo,
- *     callback_dead, cookie):
+ * proto_conn_create(s, sas, sa_b, decr, nopfs, requirepfs, nokeepalive, K,
+ *     timeo, callback_dead, cookie):
  * Create a connection with one end at ${s} and the other end connecting to
- * the target addresses ${sas}.  If ${decr} is 0, encrypt the outgoing data;
- * if ${decr} is nonzero, decrypt the incoming data.  If ${nopfs} is non-zero,
+ * the target addresses ${sas}.  Bind outgoing address to ${sa_b} if it
+ * is not NULL.  If ${decr} is 0, encrypt the outgoing data; if ${decr} is
+ * nonzero, decrypt the incoming data.  If ${nopfs} is non-zero,
  * don't use perfect forward secrecy.  If ${requirepfs} is non-zero, drop
  * the connection if the other end tries to disable perfect forward secrecy.
  * Enable transport layer keep-alives (if applicable) on both sockets if and
@@ -207,7 +208,8 @@ proto_conn_drop(void * conn_cookie, int reason)
  * function returns, close ${s}.
  */
 void *
-proto_conn_create(int s, struct sock_addr ** sas, int decr, int nopfs,
+proto_conn_create(int s, struct sock_addr ** sas,
+    const struct sock_addr * sa_b, int decr, int nopfs,
     int requirepfs, int nokeepalive, const struct proto_secret * K,
     double timeo, int (* callback_dead)(void *, int), void * cookie)
 {
@@ -242,7 +244,8 @@ proto_conn_create(int s, struct sock_addr ** sas, int decr, int nopfs,
 
 	/* Connect to target. */
 	if ((C->connect_cookie =
-	    network_connect(C->sas, callback_connect_done, C)) == NULL)
+	    network_connect_bind(C->sas, sa_b, callback_connect_done, C))
+	    == NULL)
 		goto err2;
 
 	/* If we're decrypting, start the handshake. */

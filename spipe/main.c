@@ -252,8 +252,8 @@ main(int argc, char * argv[])
 	}
 
 	/* Set up a connection. */
-	if ((conn_cookie = proto_conn_create(s[1], sas_t, 0, opt_f, opt_g,
-	    opt_j, K, opt_o, callback_conndied, &ET)) == NULL) {
+	if ((conn_cookie = proto_conn_create(s[1], sas_t, NULL, 0, opt_f,
+	    opt_g, opt_j, K, opt_o, callback_conndied, &ET)) == NULL) {
 		warnp("Could not set up connection");
 		goto err3;
 	}
