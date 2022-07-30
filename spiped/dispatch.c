@@ -169,9 +169,9 @@ callback_gotconn(void * cookie, int s)
 	node_new->A = A;
 
 	/* Create a new connection. */
-	if ((node_new->conn_cookie = proto_conn_create(s, sas, A->decr,
-	    A->nopfs, A->requirepfs, A->nokeepalive, A->K, A->timeo,
-	    callback_conndied, node_new)) == NULL) {
+	if ((node_new->conn_cookie = proto_conn_create(s, sas, NULL,
+	    A->decr, A->nopfs, A->requirepfs, A->nokeepalive, A->K,
+	    A->timeo, callback_conndied, node_new)) == NULL) {
 		warnp("Failure setting up new connection");
 		goto err3;
 	}
