@@ -18,6 +18,7 @@ struct accept_state {
 	int s;
 	const char * tgt;
 	struct sock_addr ** sas;
+	const struct sock_addr * sa_b;
 	double rtime;
 	int decr;
 	int nopfs;
@@ -169,7 +170,7 @@ callback_gotconn(void * cookie, int s)
 	node_new->A = A;
 
 	/* Create a new connection. */
-	if ((node_new->conn_cookie = proto_conn_create(s, sas, NULL,
+	if ((node_new->conn_cookie = proto_conn_create(s, sas, A->sa_b,
 	    A->decr, A->nopfs, A->requirepfs, A->nokeepalive, A->K,
 	    A->timeo, callback_conndied, node_new)) == NULL) {
 		warnp("Failure setting up new connection");
@@ -199,12 +200,13 @@ err0:
 }
 
 /**
- * dispatch_accept(s, tgt, rtime, sas, decr, nopfs, requirepfs, nokeepalive, K,
- *     nconn_max, timeo, conndone):
- * Start accepting connections on the socket ${s}.  Connect to the target
- * ${tgt}, re-resolving it every ${rtime} seconds if ${rtime} > 0; on address
- * resolution failure use the most recent successfully obtained addresses, or
- * the addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
+ * dispatch_accept(s, tgt, rtime, sas, sa_b, decr, nopfs, requirepfs,
+ *     nokeepalive, K, nconn_max, timeo, conndone):
+ * Start accepting connections on the socket ${s}.  Bind outgoing address to
+ * ${sa_b} if it is not NULL.  Connect to the target ${tgt}, re-resolving
+ * it every ${rtime} seconds if ${rtime} > 0; on address resolution
+ * failure use the most recent successfully obtained addresses, or the
+ * addresses ${sas}.  If ${decr} is 0, encrypt the outgoing connections; if
  * ${decr} is non-zero, decrypt the incoming connections.  Don't accept more
  * than ${nconn_max} connections.  If ${nopfs} is non-zero, don't use perfect
  * forward secrecy.  If ${requirepfs} is non-zero, require that both ends use
@@ -217,9 +219,9 @@ err0:
  */
 void *
 dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
-    int decr, int nopfs, int requirepfs, int nokeepalive,
-    const struct proto_secret * K, size_t nconn_max, double timeo,
-    int * conndone)
+    const struct sock_addr * sa_b, int decr, int nopfs, int requirepfs,
+    int nokeepalive, const struct proto_secret * K, size_t nconn_max,
+    double timeo, int * conndone)
 {
 	struct accept_state * A;
 
@@ -229,6 +231,7 @@ dispatch_accept(int s, const char * tgt, double rtime, struct sock_addr ** sas,
 	A->s = s;
 	A->tgt = tgt;
 	A->sas = sas;
+	A->sa_b = sa_b;
 	A->rtime = rtime;
 	A->decr = decr;
 	A->nopfs = nopfs;
