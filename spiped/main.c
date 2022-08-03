@@ -25,9 +25,10 @@ usage(void)
 	fprintf(stderr,
 	    "usage: spiped {-e | -d} -s <source socket> "
 	    "-t <target socket> -k <key file>\n"
-	    "    [-DFj] [-f | -g] [-n <max # connections>] "
-	    "[-o <connection timeout>]\n"
-	    "    [-p <pidfile>] [-r <rtime> | -R] [--syslog]\n"
+	    "    [-b <bind address> [-DFj] [-f | -g] "
+	    "[-n <max # connections>]\n"
+	    "    [-o <connection timeout>] [-p <pidfile>] [-r <rtime> | -R] "
+	    "[--syslog]\n"
 	    "    [-u {<username> | <:groupname> | <username:groupname>}]\n"
 	    "       spiped -v\n");
 	exit(1);
@@ -64,6 +65,7 @@ int
 main(int argc, char * argv[])
 {
 	/* Command-line parameters. */
+	const char * opt_b = NULL;
 	int opt_d = 0;
 	int opt_D = 0;
 	int opt_e = 0;
@@ -87,6 +89,7 @@ main(int argc, char * argv[])
 
 	/* Working variables. */
 	struct sock_addr * sa_s;
+	struct sock_addr * sa_b = NULL;
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
 	const char * ch;
@@ -100,6 +103,11 @@ main(int argc, char * argv[])
 	/* Parse the command line. */
 	while ((ch = GETOPT(argc, argv)) != NULL) {
 		GETOPT_SWITCH(ch) {
+		GETOPT_OPTARG("-b"):
+			if (opt_b)
+				usage();
+			opt_b = optarg;
+			break;
 		GETOPT_OPT("-d"):
 			if (opt_d || opt_e)
 				usage();
@@ -296,21 +304,33 @@ main(int argc, char * argv[])
 		goto err3;
 	}
 
+	/* Resolve bind address (if applicable). */
+	if (opt_b) {
+		while ((sa_b = sock_resolve_one(opt_b, 1)) == NULL) {
+			if (!opt_D) {
+				warnp("Error resolving socket address: %s",
+				    opt_b);
+				goto err3;
+			}
+			sleep(1);
+		}
+	}
+
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
-		goto err3;
+		goto err4;
 	}
 
 	/* Create and bind a socket, and mark it as listening. */
 	if ((s = sock_listener(sa_s)) == -1)
-		goto err4;
+		goto err5;
 
 	/* Daemonize and write pid. */
 	if (!opt_D && !opt_F) {
 		if (daemonize(pidfilename)) {
 			warnp("Failed to daemonize");
-			goto err5;
+			goto err6;
 		}
 		/* Send to syslog (if applicable). */
 		if (opt_syslog)
@@ -320,15 +340,15 @@ main(int argc, char * argv[])
 	/* Drop privileges (if applicable). */
 	if (opt_u && setuidgid(opt_u, SETUIDGID_SGROUP_LEAVE_WARN)) {
 		warnp("Failed to drop privileges");
-		goto err5;
+		goto err7;
 	}
 
 	/* Start accepting connections. */
 	if ((dispatch_cookie = dispatch_accept(s, opt_t, opt_R ? 0.0 : opt_r,
-	    sas_t, NULL, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
+	    sas_t, sa_b, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		goto err5;
+		goto err7;
 	}
 
 	/* dispatch is now maintaining sas_t and s. */
@@ -339,7 +359,7 @@ main(int argc, char * argv[])
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
 	    dispatch_cookie)) {
 		warn0("Failed to start graceful_shutdown timer");
-		goto err6;
+		goto err7;
 	}
 
 	/*
@@ -348,7 +368,7 @@ main(int argc, char * argv[])
 	 */
 	if (events_spin(&conndone)) {
 		warnp("Error running event loop");
-		goto err6;
+		goto err7;
 	}
 
 	/* Stop accepting connections and shut down the dispatcher. */
@@ -359,6 +379,7 @@ main(int argc, char * argv[])
 
 	/* Free arrays of resolved addresses. */
 	sock_addr_free(sa_s);
+	sock_addr_free(sa_b);
 
 	/* Free pid filename. */
 	free(pidfilename);
@@ -366,13 +387,15 @@ main(int argc, char * argv[])
 	/* Success! */
 	exit(0);
 
-err6:
+err7:
 	dispatch_shutdown(dispatch_cookie);
-err5:
+err6:
 	if (s != -1)
 		close(s);
-err4:
+err5:
 	proto_crypt_secret_free(K);
+err4:
+	sock_addr_free(sa_b);
 err3:
 	sock_addr_freelist(sas_t);
 err2:

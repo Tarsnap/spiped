@@ -32,10 +32,11 @@ spiped - secure pipe daemon
 \-k <key file>
 .br
 [\-DFj]
+[\-b <bind address>]
 [\-f | \-g]
 [\-n <max # connections>]
-[\-o <connection timeout>]
 .br
+[\-o <connection timeout>]
 [\-p <pidfile>]
 [\-r <rtime> | \-R]
 [\-\-syslog]
@@ -91,6 +92,13 @@ seconds.
 .B \-k <key file>
 Use the provided key file to authenticate and encrypt.
 Pass "\-" to read from standard input.
+.TP
+.B \-b <bind address>
+Bind the outgoing address.  If this is a network address, the port number
+may either be specified or left to the operating system.  If you specify the
+port number, the operating system will not permit you to open a second
+connection until the first one has completely expired (i.e. the TCP state is
+no longer in the TIME-WAIT state).
 .TP
 .B \-D
 Wait for DNS.  Normally when
