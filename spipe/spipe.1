@@ -29,6 +29,7 @@ spipe - spiped client utility
 .B spipe
 \-t <target socket>
 \-k <key file>
+[\-b <bind address>]
 [\-f | \-g]
 [\-j]
 [\-o <connection timeout>]
@@ -58,6 +59,13 @@ Note that reading the key via standard input will make it impossible
 to read anything else via standard input, thereby limiting
 .B spipe
 to receiving data but not sending any.
+.TP
+.B \-b <bind address>
+Bind the outgoing address.  If this is a network address, the port number
+may either be specified or left to the operating system.  If you specify the
+port number, the operating system will not permit you to open a second
+connection until the first one has completely expired (i.e. the TCP state is
+no longer in the TIME-WAIT state).
 .TP
 .B \-f
 Use fast/weak handshaking: This reduces the CPU time spent in the
