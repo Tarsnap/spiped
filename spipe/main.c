@@ -114,8 +114,8 @@ usage(void)
 
 	fprintf(stderr,
 	    "usage: spipe -t <target socket> -k <key file>"
-	    " [-f | -g] [-j]\n"
-	    "    [-o <connection timeout>]\n"
+	    " [-b <bind address>] [-f | -g]\n"
+	    "    [-j] [-o <connection timeout>]\n"
 	    "       spipe -v\n");
 	exit(1);
 }
@@ -130,6 +130,7 @@ int
 main(int argc, char * argv[])
 {
 	/* Command-line parameters. */
+	const char * opt_b = NULL;
 	int opt_f = 0;
 	int opt_g = 0;
 	int opt_j = 0;
@@ -140,6 +141,7 @@ main(int argc, char * argv[])
 
 	/* Working variables. */
 	struct events_threads ET;
+	struct sock_addr * sa_b = NULL;
 	struct sock_addr ** sas_t;
 	struct proto_secret * K;
 	const char * ch;
@@ -152,6 +154,11 @@ main(int argc, char * argv[])
 	/* Parse the command line. */
 	while ((ch = GETOPT(argc, argv)) != NULL) {
 		GETOPT_SWITCH(ch) {
+		GETOPT_OPTARG("-b"):
+			if (opt_b)
+				usage();
+			opt_b = optarg;
+			break;
 		GETOPT_OPT("-f"):
 			if (opt_f)
 				usage();
@@ -232,10 +239,16 @@ main(int argc, char * argv[])
 		goto err1;
 	}
 
+	/* Resolve bind address (if applicable). */
+	if (opt_b && ((sa_b = sock_resolve_one(opt_b, 1)) == NULL)) {
+		warnp("Failed to get bind address");
+		goto err1;
+	}
+
 	/* Load the keying data. */
 	if ((K = proto_crypt_secret(opt_k)) == NULL) {
 		warnp("Error reading shared secret");
-		goto err1;
+		goto err2;
 	}
 
 	/*
@@ -248,14 +261,14 @@ main(int argc, char * argv[])
 	 */
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, s)) {
 		warnp("socketpair");
-		goto err2;
+		goto err3;
 	}
 
 	/* Set up a connection. */
-	if ((conn_cookie = proto_conn_create(s[1], sas_t, NULL, 0, opt_f,
+	if ((conn_cookie = proto_conn_create(s[1], sas_t, sa_b, 0, opt_f,
 	    opt_g, opt_j, K, opt_o, callback_conndied, &ET)) == NULL) {
 		warnp("Could not set up connection");
-		goto err3;
+		goto err4;
 	}
 
 	/* sas_t and s[1] are now owned by proto_conn. */
@@ -265,42 +278,43 @@ main(int argc, char * argv[])
 	/* Push bits from the socket to stdout. */
 	if (pushbits(s[0], STDOUT_FILENO, &ET.threads[1])) {
 		warnp("Could not push bits");
-		goto err4;
+		goto err5;
 	}
 
 	/* Push bits from stdin into the socket. */
 	if (pushbits(STDIN_FILENO, s[0], &ET.threads[0])) {
 		warnp("Could not push bits");
-		goto err5;
+		goto err6;
 	}
 
 	/* Register a handler for SIGTERM. */
 	if (graceful_shutdown_initialize(&callback_graceful_shutdown, &ET)) {
 		warn0("Failed to start graceful_shutdown timer");
-		goto err6;
+		goto err7;
 	}
 
 	/* Loop until we're done with the connection. */
 	if (events_spin(&ET.conndone)) {
 		warnp("Error running event loop");
-		goto err4;
+		goto err5;
 	}
 
 	/* Wait for threads to finish (if necessary) */
 	if (ET.stopped == 0) {
 		if ((rc = pthread_join(ET.threads[0], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
-			goto err2;
+			goto err3;
 		}
 		if ((rc = pthread_join(ET.threads[1], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
-			goto err2;
+			goto err3;
 		}
 	}
 
 	/* Clean up. */
 	close(s[0]);
 	proto_crypt_secret_free(K);
+	sock_addr_free(sa_b);
 
 	/* Handle a connection error. */
 	if (ET.connection_error)
@@ -309,24 +323,26 @@ main(int argc, char * argv[])
 	/* Success! */
 	exit(0);
 
-err6:
+err7:
 	if ((rc = pthread_cancel(ET.threads[0])) != 0)
 		warn0("pthread_cancel: %s", strerror(rc));
 	if ((rc = pthread_join(ET.threads[0], NULL)) != 0)
 		warn0("pthread_join: %s", strerror(rc));
-err5:
+err6:
 	if ((rc = pthread_cancel(ET.threads[1])) != 0)
 		warn0("pthread_cancel: %s", strerror(rc));
 	if ((rc = pthread_join(ET.threads[1], NULL)) != 0)
 		warn0("pthread_join: %s", strerror(rc));
-err4:
+err5:
 	proto_conn_drop(conn_cookie, PROTO_CONN_CANCELLED);
-err3:
+err4:
 	if (s[1] != -1)
 		close(s[1]);
 	close(s[0]);
-err2:
+err3:
 	proto_crypt_secret_free(K);
+err2:
+	sock_addr_free(sa_b);
 err1:
 	sock_addr_freelist(sas_t);
 err0:
