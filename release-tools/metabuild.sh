@@ -101,7 +101,7 @@ add_object_files() {
 		CF=$(echo "${CF_CPUSUPPORT} ${CF_MANUAL}" |	\
 		    sed 's/^ //' | sed 's/ $//')
 		IDIRS=$(${MAKEBSD} -v IDIRS)
-		# Get the build instructions, then remove newlines, condense
+		# Get the build dependencies, then remove newlines, condense
 		# multiple spaces, remove line continuations, and replace the
 		# final space with a newline.
 		${CPP} ${S} ${CPP_ARGS_FIXED} ${IDIRS} -MT ${F} |	\
@@ -110,7 +110,9 @@ add_object_files() {
 		    sed -e 's| \\ | |g' |				\
 		    sed -e 's| $||g'
 		printf "\n"
-		echo "	${OUT_CC_BEGIN} ${CF} ${OUT_CC_MID} -c ${S} -o ${F}"
+		# Print the build instructions
+		echo "	${OUT_CC_BEGIN} ${CF} ${OUT_CC_MID} -c ${S} -o ${F}" |
+		    tr -s ' '
 	done >> $OUT
 }
 

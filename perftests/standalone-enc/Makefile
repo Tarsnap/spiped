@@ -24,13 +24,13 @@ ${PROG}:${SRCS:.c=.o} ${LIBALL}
 	${CC} -o ${PROG} ${SRCS:.c=.o} ${LIBALL} ${LDFLAGS} ${LDADD_EXTRA} ${LDADD_REQ} ${LDADD_POSIX}
 
 main.o: main.c ../../libcperciva/cpusupport/cpusupport.h ../../cpusupport-config.h ../../libcperciva/util/parsenum.h ../../libcperciva/util/warnp.h standalone.h
-	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c main.c -o main.o
+	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c main.c -o main.o
 standalone_aesctr.o: standalone_aesctr.c ../../libcperciva/crypto/crypto_aes.h ../../libcperciva/crypto/crypto_aesctr.h ../../libcperciva/util/perftest.h ../../libcperciva/util/warnp.h standalone.h
-	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c standalone_aesctr.c -o standalone_aesctr.o
+	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c standalone_aesctr.c -o standalone_aesctr.o
 standalone_aesctr_hmac.o: standalone_aesctr_hmac.c ../../libcperciva/crypto/crypto_aes.h ../../libcperciva/crypto/crypto_aesctr.h ../../libcperciva/util/perftest.h ../../libcperciva/alg/sha256.h ../../libcperciva/util/sysendian.h ../../libcperciva/util/warnp.h standalone.h
-	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c standalone_aesctr_hmac.c -o standalone_aesctr_hmac.o
+	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c standalone_aesctr_hmac.c -o standalone_aesctr_hmac.o
 standalone_hmac.o: standalone_hmac.c ../../libcperciva/util/perftest.h ../../libcperciva/alg/sha256.h ../../libcperciva/util/sysendian.h ../../libcperciva/util/warnp.h standalone.h
-	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\"  -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c standalone_hmac.c -o standalone_hmac.o
+	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c standalone_hmac.c -o standalone_hmac.o
 standalone_pce.o: standalone_pce.c ../../libcperciva/util/perftest.h ../../lib/proto/proto_crypt.h ../../libcperciva/crypto/crypto_dh.h ../../libcperciva/util/warnp.h standalone.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -DSTANDALONE_ENC_TESTING -I../.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c standalone_pce.c -o standalone_pce.o
 standalone_pipe.o: standalone_pipe.c ../../libcperciva/events/events.h ../../libcperciva/util/noeintr.h ../../libcperciva/util/perftest.h ../../lib/proto/proto_crypt.h ../../libcperciva/crypto/crypto_dh.h ../../lib/proto/proto_pipe.h ../../lib/util/pthread_create_blocking_np.h ../../libcperciva/util/warnp.h standalone.h
