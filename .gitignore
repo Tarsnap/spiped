@@ -1,6 +1,7 @@
 # Development tools
 devel-tools/
 # Build system configuration
+apisupport-config.h
 cflags-filter.sh
 cpusupport-config.h
 posix-flags.sh

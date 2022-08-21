@@ -26,12 +26,18 @@ SUBDIR_DEPTH=$(${MAKEBSD} -v SUBDIR_DEPTH)
 LIBCPERCIVA_DIR=$(${MAKEBSD} -v LIBCPERCIVA_DIR)
 
 # Set up *-config.h so that we don't have missing headers.  If we don't
-# have a LIBCPERCIVA_DIR, then we assume that we don't have cpusupport.
+# have a LIBCPERCIVA_DIR, then we assume that we don't have cpusupport and
+# apisupport.
 if [ -n "${LIBCPERCIVA_DIR}" ]; then
 	if [ -e "${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh" ]; then
 		command -p sh						\
 		    ${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh	\
 		    "${PATH}" --all > ${SUBDIR_DEPTH}/cpusupport-config.h
+	fi
+	if [ -e "${LIBCPERCIVA_DIR}/apisupport/Build/apisupport.sh" ]; then
+		command -p sh						\
+		    ${LIBCPERCIVA_DIR}/apisupport/Build/apisupport.sh	\
+		    "${PATH}" --all > ${SUBDIR_DEPTH}/apisupport-config.h
 	fi
 fi
 
@@ -82,13 +88,24 @@ get_cpusupport_cflags() {
 	done | sed 's/^ //'
 }
 
+get_apisupport_cflags() {
+	src=$1
+
+	str=$(grep 'APISUPPORT CFLAGS:' ${src} | cut -f 2- -d :)
+	# ${str} must be unquoted.
+	for X in ${str}; do
+		printf " \${CFLAGS_%s}" "$X"
+	done | sed 's/^ //'
+}
+
 add_object_files() {
 	# Set up useful variables
 	OBJ=$(${MAKEBSD} -v SRCS |				\
+	    sed -e 's| apisupport-config.h||' |			\
 	    sed -e 's| cpusupport-config.h||' |			\
 	    tr ' ' '\n' |					\
 	    sed -E 's/.c$/.o/' )
-	CPP_CONFIG="-DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\""
+	CPP_CONFIG="-DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -DAPISUPPORT_CONFIG_FILE=\"apisupport-config.h\""
 	CPP_ARGS_FIXED="-std=c99 ${CPP_CONFIG} -I${SUBDIR_DEPTH} -MM"
 	OUT_CC_BEGIN="\${CC} \${CFLAGS_POSIX} ${CFLAGS_HARDCODED}"
 	OUT_CC_MID="-I${SUBDIR_DEPTH} \${IDIRS} \${CPPFLAGS} \${CFLAGS}"
@@ -98,7 +115,8 @@ add_object_files() {
 		S=$(${MAKEBSD} source-${F})
 		CF_MANUAL=$(${MAKEBSD} -v CFLAGS.$(basename ${S}))
 		CF_CPUSUPPORT=$(get_cpusupport_cflags ${S})
-		CF=$(echo "${CF_CPUSUPPORT} ${CF_MANUAL}" |	\
+		CF_APISUPPORT=$(get_apisupport_cflags ${S})
+		CF=$(echo "${CF_CPUSUPPORT} ${CF_APISUPPORT} ${CF_MANUAL}" | \
 		    sed 's/^ //' | sed 's/ $//')
 		IDIRS=$(${MAKEBSD} -v IDIRS)
 		# Get the build dependencies, then remove newlines, condense
@@ -129,6 +147,7 @@ copyvar MAN1
 if [ -n "$(${MAKEBSD} -v SRCS)" ]; then
 	printf "SRCS=" >> $OUT
 	${MAKEBSD} -v SRCS |				\
+	    sed -e 's| apisupport-config.h||' |		\
 	    sed -e 's| cpusupport-config.h||' >> $OUT
 fi
 copyvar IDIRS
@@ -187,3 +206,4 @@ fi
 
 # Clean up -config.h files
 rm -f ${SUBDIR_DEPTH}/cpusupport-config.h
+rm -f ${SUBDIR_DEPTH}/apisupport-config.h
