@@ -60,3 +60,8 @@ if [ "$2" = "--all" ]; then
 		echo "#define APISUPPORT_${PLATFORM}_${FEATURE} 1"
 	}
 fi
+
+# Detect how to compile non-POSIX code.
+feature NONPOSIX SETGROUPS "" ""			\
+	"-U_POSIX_C_SOURCE -U_XOPEN_SOURCE"		\
+	"-U_POSIX_C_SOURCE -U_XOPEN_SOURCE -Wno-reserved-id-macro"
