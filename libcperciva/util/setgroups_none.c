@@ -1,6 +1,6 @@
-/* We use non-POSIX functionality in this file. */
-#undef _POSIX_C_SOURCE
-#undef _XOPEN_SOURCE
+/**
+ * APISUPPORT CFLAGS: NONPOSIX_SETGROUPS
+ */
 
 /*
  * There is no setgroups() in the POSIX standard, so if we want to drop
