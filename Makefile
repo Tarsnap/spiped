@@ -23,20 +23,23 @@ all:	toplevel
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
 	. ./cflags-filter.sh;				\
+	. ./apisupport-config.h;			\
 	export HAVE_BUILD_FLAGS=1;			\
 	for D in ${PROGS} ${TESTS}; do			\
 		( cd $${D} && ${MAKE} all ) || exit 2;	\
 	done
 
 .PHONY:	toplevel
-toplevel:	cflags-filter.sh cpusupport-config.h	\
-		liball posix-flags.sh
+toplevel:	apisupport-config.h cflags-filter.sh	\
+		cpusupport-config.h liball		\
+		posix-flags.sh
 
 # For "loop-back" building of a subdirectory
 buildsubdir: toplevel
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
 	. ./cflags-filter.sh;				\
+	. ./apisupport-config.h;			\
 	export HAVE_BUILD_FLAGS=1;			\
 	cd ${BUILD_SUBDIR} && ${MAKE} ${BUILD_TARGET}
 
@@ -46,6 +49,7 @@ liball: cflags-filter.sh cpusupport-config.h posix-flags.sh
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
 	. ./cflags-filter.sh;				\
+	. ./apisupport-config.h;			\
 	export HAVE_BUILD_FLAGS=1;			\
 	( cd liball && make all ) || exit 2;
 
@@ -75,6 +79,16 @@ cflags-filter.sh:
 		printf "nothing to filter out\n";			\
 	fi >> $@
 
+apisupport-config.h:
+	if [ -d ${LIBCPERCIVA_DIR}/apisupport/ ]; then			\
+		export CC="${CC}";					\
+		command -p sh						\
+		    ${LIBCPERCIVA_DIR}/apisupport/Build/apisupport.sh	\
+		    "$$PATH";						\
+	else								\
+		:;							\
+	fi > $@
+
 cpusupport-config.h:
 	if [ -d ${LIBCPERCIVA_DIR}/cpusupport/ ]; then			\
 		export CC="${CC}";					\
@@ -93,7 +107,7 @@ install:	all
 	done
 
 clean:	test-clean
-	rm -f cflags-filter.sh cpusupport-config.h posix-flags.sh
+	rm -f apisupport-config.h cflags-filter.sh cpusupport-config.h posix-flags.sh
 	for D in liball ${PROGS} ${TESTS}; do			\
 		( cd $${D} && ${MAKE} clean ) || exit 2;	\
 	done
