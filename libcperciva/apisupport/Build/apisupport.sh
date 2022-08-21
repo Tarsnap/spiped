@@ -14,7 +14,8 @@ CFLAGS_HARDCODED="-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700"
 feature() {
 	PLATFORM=$1
 	FEATURE=$2
-	shift 2;
+	EXTRALIB=$3
+	shift 3;
 
 	# Bail if we didn't include this feature in this source tree.
 	feature_filename="${SRCDIR}/apisupport-${PLATFORM}-${FEATURE}.c"
@@ -27,7 +28,8 @@ feature() {
 	    "$PLATFORM" "$FEATURE" 1>&2
 	for API_CFLAGS in "$@"; do
 		if ${CC} ${CFLAGS} ${CFLAGS_HARDCODED} ${API_CFLAGS}	\
-		    "${feature_filename}" 2>/dev/null; then
+		    "${feature_filename}" ${LDADD_EXTRA} ${EXTRALIB}	\
+		    2>/dev/null; then
 			rm -f a.out
 			break;
 		fi
