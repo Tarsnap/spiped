@@ -47,7 +47,11 @@ main(int argc, char ** argv)
 		goto err0;
 	}
 
-	/* Sanity check */
+	/* Sanity check. */
+	if (buflen <= 0) {
+		warnp("Can't have a buffer length <= 0!");
+		goto err0;
+	}
 	if (count == 0) {
 		warnp("Can't send 0 blocks!");
 		goto err0;
