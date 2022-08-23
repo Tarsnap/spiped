@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 /**
- * hmac_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmp):
+ * hmac_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for HMAC-SHA256.
  */
 int hmac_perftest(const size_t *, size_t, size_t, size_t);

@@ -255,7 +255,7 @@ dnsthread_resolveone(DNSTHREAD T, const char * addr,
 
 	/* Duplicate the address to be resolved. */
 	if ((T->addr = strdup(addr)) == NULL)
-	    goto err1;
+		goto err1;
 
 	/* Remember what callback we'll need to do eventually. */
 	T->callback = callback;
