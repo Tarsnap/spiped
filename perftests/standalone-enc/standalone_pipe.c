@@ -23,7 +23,6 @@
 /* Cookie for proto_pipe */
 struct pipe {
 	struct proto_keys * k;
-	void * cancel_cookie;
 	pthread_t enc_thr;
 	pthread_t output_thr;
 	int in[2];
@@ -55,15 +54,19 @@ static void *
 pipe_enc_thread(void * cookie)
 {
 	struct pipe * pipe = cookie;
+	void * cancel_cookie;
 
 	/* Create the pipe. */
-	if ((pipe->cancel_cookie = proto_pipe(pipe->in[1], pipe->out[0], 0,
+	if ((cancel_cookie = proto_pipe(pipe->in[1], pipe->out[0], 0,
 	    pipe->k, &pipe->status, pipe_callback_status, pipe)) == NULL)
 		warn0("proto_pipe");
 
 	/* Let events happen. */
 	if (events_spin(&pipe->done))
 		warnp("events_spin");
+
+	/* Clean up the pipe. */
+	proto_pipe_cancel(cancel_cookie);
 
 	/* Finished! */
 	return (NULL);
@@ -165,7 +168,7 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 
 	/* We've finished writing stuff. */
 	if (shutdown(pipe->in[0], SHUT_WR)) {
-		warnp("close");
+		warnp("shutdown");
 		goto err0;
 	}
 
@@ -199,7 +202,6 @@ pipe_cleanup(void * cookie)
 	struct pipe * pipe = cookie;
 
 	/* Clean up. */
-	proto_pipe_cancel(pipe->cancel_cookie);
 	proto_crypt_free(pipe->k);
 
 	/* Success! */
