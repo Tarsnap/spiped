@@ -37,6 +37,12 @@ main(int argc, char ** argv)
 		goto err0;
 	}
 
+	/* Sanity check. */
+	if (buflen <= 0) {
+		warnp("Can't have a buffer length <= 0!");
+		goto err0;
+	}
+
 	/* Allocate buffer. */
 	if ((buffer = malloc((size_t)buflen)) == NULL) {
 		warnp("malloc");
