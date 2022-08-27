@@ -58,8 +58,10 @@ pipe_enc_thread(void * cookie)
 
 	/* Create the pipe. */
 	if ((cancel_cookie = proto_pipe(pipe->in[1], pipe->out[0], 0,
-	    pipe->k, &pipe->status, pipe_callback_status, pipe)) == NULL)
+	    pipe->k, &pipe->status, pipe_callback_status, pipe)) == NULL) {
 		warn0("proto_pipe");
+		goto err0;
+	}
 
 	/* Let events happen. */
 	if (events_spin(&pipe->done))
@@ -68,6 +70,7 @@ pipe_enc_thread(void * cookie)
 	/* Clean up the pipe. */
 	proto_pipe_cancel(cancel_cookie);
 
+err0:
 	/* Finished! */
 	return (NULL);
 }
