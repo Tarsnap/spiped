@@ -1,5 +1,5 @@
-#ifndef _PERFTESTS_H_
-#define _PERFTESTS_H_
+#ifndef PERFTESTS_H_
+#define PERFTESTS_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -24,4 +24,4 @@ int perftest_buffers(size_t, const size_t *, size_t, size_t, int,
     int (*)(void *, uint8_t *, size_t, size_t),
     int (*)(void *), void *);
 
-#endif /* !_PERFTESTS_H_ */
+#endif /* !PERFTESTS_H_ */

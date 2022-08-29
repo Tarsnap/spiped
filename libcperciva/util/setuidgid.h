@@ -1,5 +1,5 @@
-#ifndef _SETUIDGID_H_
-#define _SETUIDGID_H_
+#ifndef SETUIDGID_H_
+#define SETUIDGID_H_
 
 /* How should we treat supplementary groups? */
 enum {
@@ -27,4 +27,4 @@ enum {
  */
 int setuidgid(const char *, int);
 
-#endif /* !_SETUIDGID_H_ */
+#endif /* !SETUIDGID_H_ */
