@@ -129,7 +129,7 @@ add_object_files() {
 		    sed -e 's| $||g'
 		printf "\n"
 		# Print the build instructions
-		echo "	${OUT_CC_BEGIN} ${CF} ${OUT_CC_MID} -c ${S} -o ${F}" |
+		echo "	${OUT_CC_BEGIN} ${OUT_CC_MID} ${CF} -c ${S} -o ${F}" |
 		    tr -s ' '
 	done >> $OUT
 }
