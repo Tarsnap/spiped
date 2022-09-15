@@ -1,5 +1,5 @@
-#ifndef _PROTO_CONN_H_
-#define _PROTO_CONN_H_
+#ifndef PROTO_CONN_H_
+#define PROTO_CONN_H_
 
 /* Opaque structures. */
 struct proto_secret;
@@ -42,4 +42,4 @@ void * proto_conn_create(int, struct sock_addr **, const struct sock_addr *,
  */
 int proto_conn_drop(void *, int);
 
-#endif /* !_PROTO_CONN_H_ */
+#endif /* !PROTO_CONN_H_ */

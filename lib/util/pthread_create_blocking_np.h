@@ -1,5 +1,5 @@
-#ifndef _PTHREAD_CREATE_BLOCKING_NP_H_
-#define _PTHREAD_CREATE_BLOCKING_NP_H_
+#ifndef PTHREAD_CREATE_BLOCKING_NP_H_
+#define PTHREAD_CREATE_BLOCKING_NP_H_
 
 #include <pthread.h>
 
@@ -13,4 +13,4 @@
 int pthread_create_blocking_np(pthread_t * restrict,
     const pthread_attr_t * restrict, void *(*)(void *), void *);
 
-#endif /* !_PTHREAD_CREATE_BLOCKING_NP_H_ */
+#endif /* !PTHREAD_CREATE_BLOCKING_NP_H_ */

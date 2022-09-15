@@ -1,5 +1,5 @@
-#ifndef _STANDALONE_H_
-#define _STANDALONE_H_
+#ifndef STANDALONE_H_
+#define STANDALONE_H_
 
 #include <stddef.h>
 
@@ -33,4 +33,4 @@ int pce_perftest(const size_t *, size_t, size_t, size_t);
  */
 int pipe_perftest(const size_t *, size_t, size_t, size_t);
 
-#endif /* !_STANDALONE_H_ */
+#endif /* !STANDALONE_H_ */

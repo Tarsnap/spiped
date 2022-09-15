@@ -1,5 +1,5 @@
-#ifndef _DISPATCH_H_
-#define _DISPATCH_H_
+#ifndef DISPATCH_H_
+#define DISPATCH_H_
 
 #include <stddef.h>
 
@@ -42,4 +42,4 @@ void dispatch_shutdown(void *);
  */
 void dispatch_request_shutdown(void *);
 
-#endif /* !_DISPATCH_H_ */
+#endif /* !DISPATCH_H_ */
