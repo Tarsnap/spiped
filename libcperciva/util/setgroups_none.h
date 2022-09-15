@@ -1,5 +1,5 @@
-#ifndef _SETGROUPS_NONE_H_
-#define _SETGROUPS_NONE_H_
+#ifndef SETGROUPS_NONE_H_
+#define SETGROUPS_NONE_H_
 
 /**
  * setgroups_none(void):
@@ -8,4 +8,4 @@
  */
 int setgroups_none(void);
 
-#endif /* !_SETGROUPS_NONE_H_ */
+#endif /* !SETGROUPS_NONE_H_ */

@@ -1,5 +1,5 @@
-#ifndef _NOEINTR_H_
-#define _NOEINTR_H_
+#ifndef NOEINTR_H_
+#define NOEINTR_H_
 
 #include <unistd.h>
 
@@ -11,4 +11,4 @@
  */
 ssize_t noeintr_write(int, const void *, size_t);
 
-#endif /* !_NOEINTR_H_ */
+#endif /* !NOEINTR_H_ */

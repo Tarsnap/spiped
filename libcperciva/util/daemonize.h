@@ -1,5 +1,5 @@
-#ifndef _DAEMONIZE_H_
-#define _DAEMONIZE_H_
+#ifndef DAEMONIZE_H_
+#define DAEMONIZE_H_
 
 /**
  * daemonize(spid):
@@ -10,4 +10,4 @@
  */
 int daemonize(const char *);
 
-#endif /* !_DAEMONIZE_H_ */
+#endif /* !DAEMONIZE_H_ */

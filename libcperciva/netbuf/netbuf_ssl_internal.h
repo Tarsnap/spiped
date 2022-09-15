@@ -1,5 +1,5 @@
-#ifndef _NETBUF_SSL_H_
-#define _NETBUF_SSL_H_
+#ifndef NETBUF_SSL_H_
+#define NETBUF_SSL_H_
 
 #include <stdint.h>
 #include <unistd.h>
@@ -33,4 +33,4 @@ struct netbuf_read * netbuf_read_init2(int, struct network_ssl_ctx *);
 struct netbuf_write * netbuf_write_init2(int, struct network_ssl_ctx *,
     int (*)(void *), void *);
 
-#endif /* !_NETBUF_SSL_H_ */
+#endif /* !NETBUF_SSL_H_ */
