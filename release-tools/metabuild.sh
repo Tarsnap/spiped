@@ -153,7 +153,7 @@ fi
 copyvar IDIRS
 copyvar LDADD_REQ
 copyvar SUBDIR_DEPTH
-printf "RELATIVE_DIR=$D\n" >> $OUT
+printf "RELATIVE_DIR=%s\n" "$D" >> $OUT
 
 # Add all, install, clean, $PROG
 if [ -n "$(${MAKEBSD} -v LIB)" ]; then
