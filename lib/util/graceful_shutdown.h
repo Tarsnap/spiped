@@ -1,5 +1,5 @@
-#ifndef _GRACEFUL_SHUTDOWN_H_
-#define _GRACEFUL_SHUTDOWN_H_
+#ifndef GRACEFUL_SHUTDOWN_H_
+#define GRACEFUL_SHUTDOWN_H_
 
 /**
  * graceful_shutdown_initialize(callback, caller_cookie):
@@ -15,4 +15,4 @@ int graceful_shutdown_initialize(int (*)(void *), void *);
  */
 void graceful_shutdown_manual(void);
 
-#endif /* !_GRACEFUL_SHUTDOWN_H_ */
+#endif /* !GRACEFUL_SHUTDOWN_H_ */

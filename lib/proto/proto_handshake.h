@@ -1,5 +1,5 @@
-#ifndef _PROTO_HANDSHAKE_H_
-#define _PROTO_HANDSHAKE_H_
+#ifndef PROTO_HANDSHAKE_H_
+#define PROTO_HANDSHAKE_H_
 
 /* Opaque structures. */
 struct proto_keys;
@@ -27,4 +27,4 @@ void * proto_handshake(int, int, int, int, const struct proto_secret *,
  */
 void proto_handshake_cancel(void *);
 
-#endif /* !_PROTO_HANDSHAKE_H_ */
+#endif /* !PROTO_HANDSHAKE_H_ */

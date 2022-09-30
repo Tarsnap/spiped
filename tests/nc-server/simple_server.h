@@ -1,5 +1,5 @@
-#ifndef _SIMPLE_SERVER_H_
-#define _SIMPLE_SERVER_H_
+#ifndef SIMPLE_SERVER_H_
+#define SIMPLE_SERVER_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -14,4 +14,4 @@
 int simple_server(const char *, size_t, size_t, int (*)(void *, uint8_t *,
     size_t, int), void *);
 
-#endif /* !_SIMPLE_SERVER_H_ */
+#endif /* !SIMPLE_SERVER_H_ */

@@ -1,5 +1,5 @@
-#ifndef _DNSTHREAD_H_
-#define _DNSTHREAD_H_
+#ifndef DNSTHREAD_H_
+#define DNSTHREAD_H_
 
 /* Opaque address structure. */
 struct sock_addr;
@@ -43,4 +43,4 @@ int dnsthread_kill(DNSTHREAD);
 int dnsthread_resolve(const char *,
     int (*)(void *, struct sock_addr **), void *);
 
-#endif /* !_DNSTHREAD_H_ */
+#endif /* !DNSTHREAD_H_ */

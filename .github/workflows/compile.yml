@@ -14,7 +14,7 @@ env:
                             -Wno-#warnings -Wno-pedantic -Wno-padded
                             -Wno-format-nonliteral
                             -Wno-disabled-macro-expansion
-                            -Wno-missing-noreturn -Wno-reserved-id-macro
+                            -Wno-missing-noreturn
                             -Wno-unused-macros
                             -Wno-documentation-unknown-command
   CFLAGS_GCC_LIBCPERCIVA: -Wall -Wextra -Werror -Wpedantic
@@ -23,7 +23,9 @@ env:
   CFLAGS_CLANG_PROJECT: -Wno-implicit-fallthrough -Wno-thread-safety-analysis
                         -Wno-extra-semi-stmt
   CFLAGS_GCC_PROJECT:
-  CFLAGS_OSX: -Wno-poison-system-directories -I/usr/local/opt/openssl@1.1/include
+  CFLAGS_OSX: -Wno-poison-system-directories
+              -I/usr/local/opt/openssl@1.1/include
+              -Wno-reserved-id-macro
   LDFLAGS_OSX: -L/usr/local/opt/openssl@1.1/lib
 
 jobs:

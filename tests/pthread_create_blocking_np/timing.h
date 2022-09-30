@@ -1,5 +1,5 @@
-#ifndef _TIMING_H_
-#define _TIMING_H_
+#ifndef TIMING_H_
+#define TIMING_H_
 
 /**
  * check_timing(void):
@@ -8,4 +8,4 @@
  */
 int check_timing(void);
 
-#endif /* !_TIMING_H_ */
+#endif /* !TIMING_H_ */

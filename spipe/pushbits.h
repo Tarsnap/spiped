@@ -1,5 +1,5 @@
-#ifndef _PUSHBITS_H_
-#define _PUSHBITS_H_
+#ifndef PUSHBITS_H_
+#define PUSHBITS_H_
 
 #include <sys/types.h>
 
@@ -12,4 +12,4 @@
  */
 int pushbits(int, int, pthread_t *);
 
-#endif /* !_PUSHBITS_H_ */
+#endif /* !PUSHBITS_H_ */

@@ -1,5 +1,5 @@
-#ifndef _PROTO_PIPE_H_
-#define _PROTO_PIPE_H_
+#ifndef PROTO_PIPE_H_
+#define PROTO_PIPE_H_
 
 /* Opaque structure. */
 struct proto_keys;
@@ -21,4 +21,4 @@ void * proto_pipe(int, int, int, struct proto_keys *, int *,
  */
 void proto_pipe_cancel(void *);
 
-#endif /* !_PROTO_PIPE_H_ */
+#endif /* !PROTO_PIPE_H_ */

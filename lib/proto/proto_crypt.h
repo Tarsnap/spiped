@@ -1,5 +1,5 @@
-#ifndef _PROTO_CRYPT_H_
-#define _PROTO_CRYPT_H_
+#ifndef PROTO_CRYPT_H_
+#define PROTO_CRYPT_H_
 
 #include <stdint.h>
 #include <unistd.h>
@@ -117,4 +117,4 @@ void proto_crypt_free(struct proto_keys *);
 struct proto_keys * mkkeypair(uint8_t kbuf[64]);
 #endif
 
-#endif /* !_PROTO_CRYPT_H_ */
+#endif /* !PROTO_CRYPT_H_ */
