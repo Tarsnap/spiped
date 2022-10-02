@@ -11,6 +11,14 @@ SRCDIR=$(command -p dirname "$0")
 
 CFLAGS_HARDCODED="-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700"
 
+# Do we want to record stderr to a file?
+if [ "${DEBUG:-0}" -eq "0" ]; then
+	outcc="/dev/null"
+else
+	outcc="apisupport-stderr.log"
+	rm -f "${outcc}"
+fi
+
 feature() {
 	PLATFORM=$1
 	FEATURE=$2
@@ -29,7 +37,7 @@ feature() {
 	for API_CFLAGS in "$@"; do
 		if ${CC} ${CFLAGS} ${CFLAGS_HARDCODED} ${API_CFLAGS}	\
 		    "${feature_filename}" ${LDADD_EXTRA} ${EXTRALIB}	\
-		    2>/dev/null; then
+		    2>>${outcc}; then
 			rm -f a.out
 			break;
 		fi

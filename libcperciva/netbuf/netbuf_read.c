@@ -50,7 +50,7 @@ struct netbuf_read *
 netbuf_read_init(int s)
 {
 
-    return (netbuf_read_init2(s, NULL));
+	return (netbuf_read_init2(s, NULL));
 }
 
 /**
