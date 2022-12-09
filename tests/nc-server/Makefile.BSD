@@ -6,6 +6,7 @@ NOINST	=	1
 
 # Useful relative directories
 LIBCPERCIVA_DIR	=	../../libcperciva
+LIB_DIR	=	../../lib
 
 # Main test code
 SRCS	=	main.c
@@ -16,5 +17,8 @@ IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/external/queue
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/network
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
+
+# spiped includes
+IDIRS	+=	-I${LIB_DIR}/util
 
 .include <bsd.prog.mk>
