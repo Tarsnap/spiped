@@ -2,8 +2,8 @@
 
 #include <pthread.h>
 #include <string.h>
-#include <time.h>
 
+#include "millisleep.h"
 #include "monoclock.h"
 #include "pthread_create_blocking_np.h"
 #include "warnp.h"
@@ -42,21 +42,6 @@ struct info {
 	struct timeval thr_stop;
 };
 
-/* Wait duration can be interrupted by signals. */
-static int
-wait_ms(size_t msec)
-{
-	struct timespec ts;
-
-	/* Try to wait for the desired duration. */
-	ts.tv_sec = msec / 1000;
-	ts.tv_nsec = (msec % 1000) * 1000000;
-	nanosleep(&ts, NULL);
-
-	/* Success! */
-	return (0);
-}
-
 static void *
 workfunc(void * cookie)
 {
@@ -68,7 +53,7 @@ workfunc(void * cookie)
 
 	/* Wait if the test calls for it. */
 	if (info->options & WAIT_THREAD_AFTER_START)
-		wait_ms(WAIT_MS);
+		millisleep(WAIT_MS);
 
 	/* For checking the order. */
 	if (monoclock_get(&info->thr_stop))
@@ -122,9 +107,9 @@ runner(int options1, int options2)
 
 	/* Wait if the test calls for it. */
 	if (info1.options & WAIT_PARENT_AFTER_BLOCK)
-		wait_ms(WAIT_MS);
+		millisleep(WAIT_MS);
 	if (info2.options & WAIT_PARENT_AFTER_BLOCK)
-		wait_ms(WAIT_MS);
+		millisleep(WAIT_MS);
 
 	/* Join thr1 and record time. */
 	if ((rc = pthread_join(thr1, NULL))) {

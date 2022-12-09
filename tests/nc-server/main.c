@@ -1,9 +1,11 @@
+#include <sys/time.h>
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <unistd.h>
 
+#include "millisleep.h"
 #include "monoclock.h"
 #include "parsenum.h"
 #include "warnp.h"
@@ -17,19 +19,6 @@ struct nc_cookie {
 	FILE * out;
 	size_t bps;		/* Average bytes per second to send. */
 };
-
-/* Wait duration can be interrupted by signals. */
-static int
-wait_ms(size_t msec)
-{
-	struct timespec ts;
-
-	ts.tv_sec = msec / 1000;
-	ts.tv_nsec = (msec % 1000) * 1000000;
-	nanosleep(&ts, NULL);
-
-	return (0);
-}
 
 /* Send a message, limited to bytes per second.  Send in bursts of 10ms. */
 static int
@@ -49,7 +38,7 @@ write_bps(int sock, uint8_t * buf, size_t buflen, size_t bps)
 
 	do {
 		/* Wait 10ms. */
-		wait_ms(10);
+		millisleep(10);
 
 		/* How much data should we have sent by now? */
 		if (monoclock_get(&now)) {

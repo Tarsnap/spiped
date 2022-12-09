@@ -7,10 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "getopt.h"
+#include "millisleep.h"
 #include "noeintr.h"
 #include "parsenum.h"
 #include "warnp.h"
@@ -112,21 +112,6 @@ err0:
 	return (-1);
 }
 
-/* Wait duration can be interrupted by signals. */
-static int
-wait_ms(size_t msec)
-{
-	struct timespec ts;
-
-	/* Try to wait for the desired duration. */
-	ts.tv_sec = msec / 1000;
-	ts.tv_nsec = (msec % 1000) * 1000000;
-	nanosleep(&ts, NULL);
-
-	/* Success! */
-	return (0);
-}
-
 static int
 chain_one(void)
 {
@@ -162,7 +147,7 @@ chain_one(void)
 	}
 
 	/* Wait for thread to start. */
-	wait_ms(100);
+	millisleep(100);
 
 	/*
 	 * Send the message; this will not block because the message is
@@ -274,7 +259,7 @@ chain_two(void)
 	}
 
 	/* Wait for thread to start. */
-	wait_ms(100);
+	millisleep(100);
 
 	/*
 	 * Send the message; this will not block because the message is
