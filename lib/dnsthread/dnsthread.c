@@ -125,8 +125,10 @@ workthread(void * cookie)
 	} while (1);
 
 	/* Close the socket pair. */
-	close(T->wakeupsock[1]);
-	close(T->wakeupsock[0]);
+	if (close(T->wakeupsock[1]))
+		warnp("close");
+	if (close(T->wakeupsock[0]))
+		warnp("close");
 
 	/* Destroy the condition variable. */
 	if ((rc = pthread_cond_destroy(&T->cv)) != 0) {
@@ -209,8 +211,10 @@ dnsthread_spawn(void)
 	return (T);
 
 err5:
-	close(T->wakeupsock[1]);
-	close(T->wakeupsock[0]);
+	if (close(T->wakeupsock[1]))
+		warnp("close");
+	if (close(T->wakeupsock[0]))
+		warnp("close");
 err4:
 	pthread_cond_destroy(&T->cv);
 err3:

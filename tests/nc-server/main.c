@@ -151,7 +151,8 @@ main(int argc, char ** argv)
 	exit(0);
 
 err1:
-	fclose(C->out);
+	if (fclose(C->out))
+		warnp("fclose");
 err0:
 	/* Failure! */
 	exit(1);

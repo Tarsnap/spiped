@@ -143,7 +143,8 @@ main(int argc, char ** argv)
 	exit(0);
 
 err3:
-	close(socket);
+	if (close(socket))
+		warnp("close");
 err2:
 	sock_addr_freelist(sas_t);
 err1:

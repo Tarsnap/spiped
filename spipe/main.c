@@ -312,7 +312,8 @@ main(int argc, char * argv[])
 	}
 
 	/* Clean up. */
-	close(s[0]);
+	if (close(s[0]))
+		warnp("close");
 	proto_crypt_secret_free(K);
 	sock_addr_free(sa_b);
 
@@ -336,9 +337,10 @@ err6:
 err5:
 	proto_conn_drop(conn_cookie, PROTO_CONN_CANCELLED);
 err4:
-	if (s[1] != -1)
-		close(s[1]);
-	close(s[0]);
+	if ((s[1] != -1) && close(s[1]))
+		warnp("close");
+	if (close(s[0]))
+		warnp("close");
 err3:
 	proto_crypt_secret_free(K);
 err2:

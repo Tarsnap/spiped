@@ -149,7 +149,8 @@ err2:
 	free(node_new);
 err1:
 	A->nconn -= 1;
-	close(s);
+	if (close(s))
+		warnp("close");
 err0:
 	/* Failure! */
 	return (-1);
@@ -208,7 +209,7 @@ drop(struct conn_list_node * node_ptr)
 
 	/* Close the incoming connection. */
 	if (close(node_ptr->sock_read) == -1) {
-		warn0("close");
+		warnp("close");
 		goto err0;
 	}
 
@@ -256,7 +257,7 @@ simple_server_shutdown(void * cookie)
 
 	/* Close socket and free memory. */
 	if (close(A->s) == -1)
-		warn0("close");
+		warnp("close");
 	free(A);
 }
 
@@ -330,7 +331,8 @@ err4:
 err3:
 	free(A);
 err2:
-	close(sock);
+	if (close(sock))
+		warnp("close");
 err1:
 	sock_addr_free(sa);
 err0:
