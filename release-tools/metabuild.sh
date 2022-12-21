@@ -98,6 +98,24 @@ get_apisupport_cflags() {
 	done | sed 's/^ //'
 }
 
+get_use_pthread() {
+	src=$1
+
+	# Bail if it's not optional_mutex.c
+	if [ "${src#*optional_mutex.c}" = "$src" ] ; then
+		return
+	fi
+
+	# If LDADD_REQ contains -lpthread, add _YES to the defines.
+	# Otherwise, add _NO.
+	ldadd_req=$(${MAKEBSD} -v LDADD_REQ)
+	if [ "${ldadd_req#*-lpthread}" != "$ldadd_req" ] ; then
+		printf "%s" "-DOPTIONAL_MUTEX_PTHREAD_YES"
+	else
+		printf "%s" "-DOPTIONAL_MUTEX_PTHREAD_NO"
+	fi
+}
+
 add_object_files() {
 	# Set up useful variables
 	OBJ=$(${MAKEBSD} -v SRCS |				\
@@ -116,13 +134,16 @@ add_object_files() {
 		CF_MANUAL=$(${MAKEBSD} -v CFLAGS.$(basename ${S}))
 		CF_CPUSUPPORT=$(get_cpusupport_cflags ${S})
 		CF_APISUPPORT=$(get_apisupport_cflags ${S})
-		CF=$(echo "${CF_CPUSUPPORT} ${CF_APISUPPORT} ${CF_MANUAL}" | \
+		CF_USE_PTHREAD=$(get_use_pthread ${S})
+		CF_SUPPORT="${CF_CPUSUPPORT} ${CF_APISUPPORT}"
+		CF=$(echo "${CF_SUPPORT} ${CF_USE_PTHREAD} ${CF_MANUAL} " | \
 		    sed 's/^ //' | sed 's/ $//')
 		IDIRS=$(${MAKEBSD} -v IDIRS)
 		# Get the build dependencies, then remove newlines, condense
 		# multiple spaces, remove line continuations, and replace the
 		# final space with a newline.
-		${CPP} ${S} ${CPP_ARGS_FIXED} ${IDIRS} -MT ${F} |	\
+		${CPP} ${S} ${CPP_ARGS_FIXED} ${IDIRS} -MT ${F}		\
+		    ${CF_USE_PTHREAD} |					\
 		    tr '\n' ' ' |					\
 		    tr -s ' '	|					\
 		    sed -e 's| \\ | |g' |				\
