@@ -118,9 +118,11 @@ daemonize(const char * spid)
 	return (0);
 
 err2:
-	close(fd[1]);
+	if (close(fd[1]))
+		warnp("close");
 err1:
-	close(fd[0]);
+	if (close(fd[0]))
+		warnp("close");
 err0:
 	/* Failure! */
 	return (-1);

@@ -390,8 +390,8 @@ main(int argc, char * argv[])
 err7:
 	dispatch_shutdown(dispatch_cookie);
 err6:
-	if (s != -1)
-		close(s);
+	if ((s != -1) && close(s))
+		warnp("close");
 err5:
 	proto_crypt_secret_free(K);
 err4:

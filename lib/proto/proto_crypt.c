@@ -107,8 +107,8 @@ proto_crypt_secret(const char * filename)
 	}
 
 	/* Close the file if it isn't stdin. */
-	if (f != stdin)
-		fclose(f);
+	if ((f != stdin) && fclose(f))
+		warnp("fclose");
 
 	/* Compute the final hash and wipe context state. */
 	SHA256_Final(K->K, &ctx);
@@ -118,8 +118,8 @@ proto_crypt_secret(const char * filename)
 
 err2:
 	/* Close the file if it isn't stdin. */
-	if (f != stdin)
-		fclose(f);
+	if ((f != stdin) && fclose(f))
+		warnp("fclose");
 
 	/* Wipe context state. */
 	SHA256_Final(K->K, &ctx);

@@ -101,9 +101,11 @@ main(int argc, char ** argv)
 	exit(0);
 
 err4:
-	close(socket_recv);
+	if (close(socket_recv))
+		warnp("close");
 err3:
-	close(socket);
+	if (close(socket))
+		warnp("close");
 err2:
 	sock_addr_free(sa);
 err1:

@@ -48,16 +48,20 @@ basic_copy(const char * filename_in, const char * filename_out)
 	}
 
 	/* Clean up. */
-	close(out);
-	close(in);
+	if (close(out))
+		warnp("close");
+	if (close(in))
+		warnp("close");
 
 	/* Success! */
 	return (0);
 
 err2:
-	close(out);
+	if (close(out))
+		warnp("close");
 err1:
-	close(in);
+	if (close(in))
+		warnp("close");
 err0:
 	/* Failure! */
 	return (-1);

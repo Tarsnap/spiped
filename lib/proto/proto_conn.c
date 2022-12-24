@@ -10,6 +10,7 @@
 #include "events.h"
 #include "network.h"
 #include "sock.h"
+#include "warnp.h"
 
 #include "proto_crypt.h"
 #include "proto_handshake.h"
@@ -147,11 +148,12 @@ proto_conn_drop(void * conn_cookie, int reason)
 	int rc;
 
 	/* Close the incoming connection. */
-	close(C->s);
+	if (close(C->s))
+		warnp("close");
 
 	/* Close the outgoing connection if it is open. */
-	if (C->t != -1)
-		close(C->t);
+	if ((C->t != -1) && close(C->t))
+		warnp("close");
 
 	/* Stop connecting if a connection is in progress. */
 	if (C->connect_cookie != NULL)
