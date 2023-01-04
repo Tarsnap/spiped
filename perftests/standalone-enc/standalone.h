@@ -29,7 +29,7 @@ int pce_perftest(const size_t *, size_t, size_t, size_t);
 
 /**
  * pipe_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
- * Performance test for one proto_pipe().
+ * Performance test for one proto_pipe() over a socketpair.
  */
 int pipe_perftest(const size_t *, size_t, size_t, size_t);
 

@@ -51,7 +51,7 @@ pipe_callback_status(void * cookie)
 
 /* Encrypt bytes sent to a socket, and send them to another socket. */
 static void *
-pipe_enc_thread(void * cookie)
+pipe_enc(void * cookie)
 {
 	struct pipe * pipe = cookie;
 	void * cancel_cookie;
@@ -77,7 +77,7 @@ err0:
 
 /* Drain bytes from pipe->out[1] as quickly as possible. */
 static void *
-pipe_output_thread(void * cookie)
+pipe_output(void * cookie)
 {
 	struct pipe * pipe = cookie;
 	uint8_t mybuf[MAXOUTSIZE];
@@ -92,11 +92,12 @@ pipe_output_thread(void * cookie)
 		 */
 		if ((readlen = read(pipe->out[1], mybuf, MAXOUTSIZE)) == -1) {
 			warnp("read");
-			return (NULL);
+			goto err0;
 		}
 	} while (readlen != 0);
 
-	/* Success! */
+err0:
+	/* Finished! */
 	return (NULL);
 }
 
@@ -108,7 +109,7 @@ pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 	size_t i;
 	int rc;
 
-	/* Sanity check for pipe_output_thread(). */
+	/* Sanity check for pipe_output(). */
 	assert(buflen <= MAXOUTSIZE);
 
 	/* Set up encryption key. */
@@ -135,12 +136,12 @@ pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 
 	/* Create the pipe threads. */
 	if ((rc = pthread_create_blocking_np(&pipe->output_thr, NULL,
-	    pipe_output_thread, pipe))) {
+	    pipe_output, pipe))) {
 		warn0("pthread_create: %s", strerror(rc));
 		goto err0;
 	}
 	if ((rc = pthread_create_blocking_np(&pipe->enc_thr, NULL,
-	    pipe_enc_thread, pipe))) {
+	    pipe_enc, pipe))) {
 		warn0("pthread_create: %s", strerror(rc));
 		goto err0;
 	}
@@ -176,11 +177,11 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	}
 
 	/* Wait for threads to finish. */
-	if ((rc = pthread_join(pipe->output_thr, NULL))) {
+	if ((rc = pthread_join(pipe->enc_thr, NULL))) {
 		warn0("pthread_join: %s", strerror(rc));
 		goto err0;
 	}
-	if ((rc = pthread_join(pipe->enc_thr, NULL))) {
+	if ((rc = pthread_join(pipe->output_thr, NULL))) {
 		warn0("pthread_join: %s", strerror(rc));
 		goto err0;
 	}
@@ -213,7 +214,7 @@ pipe_cleanup(void * cookie)
 
 /**
  * pipe_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
- * Performance test for one proto_pipe().
+ * Performance test for one proto_pipe() over a socketpair.
  */
 int
 pipe_perftest(const size_t * perfsizes, size_t num_perf,
@@ -222,7 +223,7 @@ pipe_perftest(const size_t * perfsizes, size_t num_perf,
 	struct pipe pipe_actual;
 
 	/* Report what we're doing. */
-	printf("Testing proto_pipe()\n");
+	printf("Testing one proto_pipe() over a socketpair\n");
 
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
