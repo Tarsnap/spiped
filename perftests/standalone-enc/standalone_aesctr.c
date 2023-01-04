@@ -45,11 +45,11 @@ aesctr_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 }
 
 /**
- * aesctr_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
+ * standalone_aesctr(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for AES-CTR.
  */
 int
-aesctr_perftest(const size_t * perfsizes, size_t num_perf,
+standalone_aesctr(const size_t * perfsizes, size_t num_perf,
     size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	struct crypto_aes_key * k_aes;

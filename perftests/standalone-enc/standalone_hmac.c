@@ -51,11 +51,11 @@ hmac_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 }
 
 /**
- * hmac_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
+ * standalone_hmac(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for HMAC-SHA256.
  */
 int
-hmac_perftest(const size_t * perfsizes, size_t num_perf,
+standalone_hmac(const size_t * perfsizes, size_t num_perf,
     size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	HMAC_SHA256_CTX ctx;

@@ -64,11 +64,11 @@ aesctr_hmac_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 }
 
 /**
- * aesctr_hmac_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
+ * standalone_aesctr_hmac(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for AES-CTR followed by HMAC-SHA256.
  */
 int
-aesctr_hmac_perftest(const size_t * perfsizes, size_t num_perf,
+standalone_aesctr_hmac(const size_t * perfsizes, size_t num_perf,
     size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	struct aesctr_hmac_cookie aesctr_hmac_cookie;

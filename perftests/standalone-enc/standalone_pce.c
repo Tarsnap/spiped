@@ -65,11 +65,11 @@ pce_cleanup(void * cookie)
 }
 
 /**
- * pce_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
+ * standalone_pce(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
  * Performance test for proto_crypt_enc().
  */
 int
-pce_perftest(const size_t * perfsizes, size_t num_perf,
+standalone_pce(const size_t * perfsizes, size_t num_perf,
     size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	struct pce pce_actual;

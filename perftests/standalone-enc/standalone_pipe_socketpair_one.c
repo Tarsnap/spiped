@@ -213,11 +213,12 @@ pipe_cleanup(void * cookie)
 }
 
 /**
- * pipe_perftest(perfsizes, num_perf, nbytes_perftest, nbytes_warmup):
+ * standalone_pipe_socketpair_one(perfsizes, num_perf, nbytes_perftest,
+ *     nbytes_warmup):
  * Performance test for one proto_pipe() over a socketpair.
  */
 int
-pipe_perftest(const size_t * perfsizes, size_t num_perf,
+standalone_pipe_socketpair_one(const size_t * perfsizes, size_t num_perf,
     size_t nbytes_perftest, size_t nbytes_warmup)
 {
 	struct pipe pipe_actual;
