@@ -83,27 +83,27 @@ main(int argc, char * argv[])
 	/* Run the desired test. */
 	switch (desired_test) {
 	case 1:
-		if (hmac_perftest(perfsizes, num_perf,
+		if (standalone_hmac(perfsizes, num_perf,
 		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	case 2:
-		if (aesctr_perftest(perfsizes, num_perf,
+		if (standalone_aesctr(perfsizes, num_perf,
 		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	case 3:
-		if (aesctr_hmac_perftest(perfsizes, num_perf,
+		if (standalone_aesctr_hmac(perfsizes, num_perf,
 		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	case 4:
-		if (pce_perftest(perfsizes, num_perf,
+		if (standalone_pce(perfsizes, num_perf,
 		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
 	case 5:
-		if (pipe_perftest(perfsizes, num_perf,
+		if (standalone_pipe_socketpair_one(perfsizes, num_perf,
 		    nbytes_perftest, nbytes_warmup))
 			goto err0;
 		break;
