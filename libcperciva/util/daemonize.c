@@ -62,6 +62,15 @@ daemonize(const char * spid)
 				/* EOF -- the child died without poking us. */
 				goto err1;
 			case 1:
+				/*
+				 * We don't need to read from this any more.
+				 * The pipe would be implicitly closed by
+				 * the following _exit(), but we're explicitly
+				 * closing it for the benefit of leak checkers.
+				 */
+				if (close(fd[0]))
+					warnp("close");
+
 				/* We have been poked by the child.  Exit. */
 				_exit(0);
 			}
