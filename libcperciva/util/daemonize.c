@@ -7,6 +7,41 @@
 
 #include "daemonize.h"
 
+/* Read and discard one byte from ${fd}, looping upon EINTR. */
+static int
+readbyte(int fd)
+{
+	char dummy;
+	char done = 0;
+
+	do {
+		switch (read(fd, &dummy, 1)) {
+		case -1:
+			/* Anything other than EINTR is bad. */
+			if (errno != EINTR) {
+				warnp("read");
+				goto err0;
+			}
+
+			/* Otherwise, loop and read again. */
+			break;
+		case 0:
+			warn0("Unexpected EOF in pipe");
+			goto err0;
+		case 1:
+			/* Expected value; quit the loop. */
+			done = 1;
+		}
+	} while (!done);
+
+	/* Success! */
+	return (0);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
+
 /**
  * daemonize(spid):
  * Daemonize and write the process ID in decimal to a file named ${spid}.
@@ -53,34 +88,23 @@ daemonize(const char * spid)
 			warnp("close");
 			goto err1;
 		}
-		do {
-			switch (read(fd[0], &dummy, 1)) {
-			case -1:
-				/* Error in read. */
-				break;
-			case 0:
-				/* EOF -- the child died without poking us. */
-				goto err1;
-			case 1:
-				/*
-				 * We don't need to read from this any more.
-				 * The pipe would be implicitly closed by
-				 * the following _exit(), but we're explicitly
-				 * closing it for the benefit of leak checkers.
-				 */
-				if (close(fd[0]))
-					warnp("close");
 
-				/* We have been poked by the child.  Exit. */
-				_exit(0);
-			}
+		/* Read and discard a byte from the read end of the pipe. */
+		if (readbyte(fd[0]))
+			goto err1;
 
-			/* Anything other than EINTR is bad. */
-			if (errno != EINTR) {
-				warnp("read");
-				goto err1;
-			}
-		} while (1);
+		/*
+		 * We don't need to read from this any more.  The pipe would
+		 * be implicitly closed by the following _exit(), but we're
+		 * explicitly closing it for the benefit of leak checkers.
+		 */
+		if (close(fd[0])) {
+			warnp("close");
+			goto err0;
+		}
+
+		/* We have been poked by the child.  Exit. */
+		_exit(0);
 	}
 
 	/* Set ourselves to be a session leader. */
