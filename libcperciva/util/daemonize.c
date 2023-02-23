@@ -42,6 +42,34 @@ err0:
 	return (-1);
 }
 
+/* Write the process' pid to a file called ${spid}. */
+static int
+writepid(const char * spid)
+{
+	FILE * f;
+
+	/* Write our pid to a file. */
+	if ((f = fopen(spid, "w")) == NULL) {
+		warnp("fopen(%s)", spid);
+		goto err0;
+	}
+	if (fprintf(f, "%d", getpid()) < 0) {
+		warnp("fprintf");
+		goto err0;
+	}
+	if (fclose(f)) {
+		warnp("fclose");
+		goto err0;
+	}
+
+	/* Success! */
+	return (0);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
+
 /**
  * daemonize(spid):
  * Daemonize and write the process ID in decimal to a file named ${spid}.
@@ -52,7 +80,6 @@ err0:
 int
 daemonize(const char * spid)
 {
-	FILE * f;
 	int fd[2];
 	char dummy = 0;
 
@@ -114,18 +141,8 @@ daemonize(const char * spid)
 	}
 
 	/* Write out our pid file. */
-	if ((f = fopen(spid, "w")) == NULL) {
-		warnp("fopen(%s)", spid);
+	if (writepid(spid))
 		goto die;
-	}
-	if (fprintf(f, "%d", getpid()) < 0) {
-		warnp("fprintf");
-		goto die;
-	}
-	if (fclose(f)) {
-		warnp("fclose");
-		goto die;
-	}
 
 	/* Tell the parent to suicide. */
 	if (noeintr_write(fd[1], &dummy, 1) == -1) {
