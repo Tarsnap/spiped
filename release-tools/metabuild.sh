@@ -131,7 +131,7 @@ add_object_files() {
 	# Generate build instructions for each object
 	for F in $OBJ; do
 		S=$(${MAKEBSD} source-${F})
-		CF_MANUAL=$(${MAKEBSD} -v CFLAGS.$(basename ${S}))
+		CF_MANUAL=$(${MAKEBSD} -v CFLAGS."$(basename ${S})")
 		CF_CPUSUPPORT=$(get_cpusupport_cflags ${S})
 		CF_APISUPPORT=$(get_apisupport_cflags ${S})
 		CF_USE_PTHREAD=$(get_use_pthread ${S})
