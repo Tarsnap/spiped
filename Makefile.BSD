@@ -1,6 +1,7 @@
 PKG=	spiped
 PROGS=	spipe					\
 	spiped
+LIBS=	liball
 TESTS=	perftests/recv-zeros			\
 	perftests/send-zeros			\
 	perftests/standalone-enc		\
@@ -22,14 +23,14 @@ CFLAGS_HARDCODED=	-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CON
 
 # This creates (and deletes) a fake cpusupport-config.h that is
 # blank (and thus does not require any special CFLAGS to compile).
-.for D in liball ${PROGS} ${TESTS}
+.for D in ${LIBS} ${PROGS} ${TESTS}
 ${D}/Makefile::
 	CPP="${CPP}" ./release-tools/metabuild.sh	\
 	    "${D}" "${MAKEBSD}"	"${CFLAGS_HARDCODED}"
 .endfor
 
 Makefiles:
-.for D in liball ${PROGS} ${TESTS}
+.for D in ${LIBS} ${PROGS} ${TESTS}
 	${MAKEBSD} ${D}/Makefile
 .endfor
 
