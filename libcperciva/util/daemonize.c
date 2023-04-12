@@ -7,6 +7,69 @@
 
 #include "daemonize.h"
 
+/* Read and discard one byte from ${fd}, looping upon EINTR. */
+static int
+readbyte(int fd)
+{
+	char dummy;
+	char done = 0;
+
+	do {
+		switch (read(fd, &dummy, 1)) {
+		case -1:
+			/* Anything other than EINTR is bad. */
+			if (errno != EINTR) {
+				warnp("read");
+				goto err0;
+			}
+
+			/* Otherwise, loop and read again. */
+			break;
+		case 0:
+			warn0("Unexpected EOF in pipe");
+			goto err0;
+		case 1:
+			/* Expected value; quit the loop. */
+			done = 1;
+		}
+	} while (!done);
+
+	/* Success! */
+	return (0);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
+
+/* Write the process' pid to a file called ${spid}. */
+static int
+writepid(const char * spid)
+{
+	FILE * f;
+
+	/* Write our pid to a file. */
+	if ((f = fopen(spid, "w")) == NULL) {
+		warnp("fopen(%s)", spid);
+		goto err0;
+	}
+	if (fprintf(f, "%d", getpid()) < 0) {
+		warnp("fprintf");
+		goto err0;
+	}
+	if (fclose(f)) {
+		warnp("fclose");
+		goto err0;
+	}
+
+	/* Success! */
+	return (0);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
+
 /**
  * daemonize(spid):
  * Daemonize and write the process ID in decimal to a file named ${spid}.
@@ -17,7 +80,6 @@
 int
 daemonize(const char * spid)
 {
-	FILE * f;
 	int fd[2];
 	char dummy = 0;
 
@@ -53,25 +115,23 @@ daemonize(const char * spid)
 			warnp("close");
 			goto err1;
 		}
-		do {
-			switch (read(fd[0], &dummy, 1)) {
-			case -1:
-				/* Error in read. */
-				break;
-			case 0:
-				/* EOF -- the child died without poking us. */
-				goto err1;
-			case 1:
-				/* We have been poked by the child.  Exit. */
-				_exit(0);
-			}
 
-			/* Anything other than EINTR is bad. */
-			if (errno != EINTR) {
-				warnp("read");
-				goto err1;
-			}
-		} while (1);
+		/* Read and discard a byte from the read end of the pipe. */
+		if (readbyte(fd[0]))
+			goto err1;
+
+		/*
+		 * We don't need to read from this any more.  The pipe would
+		 * be implicitly closed by the following _exit(), but we're
+		 * explicitly closing it for the benefit of leak checkers.
+		 */
+		if (close(fd[0])) {
+			warnp("close");
+			goto err0;
+		}
+
+		/* We have been poked by the child.  Exit. */
+		_exit(0);
 	}
 
 	/* Set ourselves to be a session leader. */
@@ -81,18 +141,8 @@ daemonize(const char * spid)
 	}
 
 	/* Write out our pid file. */
-	if ((f = fopen(spid, "w")) == NULL) {
-		warnp("fopen(%s)", spid);
+	if (writepid(spid))
 		goto die;
-	}
-	if (fprintf(f, "%d", getpid()) < 0) {
-		warnp("fprintf");
-		goto die;
-	}
-	if (fclose(f)) {
-		warnp("fclose");
-		goto die;
-	}
 
 	/* Tell the parent to suicide. */
 	if (noeintr_write(fd[1], &dummy, 1) == -1) {
