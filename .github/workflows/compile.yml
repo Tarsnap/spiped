@@ -31,19 +31,17 @@ env:
 jobs:
   Ubuntu:
     name: Ubuntu
-    # Ubuntu 16.04 comes with valgrind-3.11, which can't handle RDRAND
-    # instructions.  We need at least Ubuntu 18.04, which has valgrind-3.13.
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - name: Update apt-get
       run: sudo apt-get update
     - name: Install software
       run: sudo apt-get install --no-install-recommends valgrind
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Compile with clang
       env:
-        CC: clang-9
+        CC: clang-10
         CFLAGS: ${{ env.CFLAGS_ALL }}
                 ${{ env.CFLAGS_CLANG_LIBCPERCIVA }}
                 ${{ env.CFLAGS_CLANG_PROJECT }}
@@ -72,7 +70,7 @@ jobs:
     runs-on: macOS-11
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Compile with clang
       env:
         CC: clang
