@@ -28,6 +28,15 @@ int standalone_aesctr_hmac(const size_t *, size_t, size_t, size_t);
 int standalone_pce(const size_t *, size_t, size_t, size_t);
 
 /**
+ * standalone_transfer_noencrypt(perfsizes, num_perf, nbytes_perftest,
+ *     nbytes_warmup, method):
+ * Performance test for sending data through two communication endpoints with
+ * no encryption.  If ${method} is 0, use two pipes; if ${method} is 1, use
+ * two socketpairs.
+ */
+int standalone_transfer_noencrypt(const size_t *, size_t, size_t, size_t, int);
+
+/**
  * standalone_pipe_socketpair_one(perfsizes, num_perf, nbytes_perftest,
  *     nbytes_warmup):
  * Performance test for one proto_pipe() over a socketpair.

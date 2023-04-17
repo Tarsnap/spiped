@@ -64,7 +64,7 @@ main(int argc, char * argv[])
 		fprintf(stderr, "usage: test_standalone_enc NUM [MULT]\n");
 		exit(1);
 	}
-	if (PARSENUM(&desired_test, argv[1], 1, 5)) {
+	if (PARSENUM(&desired_test, argv[1], 1, 7)) {
 		warnp("parsenum");
 		goto err0;
 	}
@@ -103,6 +103,16 @@ main(int argc, char * argv[])
 			goto err0;
 		break;
 	case 5:
+		if (standalone_transfer_noencrypt(perfsizes, num_perf,
+		    nbytes_perftest, nbytes_warmup, 0))
+			goto err0;
+		break;
+	case 6:
+		if (standalone_transfer_noencrypt(perfsizes, num_perf,
+		    nbytes_perftest, nbytes_warmup, 1))
+			goto err0;
+		break;
+	case 7:
 		if (standalone_pipe_socketpair_one(perfsizes, num_perf,
 		    nbytes_perftest, nbytes_warmup))
 			goto err0;
