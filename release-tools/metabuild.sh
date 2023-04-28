@@ -122,7 +122,8 @@ add_object_files() {
 		# Get the build dependencies, then remove newlines, condense
 		# multiple spaces, remove line continuations, and replace the
 		# final space with a newline.
-		${CPP} ${S} ${CPP_ARGS_FIXED} ${IDIRS} -MT ${F} |	\
+		${CPP} ${S} ${CPP_ARGS_FIXED} ${CF_MANUAL} ${IDIRS}	\
+		    -MT ${F} |	\
 		    tr '\n' ' ' |					\
 		    tr -s ' '	|					\
 		    sed -e 's| \\ | |g' |				\
