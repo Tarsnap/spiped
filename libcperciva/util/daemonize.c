@@ -55,7 +55,7 @@ writepid(const char * spid)
 	}
 	if (fprintf(f, "%d", getpid()) < 0) {
 		warnp("fprintf");
-		goto err0;
+		goto err1;
 	}
 	if (fclose(f)) {
 		warnp("fclose");
@@ -65,6 +65,9 @@ writepid(const char * spid)
 	/* Success! */
 	return (0);
 
+err1:
+	if (fclose(f))
+		warnp("fclose");
 err0:
 	/* Failure! */
 	return (-1);
