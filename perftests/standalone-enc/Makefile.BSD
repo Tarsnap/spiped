@@ -17,6 +17,7 @@ SRCS	+=	standalone_aesctr.c
 SRCS	+=	standalone_aesctr_hmac.c
 SRCS	+=	standalone_hmac.c
 SRCS	+=	standalone_pce.c
+SRCS	+=	standalone_transfer_noencrypt.c
 SRCS	+=	standalone_pipe_socketpair_one.c
 
 # spiped protocol, with an extra -DSTANDALONE_ENC_TESTING to enable mkkeypair()
@@ -43,7 +44,7 @@ CFLAGS.standalone_pipe_socketpair_one.c= -DSTANDALONE_ENC_TESTING
 perftest:
 	@${MAKE} all > /dev/null
 	@printf "# nblks\tbsize\ttime\tspeed\talg\n"
-	@for N in 1 2 3 4 5; do					\
+	@for N in 1 2 3 4 5 6 7; do				\
 		./test_standalone_enc $$N |			\
 		    grep "blocks" |				\
 		    awk -v N="$$N"				\
