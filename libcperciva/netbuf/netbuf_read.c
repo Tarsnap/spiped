@@ -102,6 +102,40 @@ netbuf_read_peek(struct netbuf_read * R, uint8_t ** data, size_t * datalen)
 	*datalen = R->datalen - R->bufpos;
 }
 
+/* Ensure that ${R} can store at least ${len} bytes. */
+static int
+netbuf_read_resize_buffer(struct netbuf_read * R, size_t len)
+{
+	uint8_t * nbuf;
+	size_t nbuflen;
+
+	/* Compute new buffer size. */
+	nbuflen = R->buflen * 2;
+	if (nbuflen < len)
+		nbuflen = len;
+
+	/* Allocate new buffer. */
+	if ((nbuf = malloc(nbuflen)) == NULL)
+		goto err0;
+
+	/* Copy data into new buffer. */
+	memcpy(nbuf, &R->buf[R->bufpos], R->datalen - R->bufpos);
+
+	/* Free old buffer and use new buffer. */
+	free(R->buf);
+	R->buf = nbuf;
+	R->buflen = nbuflen;
+	R->datalen -= R->bufpos;
+	R->bufpos = 0;
+
+	/* Success! */
+	return (0);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
+
 /**
  * netbuf_read_wait(R, len, callback, cookie):
  * Wait until ${R} has ${len} or more bytes of data buffered or an error
@@ -112,8 +146,6 @@ int
 netbuf_read_wait(struct netbuf_read * R, size_t len,
     int (* callback)(void *, int), void * cookie)
 {
-	uint8_t * nbuf;
-	size_t nbuflen;
 
 	/* Sanity-check: We shouldn't be reading already. */
 	assert(R->read_cookie == NULL);
@@ -133,26 +165,8 @@ netbuf_read_wait(struct netbuf_read * R, size_t len,
 	}
 
 	/* Resize the buffer if needed. */
-	if (R->buflen < len) {
-		/* Compute new buffer size. */
-		nbuflen = R->buflen * 2;
-		if (nbuflen < len)
-			nbuflen = len;
-
-		/* Allocate new buffer. */
-		if ((nbuf = malloc(nbuflen)) == NULL)
-			goto err0;
-
-		/* Copy data into new buffer. */
-		memcpy(nbuf, &R->buf[R->bufpos], R->datalen - R->bufpos);
-
-		/* Free old buffer and use new buffer. */
-		free(R->buf);
-		R->buf = nbuf;
-		R->buflen = nbuflen;
-		R->datalen -= R->bufpos;
-		R->bufpos = 0;
-	}
+	if ((R->buflen < len) && netbuf_read_resize_buffer(R, len))
+		goto err0;
 
 	/* Move data to start of buffer if needed. */
 	if (R->buflen - R->bufpos < len) {
