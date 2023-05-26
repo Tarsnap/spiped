@@ -30,8 +30,8 @@ scenario_cmd() {
 	do
 		setup_check_variables "dnsthread-resolve ${addr}"
 		${c_valgrind_cmd}				\
-		${dnsthread_resolve} ${addr} >> ${addr_output}
-		echo $? > ${c_exitfile}
+		"${dnsthread_resolve}" "${addr}" >> "${addr_output}"
+		echo $? > "${c_exitfile}"
 	done
 
 	# Wait for server(s) to quit.

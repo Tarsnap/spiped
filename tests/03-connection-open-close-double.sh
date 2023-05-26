@@ -21,8 +21,8 @@ scenario_cmd() {
 	setup_check_variables "multi open 2 seconds close"
 	(
 		( echo "" ; sleep 2 ) |		\
-			 ${nc_client_binary} ${src_sock}
-		echo $? > ${c_exitfile}
+			 ${nc_client_binary} "${src_sock}"
+		echo $? > "${c_exitfile}"
 		touch "${flag_1}"
 	) &
 
@@ -30,8 +30,8 @@ scenario_cmd() {
 	# Don't check that we've already finished the previous test.
 	setup_check_variables "multi open close" 0
 	(
-		echo "" | ${nc_client_binary} ${src_sock}
-		echo $? > ${c_exitfile}
+		echo "" | ${nc_client_binary} "${src_sock}"
+		echo $? > "${c_exitfile}"
 		touch "${flag_2}"
 	) &
 

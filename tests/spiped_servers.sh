@@ -59,15 +59,15 @@ setup_spiped_decryption_server () {
 
 	# Start backend server (if desired).
 	if [ ! "${use_nc}" -eq 0 ]; then
-		${nc_server_binary} ${dst_sock} ${nc_output} ${nc_bps} &
+		${nc_server_binary} "${dst_sock}" "${nc_output}" "${nc_bps}" &
 	fi
 
 	# Start spiped to connect middle port to backend.
 	${this_c_valgrind_cmd}			\
-	${this_spiped_cmd} -d			\
-		-s ${mid_sock}			\
-		-t ${dst_sock}			\
-		-p ${s_basename}-spiped-d.pid	\
+	"${this_spiped_cmd}" -d			\
+		-s "${mid_sock}"		\
+		-t "${dst_sock}"		\
+		-p "${s_basename}-spiped-d.pid"	\
 		-k /dev/null -o 1
 	echo "$?" > "${c_exitfile}"
 }
@@ -79,10 +79,10 @@ setup_spiped_encryption_server () {
 	# Start spiped to connect source port to middle.
 	setup_check_variables "setup_spiped_encryption_server"
 	${c_valgrind_cmd}			\
-	${spiped_binary} -e			\
-		-s ${src_sock}			\
-		-t ${mid_sock}			\
-		-p ${s_basename}-spiped-e.pid	\
+	"${spiped_binary}" -e			\
+		-s "${src_sock}"		\
+		-t "${mid_sock}"		\
+		-p "${s_basename}-spiped-e.pid"	\
 		-k /dev/null -o 1
 	echo "$?" > "${c_exitfile}"
 }
@@ -91,13 +91,13 @@ setup_spiped_encryption_server () {
 # Stops the various servers.
 servers_stop() {
 	# Signal spiped servers to stop
-	if [ -e ${s_basename}-spiped-e.pid ]; then
-		kill "$(cat ${s_basename}-spiped-e.pid)"
-		rm ${s_basename}-spiped-e.pid
+	if [ -e "${s_basename}-spiped-e.pid" ]; then
+		kill "$(cat "${s_basename}-spiped-e.pid")"
+		rm "${s_basename}-spiped-e.pid"
 	fi
-	if [ -e ${s_basename}-spiped-d.pid ]; then
-		kill "$(cat ${s_basename}-spiped-d.pid)"
-		rm ${s_basename}-spiped-d.pid
+	if [ -e "${s_basename}-spiped-d.pid" ]; then
+		kill "$(cat "${s_basename}-spiped-d.pid")"
+		rm "${s_basename}-spiped-d.pid"
 	fi
 
 	# Give servers a chance to stop without fuss.
@@ -105,20 +105,20 @@ servers_stop() {
 
 	# Waiting for servers to stop
 	while has_pid "spiped -e -s ${src_sock}" ; do
-		if [ ${VERBOSE} -ne 0 ]; then
+		if [ "${VERBOSE}" -ne 0 ]; then
 			echo "Waiting to stop: spiped -e" 1>&2
 		fi
 		sleep 1
 	done
 	while has_pid "spiped -d -s ${mid_sock}" ; do
-		if [ ${VERBOSE} -ne 0 ]; then
+		if [ "${VERBOSE}" -ne 0 ]; then
 			echo "Waiting to stop: spiped -d" 1>&2
 		fi
 		sleep 1
 	done
 	if [ -n "${nc_server_binary+set}" ]; then
 		while has_pid "${nc_server_binary} ${dst_sock}" ; do
-			if [ ${VERBOSE} -ne 0 ]; then
+			if [ "${VERBOSE}" -ne 0 ]; then
 				echo "Waiting to stop: ncat" 1>&2
 			fi
 			sleep 1

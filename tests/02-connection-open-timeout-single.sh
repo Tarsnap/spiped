@@ -21,8 +21,8 @@ scenario_cmd() {
 	setup_check_variables "open 2 seconds close"
 	(
 		( echo "" ; sleep 2 ) |		\
-			 ${nc_client_binary} ${src_sock}
-		echo $? > ${c_exitfile}
+			 ${nc_client_binary} "${src_sock}"
+		echo $? > "${c_exitfile}"
 		touch "${flag_1}"
 	) &
 	wait_for_file "${flag_1}"
