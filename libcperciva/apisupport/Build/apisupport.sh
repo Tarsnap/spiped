@@ -35,9 +35,9 @@ feature() {
 	printf "Checking if compiler supports %s %s feature..."		\
 	    "$PLATFORM" "$FEATURE" 1>&2
 	for API_CFLAGS in "$@"; do
-		if ${CC} ${CFLAGS} ${CFLAGS_HARDCODED} ${API_CFLAGS}	\
-		    "${feature_filename}" ${LDADD_EXTRA} ${EXTRALIB}	\
-		    2>>${outcc}; then
+		if ${CC} ${CPPFLAGS} ${CFLAGS} ${CFLAGS_HARDCODED}	\
+		    ${API_CFLAGS} "${feature_filename}" ${LDADD_EXTRA}	\
+		    ${EXTRALIB}	2>>${outcc}; then
 			rm -f a.out
 			break;
 		fi
