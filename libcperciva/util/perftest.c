@@ -27,9 +27,9 @@
 int
 perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
     size_t nbytes_warmup, int cputime,
-    int init_func(void * cookie, uint8_t * buf, size_t buflen),
-    int func(void * cookie, uint8_t * buf, size_t buflen, size_t num_buffers),
-    int clean_func(void * cookie), void * cookie)
+    int init_func(void *, uint8_t *, size_t),
+    int func(void *, uint8_t *, size_t, size_t),
+    int clean_func(void *), void * cookie)
 {
 	uint8_t * buf;
 	struct timeval begin, end;

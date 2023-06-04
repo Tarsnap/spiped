@@ -2,7 +2,7 @@
 
 ### Find script directory and load helper functions.
 scriptdir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
-. ${scriptdir}/shared_test_functions.sh
+. "${scriptdir}/shared_test_functions.sh"
 
 
 ### Project-specific constants and setup
@@ -26,17 +26,17 @@ dnsthread_resolve=${scriptdir}/../tests/dnsthread-resolve/dnsthread-resolve
 system_spiped_binary=$( find_system spiped )
 
 # Check for required commands.
-if ! command -v ${spiped_binary} >/dev/null 2>&1; then
+if ! command -v "${spiped_binary}" >/dev/null 2>&1; then
 	echo "spiped not detected; did you forget to run 'make all'?"
 	exit 1
 fi
-if ! command -v ${spipe_binary} >/dev/null 2>&1; then
+if ! command -v "${spipe_binary}" >/dev/null 2>&1; then
 	echo "spiped not detected; did you forget to run 'make all'?"
 	exit 1
 fi
 
 # Functions to help start and stop servers
-. ${scriptdir}/spiped_servers.sh
+. "${scriptdir}/spiped_servers.sh"
 
 
 ### Run tests using project-specific constants

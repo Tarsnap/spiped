@@ -21,7 +21,7 @@ if [ "$#" -ne 3 ]; then
 fi
 
 # Set up directories
-cd ${D}
+cd "${D}"
 SUBDIR_DEPTH=$(${MAKEBSD} -v SUBDIR_DEPTH)
 LIBCPERCIVA_DIR=$(${MAKEBSD} -v LIBCPERCIVA_DIR)
 
@@ -31,27 +31,27 @@ LIBCPERCIVA_DIR=$(${MAKEBSD} -v LIBCPERCIVA_DIR)
 if [ -n "${LIBCPERCIVA_DIR}" ]; then
 	if [ -e "${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh" ]; then
 		command -p sh						\
-		    ${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh	\
-		    "${PATH}" --all > ${SUBDIR_DEPTH}/cpusupport-config.h
+		    "${LIBCPERCIVA_DIR}/cpusupport/Build/cpusupport.sh"	\
+		    "${PATH}" --all > "${SUBDIR_DEPTH}/cpusupport-config.h"
 	fi
 	if [ -e "${LIBCPERCIVA_DIR}/apisupport/Build/apisupport.sh" ]; then
 		command -p sh						\
-		    ${LIBCPERCIVA_DIR}/apisupport/Build/apisupport.sh	\
-		    "${PATH}" --all > ${SUBDIR_DEPTH}/apisupport-config.h
+		    "${LIBCPERCIVA_DIR}/apisupport/Build/apisupport.sh"	\
+		    "${PATH}" --all > "${SUBDIR_DEPTH}/apisupport-config.h"
 	fi
 fi
 
 copyvar() {
 	var=$1
-	if [ -n "$(${MAKEBSD} -v $var)" ]; then
+	if [ -n "$(${MAKEBSD} -v "$var")" ]; then
 		printf "%s=" "$var" >> $OUT
-		${MAKEBSD} -v $var >> $OUT
+		${MAKEBSD} -v "$var" >> $OUT
 	fi
 }
 
 addvar_lib() {
 	var=$1
-	varval=$(${MAKEBSD} -v $var)
+	varval=$(${MAKEBSD} -v "$var")
 	if [ -n "${varval}" ]; then
 		printf "%s=lib%s.a\n" "$var" "${varval}" >> $OUT
 	fi
@@ -59,7 +59,7 @@ addvar_lib() {
 
 add_makefile_prog() {
 	# Get a copy of the default Makefile.prog
-	cp ${SUBDIR_DEPTH}/release-tools/Makefile.prog prog.tmp
+	cp "${SUBDIR_DEPTH}/release-tools/Makefile.prog" prog.tmp
 
 	# Remove the "install:" (if applicable)
 	if [ "$(${MAKEBSD} -v NOINST)" = "1" ]; then
@@ -81,7 +81,7 @@ add_makefile_prog() {
 get_cpusupport_cflags() {
 	src=$1
 
-	str=$(grep 'CPUSUPPORT CFLAGS:' ${src} | cut -f 2- -d :)
+	str=$(grep 'CPUSUPPORT CFLAGS:' "${src}" | cut -f 2- -d :)
 	# ${str} must be unquoted.
 	for X in ${str}; do
 		printf " \${CFLAGS_%s}" "$X"
@@ -91,7 +91,7 @@ get_cpusupport_cflags() {
 get_apisupport_cflags() {
 	src=$1
 
-	str=$(grep 'APISUPPORT CFLAGS:' ${src} | cut -f 2- -d :)
+	str=$(grep 'APISUPPORT CFLAGS:' "${src}" | cut -f 2- -d :)
 	# ${str} must be unquoted.
 	for X in ${str}; do
 		printf " \${CFLAGS_%s}" "$X"
@@ -112,18 +112,18 @@ add_object_files() {
 
 	# Generate build instructions for each object
 	for F in $OBJ; do
-		S=$(${MAKEBSD} source-${F})
-		CF_MANUAL=$(${MAKEBSD} -v CFLAGS."$(basename ${S})")
-		CF_CPUSUPPORT=$(get_cpusupport_cflags ${S})
-		CF_APISUPPORT=$(get_apisupport_cflags ${S})
+		S=$(${MAKEBSD} source-"${F}")
+		CF_MANUAL=$(${MAKEBSD} -v CFLAGS."$(basename "${S}")")
+		CF_CPUSUPPORT=$(get_cpusupport_cflags "${S}")
+		CF_APISUPPORT=$(get_apisupport_cflags "${S}")
 		CF=$(echo "${CF_CPUSUPPORT} ${CF_APISUPPORT} ${CF_MANUAL}" | \
 		    sed 's/^ //' | sed 's/ $//')
 		IDIRS=$(${MAKEBSD} -v IDIRS)
 		# Get the build dependencies, then remove newlines, condense
 		# multiple spaces, remove line continuations, and replace the
 		# final space with a newline.
-		${CPP} ${S} ${CPP_ARGS_FIXED} ${CF_MANUAL} ${IDIRS}	\
-		    -MT ${F} |	\
+		${CPP} "${S}" ${CPP_ARGS_FIXED} ${CF_MANUAL} ${IDIRS}	\
+		    -MT "${F}" |	\
 		    tr '\n' ' ' |					\
 		    tr -s ' '	|					\
 		    sed -e 's| \\ | |g' |				\
@@ -158,7 +158,7 @@ printf "RELATIVE_DIR=%s\n" "$D" >> $OUT
 
 # Add all, install, clean, $PROG
 if [ -n "$(${MAKEBSD} -v LIB)" ]; then
-	cat ${SUBDIR_DEPTH}/release-tools/Makefile.lib >> $OUT
+	cat "${SUBDIR_DEPTH}/release-tools/Makefile.lib" >> $OUT
 elif [ -n "$(${MAKEBSD} -v SRCS)" ]; then
 	copyvar LIBALL
 	add_makefile_prog
@@ -206,5 +206,5 @@ if grep -q "^clean_extra:" Makefile.BSD ; then
 fi
 
 # Clean up -config.h files
-rm -f ${SUBDIR_DEPTH}/cpusupport-config.h
-rm -f ${SUBDIR_DEPTH}/apisupport-config.h
+rm -f "${SUBDIR_DEPTH}/cpusupport-config.h"
+rm -f "${SUBDIR_DEPTH}/apisupport-config.h"

@@ -19,8 +19,8 @@ run_test() {
 	# Open and close a connection.
 	setup_check_variables "open close"
 	(
-		echo "" | ${nc_client_binary} ${src_sock}
-		echo $? > ${c_exitfile}
+		echo "" | ${nc_client_binary} "${src_sock}"
+		echo $? > "${c_exitfile}"
 	)
 
 	# Wait for server(s) to quit.
@@ -44,9 +44,9 @@ scenario_cmd() {
 	run_test
 
 	# Clean up left-over sockets
-	rm ${src_sock}
-	rm ${mid_sock}
-	rm ${dst_sock}
+	rm "${src_sock}"
+	rm "${mid_sock}"
+	rm "${dst_sock}"
 
 	# Restore the network sockets
 	src_sock=${src_sock_orig}

@@ -14,29 +14,29 @@ sendfile=${scriptdir}/shared_test_functions.sh
 ### Actual command
 scenario_cmd() {
 	# Set up infrastructure.
-	setup_spiped_decryption_server ${ncat_output}
+	setup_spiped_decryption_server "${ncat_output}"
 	setup_spiped_encryption_server
 
 	# Open and close a connection.
 	setup_check_variables "spiped send"
 	(
-		${nc_client_binary} ${src_sock} < ${sendfile}
-		echo $? > ${c_exitfile}
+		${nc_client_binary} "${src_sock}" < "${sendfile}"
+		echo $? > "${c_exitfile}"
 	)
 
 	# Wait for server(s) to quit.
 	servers_stop
 
 	setup_check_variables "spiped send output"
-	if ! cmp -s ${ncat_output} ${sendfile}; then
-		if [ ${VERBOSE} -ne 0 ]; then
+	if ! cmp -s "${ncat_output}" "${sendfile}"; then
+		if [ "${VERBOSE}" -ne 0 ]; then
 			printf "Test output does not match input;" 1>&2
 			printf -- " output is:\n----\n" 1>&2
-			cat ${ncat_output} 1>&2
+			cat "${ncat_output}" 1>&2
 			printf -- "----\n" 1>&2
 		fi
 		echo 1
 	else
 		echo 0
-	fi > ${c_exitfile}
+	fi > "${c_exitfile}"
 }
