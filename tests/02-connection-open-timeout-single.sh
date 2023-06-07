@@ -25,7 +25,7 @@ scenario_cmd() {
 		echo $? > "${c_exitfile}"
 		touch "${flag_1}"
 	) &
-	wait_for_file "${flag_1}"
+	wait_while test ! -e "${flag_1}"
 
 	# Wait for server(s) to quit.
 	servers_stop
