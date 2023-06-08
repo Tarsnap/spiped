@@ -100,37 +100,15 @@ servers_stop() {
 		rm "${s_basename}-spiped-d.pid"
 	fi
 
-	# Give servers a chance to stop without fuss.
-	sleep 1
-
 	# Waiting for servers to stop
-	while has_pid "spiped -e -s ${src_sock}" ; do
-		if [ "${VERBOSE}" -ne 0 ]; then
-			echo "Waiting to stop: spiped -e" 1>&2
-		fi
-		sleep 1
-	done
-	while has_pid "spiped -d -s ${mid_sock}" ; do
-		if [ "${VERBOSE}" -ne 0 ]; then
-			echo "Waiting to stop: spiped -d" 1>&2
-		fi
-		sleep 1
-	done
+	wait_while has_pid "spiped -e -s ${src_sock}"
+	wait_while has_pid "spiped -d -s ${mid_sock}"
 	if [ -n "${nc_server_binary+set}" ]; then
-		while has_pid "${nc_server_binary} ${dst_sock}" ; do
-			if [ "${VERBOSE}" -ne 0 ]; then
-				echo "Waiting to stop: ncat" 1>&2
-			fi
-			sleep 1
-		done
+		wait_while has_pid "${nc_server_binary} ${dst_sock}"
 	fi
 
 	# Give valgrind a chance to finish writing files
 	if [ -n "${c_valgrind_cmd}" ]; then
-		if [ "${VERBOSE}" -ne 0 ]; then
-			printf "Giving extra time for valgrind to write"
-			printf " the logfile\n" 1>&2
-		fi
-		sleep 1
+		wait_while valgrind_incomplete
 	fi
 }
