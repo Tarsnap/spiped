@@ -6,6 +6,7 @@ TESTS=	perftests/recv-zeros			\
 	perftests/send-zeros			\
 	perftests/standalone-enc		\
 	tests/dnsthread-resolve			\
+	tests/msleep				\
 	tests/nc-client				\
 	tests/nc-server				\
 	tests/pthread_create_blocking_np	\

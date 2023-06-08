@@ -15,6 +15,7 @@ perftests/recv-zeros/recv-zeros
 perftests/send-zeros/send-zeros
 perftests/standalone-enc/test_standalone_enc
 tests/dnsthread-resolve/dnsthread-resolve
+tests/msleep/msleep
 tests/nc-client/nc-client
 tests/nc-server/nc-server
 tests/pthread_create_blocking_np/test_pthread_create_blocking_np
