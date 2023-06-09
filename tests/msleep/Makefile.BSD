@@ -1,0 +1,16 @@
+# Program name.
+PROG=	msleep
+
+# Don't install it.
+NOINST	=	1
+
+# Useful relative directory
+LIBCPERCIVA_DIR	=	../../libcperciva
+
+# Main test code
+SRCS=	main.c
+
+# libcperciva includes
+IDIRS	+=	-I ${LIBCPERCIVA_DIR}/util
+
+.include <bsd.prog.mk>
