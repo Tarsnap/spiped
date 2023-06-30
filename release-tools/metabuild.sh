@@ -144,6 +144,7 @@ else
 	copyvar PROG
 fi
 copyvar MAN1
+
 # SRCS is trickier to handle, as we need to remove any -config.h from the list.
 if [ -n "$(${MAKEBSD} -v SRCS)" ]; then
 	printf "SRCS=" >> $OUT
