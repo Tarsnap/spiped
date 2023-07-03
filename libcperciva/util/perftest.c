@@ -22,7 +22,9 @@
  * where ${buffer} is large enough to hold the maximum buffer size.  Print
  * the time and speed of processing each buffer size.  ${init_func} and
  * ${clean_func} may be NULL.  If ${init_func} has completed successfully,
- * then ${clean_func} will be called if there is a subsequent error.
+ * then ${clean_func} will be called if there is a subsequent error.  If
+ * ${nbytes_warmup} is 0, then don't perform an initial ${init_func} &&
+ * ${func} && ${clean_func}.
  */
 int
 perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
@@ -60,13 +62,15 @@ perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
 	}
 
 	/* Warm up. */
-	nbuffers_warmup = nbytes_warmup / max_buflen;
-	if (init_func && init_func(cookie, buf, max_buflen))
-		goto err2;
-	if (func(cookie, buf, max_buflen, nbuffers_warmup))
-		goto err3;
-	if (clean_func && clean_func(cookie))
-		goto err2;
+	if (nbytes_warmup > 0) {
+		nbuffers_warmup = nbytes_warmup / max_buflen;
+		if (init_func && init_func(cookie, buf, max_buflen))
+			goto err2;
+		if (func(cookie, buf, max_buflen, nbuffers_warmup))
+			goto err3;
+		if (clean_func && clean_func(cookie))
+			goto err2;
+	}
 
 	/* Run operations. */
 	for (i = 0; i < nsizes; i++) {
