@@ -85,7 +85,7 @@ callback_snc_response(void * cookie, uint8_t * buf, size_t buflen, int sock)
 		goto err0;
 	}
 
-	/* Echo to the client (if applicable).  */
+	/* Echo to the client (if applicable). */
 	if ((C->bps > 0) && (write_bps(sock, buf, buflen, C->bps)))
 		goto err0;
 
