@@ -1,27 +1,27 @@
 # Development tools
-devel-tools/
+/devel-tools/
 # Build system configuration
-apisupport-config.h
-cflags-filter.sh
-cpusupport-config.h
-posix-flags.sh
+/apisupport-config.h
+/cflags-filter.sh
+/cpusupport-config.h
+/posix-flags.sh
 # Other directories
 *.o
-liball/liball.a
-spipe/spipe
-spiped/spiped
+/liball/liball.a
+/spipe/spipe
+/spiped/spiped
 # Test binaries
-perftests/recv-zeros/recv-zeros
-perftests/send-zeros/send-zeros
-perftests/standalone-enc/test_standalone_enc
-tests/dnsthread-resolve/dnsthread-resolve
-tests/msleep/msleep
-tests/nc-client/nc-client
-tests/nc-server/nc-server
-tests/pthread_create_blocking_np/test_pthread_create_blocking_np
-tests/pushbits/test_pushbits
-tests/valgrind/potential-memleaks
+/perftests/recv-zeros/recv-zeros
+/perftests/send-zeros/send-zeros
+/perftests/standalone-enc/test_standalone_enc
+/tests/dnsthread-resolve/dnsthread-resolve
+/tests/msleep/msleep
+/tests/nc-client/nc-client
+/tests/nc-server/nc-server
+/tests/pthread_create_blocking_np/test_pthread_create_blocking_np
+/tests/pushbits/test_pushbits
+/tests/valgrind/potential-memleaks
 # Test output
-perftests/standalone-enc/bench.*
-tests-output/
-tests-valgrind/
+/perftests/standalone-enc/bench.*
+/tests-output/
+/tests-valgrind/
