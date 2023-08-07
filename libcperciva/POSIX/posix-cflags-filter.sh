@@ -9,15 +9,15 @@ if [ -z "${CC}" ]; then
 	exit 1
 fi
 if ! [ "${PATH}" = "$1" ]; then
-	echo "WARNING: POSIX violation: $SHELL's command -p resets \$PATH" 1>&2
+	echo "WARNING: POSIX violation: ${SHELL}'s command -p resets \$PATH" 1>&2
 	PATH=$1
 fi
 
 # Find directory of this script and the source files
 D=$(dirname "$0")
 
-if ! ${CC} -O2 "$D/posix-cflags-filter.c" 2>/dev/null; then
-	if ${CC} "$D/posix-cflags-filter.c" 2>/dev/null; then
+if ! ${CC} -O2 "${D}/posix-cflags-filter.c" 2>/dev/null; then
+	if ${CC} "${D}/posix-cflags-filter.c" 2>/dev/null; then
 		echo 'CFLAGS_FILTERED=""'
 		echo 'for OPT in $CFLAGS; do'
 		echo '	if [ "$OPT" = "-O2" ]; then'
