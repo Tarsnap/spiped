@@ -16,7 +16,7 @@ MAN	=
 
 .if !defined(NOLIBALL)
 # Link everything to liball.a, unless they specifically ask not to use it.
-LIBALL	=	${SUBDIR_DEPTH}/liball/liball.a
+LIBALL	=	${SUBDIR_DEPTH}/liball/liball.a ${SUBDIR_DEPTH}/liball/optional_mutex_normal/liball_optional_mutex_normal.a
 LDADD	+=	${LIBALL}
 DPADD	+=	${LIBALL}
 .endif
