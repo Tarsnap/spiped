@@ -21,7 +21,7 @@
 #define MAXOUTSIZE 16384
 
 /* Cookie for proto_pipe */
-struct pipe {
+struct pipeinfo {
 	struct proto_keys * k;
 	pthread_t enc_thr;
 	pthread_t output_thr;
@@ -34,16 +34,16 @@ struct pipe {
 static int
 pipe_callback_status(void * cookie)
 {
-	struct pipe * pipe = cookie;
+	struct pipeinfo * pipeinfo = cookie;
 
 	/* Was there an error? */
-	if (pipe->status) {
-		warn0("proto_pipe callback status: %i", pipe->status);
+	if (pipeinfo->status) {
+		warn0("proto_pipe callback status: %i", pipeinfo->status);
 		return (-1);
 	}
 
 	/* We've finished. */
-	pipe->done = 1;
+	pipeinfo->done = 1;
 
 	/* Success! */
 	return (0);
@@ -53,18 +53,19 @@ pipe_callback_status(void * cookie)
 static void *
 pipe_enc(void * cookie)
 {
-	struct pipe * pipe = cookie;
+	struct pipeinfo * pipeinfo = cookie;
 	void * cancel_cookie;
 
 	/* Create the pipe. */
-	if ((cancel_cookie = proto_pipe(pipe->in[1], pipe->out[0], 0,
-	    pipe->k, &pipe->status, pipe_callback_status, pipe)) == NULL) {
+	if ((cancel_cookie = proto_pipe(pipeinfo->in[1], pipeinfo->out[0], 0,
+	    pipeinfo->k, &pipeinfo->status, pipe_callback_status, pipeinfo))
+	    == NULL) {
 		warn0("proto_pipe");
 		goto err0;
 	}
 
 	/* Let events happen. */
-	if (events_spin(&pipe->done))
+	if (events_spin(&pipeinfo->done))
 		warnp("events_spin");
 
 	/* Clean up the pipe. */
@@ -75,11 +76,11 @@ err0:
 	return (NULL);
 }
 
-/* Drain bytes from pipe->out[1] as quickly as possible. */
+/* Drain bytes from pipeinfo->out[1] as quickly as possible. */
 static void *
 pipe_output(void * cookie)
 {
-	struct pipe * pipe = cookie;
+	struct pipeinfo * pipeinfo = cookie;
 	uint8_t mybuf[MAXOUTSIZE];
 	ssize_t readlen;
 
@@ -90,7 +91,8 @@ pipe_output(void * cookie)
 		 * encrypted packet, PCRYPT_ESZ in proto_crypt.h), but it's
 		 * not impossible to have more than that.
 		 */
-		if ((readlen = read(pipe->out[1], mybuf, MAXOUTSIZE)) == -1) {
+		if ((readlen = read(pipeinfo->out[1], mybuf, MAXOUTSIZE))
+		    == -1) {
 			warnp("read");
 			goto err0;
 		}
@@ -104,7 +106,7 @@ err0:
 static int
 pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 {
-	struct pipe * pipe = cookie;
+	struct pipeinfo * pipeinfo = cookie;
 	uint8_t kbuf[64];
 	size_t i;
 	int rc;
@@ -114,15 +116,15 @@ pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 
 	/* Set up encryption key. */
 	memset(kbuf, 0, 64);
-	if ((pipe->k = mkkeypair(kbuf)) == NULL)
+	if ((pipeinfo->k = mkkeypair(kbuf)) == NULL)
 		goto err0;
 
 	/* Create socket pairs for the input and output. */
-	if (socketpair(AF_UNIX, SOCK_STREAM, 0, pipe->in)) {
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, pipeinfo->in)) {
 		warnp("socketpair");
 		goto err0;
 	}
-	if (socketpair(AF_UNIX, SOCK_STREAM, 0, pipe->out)) {
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, pipeinfo->out)) {
 		warnp("socketpair");
 		goto err0;
 	}
@@ -132,16 +134,16 @@ pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 		buf[i] = (uint8_t)(i & 0xff);
 
 	/* We haven't finished the event loop. */
-	pipe->done = 0;
+	pipeinfo->done = 0;
 
 	/* Create the pipe threads. */
-	if ((rc = pthread_create_blocking_np(&pipe->output_thr, NULL,
-	    pipe_output, pipe))) {
+	if ((rc = pthread_create_blocking_np(&pipeinfo->output_thr, NULL,
+	    pipe_output, pipeinfo))) {
 		warn0("pthread_create: %s", strerror(rc));
 		goto err0;
 	}
-	if ((rc = pthread_create_blocking_np(&pipe->enc_thr, NULL,
-	    pipe_enc, pipe))) {
+	if ((rc = pthread_create_blocking_np(&pipeinfo->enc_thr, NULL,
+	    pipe_enc, pipeinfo))) {
 		warn0("pthread_create: %s", strerror(rc));
 		goto err0;
 	}
@@ -157,13 +159,13 @@ err0:
 static int
 pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 {
-	struct pipe * pipe = cookie;
+	struct pipeinfo * pipeinfo = cookie;
 	size_t i;
 	int rc;
 
 	/* Send bytes. */
 	for (i = 0; i < nreps; i++) {
-		if (noeintr_write(pipe->in[0], buf, buflen)
+		if (noeintr_write(pipeinfo->in[0], buf, buflen)
 		    != (ssize_t)buflen) {
 			warnp("network_write");
 			goto err0;
@@ -171,23 +173,23 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	}
 
 	/* We've finished writing stuff. */
-	if (shutdown(pipe->in[0], SHUT_WR)) {
+	if (shutdown(pipeinfo->in[0], SHUT_WR)) {
 		warnp("shutdown");
 		goto err0;
 	}
 
 	/* Wait for threads to finish. */
-	if ((rc = pthread_join(pipe->enc_thr, NULL))) {
+	if ((rc = pthread_join(pipeinfo->enc_thr, NULL))) {
 		warn0("pthread_join: %s", strerror(rc));
 		goto err0;
 	}
-	if ((rc = pthread_join(pipe->output_thr, NULL))) {
+	if ((rc = pthread_join(pipeinfo->output_thr, NULL))) {
 		warn0("pthread_join: %s", strerror(rc));
 		goto err0;
 	}
 
 	/* Clean up. */
-	if (close(pipe->out[0])) {
+	if (close(pipeinfo->out[0])) {
 		warnp("close");
 		goto err0;
 	}
@@ -203,10 +205,10 @@ err0:
 static int
 pipe_cleanup(void * cookie)
 {
-	struct pipe * pipe = cookie;
+	struct pipeinfo * pipeinfo = cookie;
 
 	/* Clean up. */
-	proto_crypt_free(pipe->k);
+	proto_crypt_free(pipeinfo->k);
 
 	/* Success! */
 	return (0);
@@ -221,7 +223,7 @@ int
 standalone_pipe_socketpair_one(const size_t * perfsizes, size_t num_perf,
     size_t nbytes_perftest, size_t nbytes_warmup)
 {
-	struct pipe pipe_actual;
+	struct pipeinfo pipeinfo_actual;
 
 	/* Report what we're doing. */
 	printf("Testing one proto_pipe() over a socketpair\n");
@@ -229,7 +231,7 @@ standalone_pipe_socketpair_one(const size_t * perfsizes, size_t num_perf,
 	/* Time the function. */
 	if (perftest_buffers(nbytes_perftest, perfsizes, num_perf,
 	    nbytes_warmup, 0, pipe_init, pipe_func, pipe_cleanup,
-	    &pipe_actual)) {
+	    &pipeinfo_actual)) {
 		warn0("perftest_buffers");
 		goto err0;
 	}
