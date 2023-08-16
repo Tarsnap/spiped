@@ -192,12 +192,6 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 		goto err0;
 	}
 
-	/* Clean up. */
-	if (close(pipeinfo->out[W])) {
-		warnp("close");
-		goto err0;
-	}
-
 	/* Success! */
 	return (0);
 
@@ -211,11 +205,33 @@ pipe_cleanup(void * cookie)
 {
 	struct pipeinfo * pipeinfo = cookie;
 
-	/* Clean up. */
+	/* Clean up encryption key. */
 	proto_crypt_free(pipeinfo->k);
+
+	/* Clean up sockets. */
+	if (close(pipeinfo->in[W])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(pipeinfo->in[R])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(pipeinfo->out[W])) {
+		warnp("close");
+		goto err0;
+	}
+	if (close(pipeinfo->out[R])) {
+		warnp("close");
+		goto err0;
+	}
 
 	/* Success! */
 	return (0);
+
+err0:
+	/* Failure! */
+	return (-1);
 }
 
 /**
