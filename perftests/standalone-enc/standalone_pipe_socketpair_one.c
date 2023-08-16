@@ -20,6 +20,10 @@
 /* The smallest this can be is PCRYPT_ESZ (which is 1060). */
 #define MAXOUTSIZE 16384
 
+/* Ends of socketpairs (convention, not a firm requirement). */
+#define R 0
+#define W 1
+
 /* Cookie for proto_pipe */
 struct pipeinfo {
 	struct proto_keys * k;
@@ -57,7 +61,7 @@ pipe_enc(void * cookie)
 	void * cancel_cookie;
 
 	/* Create the pipe. */
-	if ((cancel_cookie = proto_pipe(pipeinfo->in[1], pipeinfo->out[0], 0,
+	if ((cancel_cookie = proto_pipe(pipeinfo->in[R], pipeinfo->out[W], 0,
 	    pipeinfo->k, &pipeinfo->status, pipe_callback_status, pipeinfo))
 	    == NULL) {
 		warn0("proto_pipe");
@@ -76,7 +80,7 @@ err0:
 	return (NULL);
 }
 
-/* Drain bytes from pipeinfo->out[1] as quickly as possible. */
+/* Drain bytes from pipeinfo->out[R] as quickly as possible. */
 static void *
 pipe_output(void * cookie)
 {
@@ -91,7 +95,7 @@ pipe_output(void * cookie)
 		 * encrypted packet, PCRYPT_ESZ in proto_crypt.h), but it's
 		 * not impossible to have more than that.
 		 */
-		if ((readlen = read(pipeinfo->out[1], mybuf, MAXOUTSIZE))
+		if ((readlen = read(pipeinfo->out[R], mybuf, MAXOUTSIZE))
 		    == -1) {
 			warnp("read");
 			goto err0;
@@ -165,7 +169,7 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 
 	/* Send bytes. */
 	for (i = 0; i < nreps; i++) {
-		if (noeintr_write(pipeinfo->in[0], buf, buflen)
+		if (noeintr_write(pipeinfo->in[W], buf, buflen)
 		    != (ssize_t)buflen) {
 			warnp("network_write");
 			goto err0;
@@ -173,7 +177,7 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	}
 
 	/* We've finished writing stuff. */
-	if (shutdown(pipeinfo->in[0], SHUT_WR)) {
+	if (shutdown(pipeinfo->in[W], SHUT_WR)) {
 		warnp("shutdown");
 		goto err0;
 	}
@@ -189,7 +193,7 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	}
 
 	/* Clean up. */
-	if (close(pipeinfo->out[0])) {
+	if (close(pipeinfo->out[W])) {
 		warnp("close");
 		goto err0;
 	}
