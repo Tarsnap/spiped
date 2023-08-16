@@ -1,9 +1,10 @@
 # Should be sourced by `command -p sh path/to/apisupport.sh "$PATH"` from
 # within a Makefile.
 if ! [ "${PATH}" = "$1" ]; then
-	echo "WARNING: POSIX violation: $SHELL's command -p resets \$PATH" 1>&2
+	echo "WARNING: POSIX violation: ${SHELL}'s command -p resets \$PATH" 1>&2
 	PATH=$1
 fi
+
 # Standard output should be written to apisupport-config.h, which is both a
 # C header file defining APISUPPORT_PLATFORM_FEATURE macros and sourceable sh
 # code which sets CFLAGS_PLATFORM_FEATURE environment variables.
@@ -33,17 +34,17 @@ feature() {
 
 	# Check if we can compile this feature (and any required arguments).
 	printf "Checking if compiler supports %s %s feature..."		\
-	    "$PLATFORM" "$FEATURE" 1>&2
+	    "${PLATFORM}" "${FEATURE}" 1>&2
 	for API_CFLAGS in "$@"; do
 		if ${CC} ${CPPFLAGS} ${CFLAGS} ${CFLAGS_HARDCODED}	\
 		    ${API_CFLAGS} "${feature_filename}" ${LDADD_EXTRA}	\
-		    ${EXTRALIB}	2>>${outcc}; then
+		    ${EXTRALIB}	2>>"${outcc}"; then
 			rm -f a.out
 			break;
 		fi
 		API_CFLAGS=NOTSUPPORTED;
 	done
-	case $API_CFLAGS in
+	case ${API_CFLAGS} in
 	NOTSUPPORTED)
 		echo " no" 1>&2
 		;;
@@ -52,7 +53,7 @@ feature() {
 		echo "#define APISUPPORT_${PLATFORM}_${FEATURE} 1"
 		;;
 	*)
-		echo " yes, via $API_CFLAGS" 1>&2
+		echo " yes, via ${API_CFLAGS}" 1>&2
 		echo "#define APISUPPORT_${PLATFORM}_${FEATURE} 1"
 		echo "#ifdef apisupport_dummy"
 		echo "export CFLAGS_${PLATFORM}_${FEATURE}=\"${API_CFLAGS}\""

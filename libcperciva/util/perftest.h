@@ -17,7 +17,9 @@
  * where ${buffer} is large enough to hold the maximum buffer size.  Print
  * the time and speed of processing each buffer size.  ${init_func} and
  * ${clean_func} may be NULL.  If ${init_func} has completed successfully,
- * then ${clean_func} will be called if there is a subsequent error.
+ * then ${clean_func} will be called if there is a subsequent error.  If
+ * ${nbytes_warmup} is 0, then don't perform an initial ${init_func} &&
+ * ${func} && ${clean_func}.
  */
 int perftest_buffers(size_t, const size_t *, size_t, size_t, int,
     int (*)(void *, uint8_t *, size_t),

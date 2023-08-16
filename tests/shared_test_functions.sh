@@ -17,6 +17,18 @@
 #     scenario_cmd()
 # function which was defined in that file.
 #
+# Functions which are available to other scripts as a "public API" are:
+# - has_pid(cmd):
+#   Look for a ${cmd} in $(ps).
+# - wait_while(func):
+#   Wait until ${func} returns non-zero.
+# - setup_check_variables(description, check_prev):
+#   Set up the below variables.
+# - expected_exitcode(expected, actual):
+#   Check if ${expected} matches ${actual}.
+# - run_scenarios():
+#   Run scenarios in the test directory.
+#
 ### Variables
 #
 # Wherever possible, this suite uses local variables and
@@ -27,6 +39,7 @@
 #       valgrind log files.
 # - s_count: this is the count of the scenario's checks (so that
 #       each check can have distinct files).
+# - s_count_str: ${s_count} expressed as a two-digit string.
 # - s_retval: this is the overall exit code of the scenario.
 # - c_exitfile: this contains the exit code of each check.
 # - c_valgrind_min: this is the minimum value of USE_VALGRIND
@@ -161,12 +174,12 @@ setup_check_variables() {
 	fi
 
 	# Set up the "exit" file.
-	count_str=$(printf "%02d" "${s_count}")
-	c_exitfile="${s_basename}-${count_str}.exit"
+	s_count_str=$(printf "%02d" "${s_count}")
+	c_exitfile="${s_basename}-${s_count_str}.exit"
 
 	# Write the "description" file.
 	printf "%s\n" "${description}" >				\
-		"${s_basename}-${count_str}.desc"
+		"${s_basename}-${s_count_str}.desc"
 
 	# Set up the valgrind command (or an empty string).
 	c_valgrind_cmd="$(valgrind_setup_cmd)"
@@ -205,7 +218,7 @@ notify_success_or_fail() {
 
 	# Bail if there's no exitfiles.
 	exitfiles=$(ls "${log_basename}"-*.exit) || true
-	if [ -z "$exitfiles" ]; then
+	if [ -z "${exitfiles}" ]; then
 		echo "FAILED" 1>&2
 		s_retval=1
 		return
@@ -216,7 +229,7 @@ notify_success_or_fail() {
 	skip_exitfiles=0
 
 	# Check each exitfile.
-	for exitfile in $(echo "$exitfiles" | sort); do
+	for exitfile in $(echo "${exitfiles}" | sort); do
 		ret=$(cat "${exitfile}")
 		total_exitfiles=$(( total_exitfiles + 1 ))
 		if [ "${ret}" -lt 0 ]; then
@@ -252,8 +265,8 @@ notify_success_or_fail() {
 	done
 
 	# Notify about skip or success.
-	if [ ${skip_exitfiles} -gt 0 ]; then
-		if [ ${skip_exitfiles} -eq ${total_exitfiles} ]; then
+	if [ "${skip_exitfiles}" -gt 0 ]; then
+		if [ "${skip_exitfiles}" -eq "${total_exitfiles}" ]; then
 			echo "SKIP!" 1>&2
 		else
 			echo "PARTIAL SUCCESS / SKIP!" 1>&2
@@ -321,8 +334,8 @@ run_scenarios() {
 		# want to allow it to echo values to stdout.
 		scenario_runner "${scenario}"
 		retval=$?
-		if [ ${retval} -gt 0 ]; then
-			exit ${retval}
+		if [ "${retval}" -gt 0 ]; then
+			exit "${retval}"
 		fi
 	done
 }
