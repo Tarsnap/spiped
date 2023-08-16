@@ -57,6 +57,21 @@ addvar_lib() {
 	fi
 }
 
+copyvar_LIBALL_optional_mutex() {
+	var=LIBALL
+	val=$(${MAKEBSD} -v LIBALL)
+	if [ -n "${val}" ]; then
+		# Replace optional_mutex_normal with pthread variant,
+		# if appropriate.
+		ldadd_req=$(${MAKEBSD} -v LDADD_REQ)
+		if [ "${ldadd_req#*-lpthread}" != "${ldadd_req}" ] ; then
+			val=$(echo "${val}" |				\
+			    sed 's/optional_mutex_normal/optional_mutex_pthread/g')
+		fi
+		printf "%s=%s\n" "${var}" "${val}" >> "${OUT}"
+	fi
+}
+
 add_makefile_prog() {
 	# Get a copy of the default Makefile.prog
 	cp "${SUBDIR_DEPTH}/release-tools/Makefile.prog" prog.tmp
@@ -161,7 +176,7 @@ printf "RELATIVE_DIR=%s\n" "${D}" >> "${OUT}"
 if [ -n "$(${MAKEBSD} -v LIB)" ]; then
 	cat "${SUBDIR_DEPTH}/release-tools/Makefile.lib" >> "${OUT}"
 elif [ -n "$(${MAKEBSD} -v SRCS)" ]; then
-	copyvar LIBALL
+	copyvar_LIBALL_optional_mutex
 	add_makefile_prog
 else
 	printf "\nall:\n\ttrue\n\nclean:\n\ttrue\n" >> "${OUT}"
