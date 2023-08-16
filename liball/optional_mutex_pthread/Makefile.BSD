@@ -1,0 +1,21 @@
+# Library name.
+LIB	=	all_optional_mutex_pthread
+
+# Don't install it.
+NOINST	=	1
+
+# Don't link to liball.a.
+NOLIBALL	=	1
+
+# Useful relative directories.
+LIBCPERCIVA_DIR	=	../../libcperciva
+
+# Handle optional_mutex (this cannot be part of liball).
+.PATH.c	:	${LIBCPERCIVA_DIR}/util
+SRCS	+=	optional_mutex.c
+IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
+
+# Required define.
+CFLAGS.optional_mutex.c=	-DOPTIONAL_MUTEX_PTHREAD_YES
+
+.include <bsd.prog.mk>
