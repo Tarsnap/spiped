@@ -26,11 +26,11 @@ static struct testcase {
 
 /* It's ok if "prev" and "next" are the same time. */
 #define CHECK_TIME(prev, next) do {					\
-		if (timeval_diff(prev, next) < 0) {			\
-			warn0(#prev " is after " #next);		\
-			goto err0;					\
-		}							\
-	} while (0)
+	if (timeval_diff(prev, next) < 0) {				\
+		warn0(#prev " is after " #next);			\
+		goto err0;						\
+	}								\
+} while (0)
 
 /* Each test. */
 struct info {
