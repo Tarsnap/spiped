@@ -6,7 +6,7 @@ IDIRS=-I../../libcperciva/util -I../../lib/util
 LDADD_REQ=-lpthread
 SUBDIR_DEPTH=../..
 RELATIVE_DIR=tests/pthread_create_blocking_np
-LIBALL=../../liball/liball.a
+LIBALL=../../liball/liball.a ../../liball/optional_mutex_pthread/liball_optional_mutex_pthread.a
 
 all:
 	if [ -z "$${HAVE_BUILD_FLAGS}" ]; then \

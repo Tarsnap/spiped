@@ -5,7 +5,7 @@ SRCS=main.c simple_server.c
 IDIRS=-I../../libcperciva/events -I../../libcperciva/external/queue -I../../libcperciva/network -I../../libcperciva/util -I../../lib/util
 SUBDIR_DEPTH=../..
 RELATIVE_DIR=tests/nc-server
-LIBALL=../../liball/liball.a
+LIBALL=../../liball/liball.a ../../liball/optional_mutex_normal/liball_optional_mutex_normal.a
 
 all:
 	if [ -z "$${HAVE_BUILD_FLAGS}" ]; then \

@@ -7,7 +7,7 @@ IDIRS=-I../libcperciva/crypto -I../libcperciva/events -I../libcperciva/util -I..
 LDADD_REQ=-lcrypto -lpthread
 SUBDIR_DEPTH=..
 RELATIVE_DIR=spipe
-LIBALL=../liball/liball.a
+LIBALL=../liball/liball.a ../liball/optional_mutex_pthread/liball_optional_mutex_pthread.a
 
 all:
 	if [ -z "$${HAVE_BUILD_FLAGS}" ]; then \
