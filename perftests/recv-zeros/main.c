@@ -2,7 +2,6 @@
 
 #include <fcntl.h>
 #include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -15,7 +14,7 @@ main(int argc, char ** argv)
 {
 	/* Command-line parameters. */
 	const char * addr = NULL;
-	ssize_t buflen;
+	size_t buflen;
 
 	/* Working variables. */
 	struct sock_addr * sa;
@@ -37,14 +36,8 @@ main(int argc, char ** argv)
 		goto err0;
 	}
 
-	/* Sanity check. */
-	if (buflen <= 0) {
-		warnp("Can't have a buffer length <= 0!");
-		goto err0;
-	}
-
 	/* Allocate buffer. */
-	if ((buffer = malloc((size_t)buflen)) == NULL) {
+	if ((buffer = malloc(buflen)) == NULL) {
 		warnp("malloc");
 		goto err0;
 	}
@@ -76,8 +69,8 @@ main(int argc, char ** argv)
 
 	/* Receive data, but do nothing with it. */
 	do {
-		r = recv(socket_recv, buffer, (size_t)buflen, MSG_WAITALL);
-	} while (r == buflen);
+		r = recv(socket_recv, buffer, buflen, MSG_WAITALL);
+	} while (r == (ssize_t)buflen);
 	if (r != 0) {
 		warnp("recv");
 		goto err4;
