@@ -8,6 +8,8 @@
 # Other directories
 *.o
 /liball/liball.a
+/liball/optional_mutex_normal/liball_optional_mutex_normal.a
+/liball/optional_mutex_pthread/liball_optional_mutex_pthread.a
 /spipe/spipe
 /spiped/spiped
 # Test binaries

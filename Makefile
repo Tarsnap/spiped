@@ -2,7 +2,9 @@
 
 PROGS=	spipe					\
 	spiped
-LIBS=	liball
+LIBS=	liball					\
+	liball/optional_mutex_normal		\
+	liball/optional_mutex_pthread
 TESTS=	perftests/recv-zeros			\
 	perftests/send-zeros			\
 	perftests/standalone-enc		\

@@ -6,7 +6,7 @@ IDIRS=-I../../lib/proto -I../../libcperciva/alg -I../../libcperciva/cpusupport -
 LDADD_REQ=-lcrypto -lpthread
 SUBDIR_DEPTH=../..
 RELATIVE_DIR=perftests/standalone-enc
-LIBALL=../../liball/liball.a
+LIBALL=../../liball/liball.a ../../liball/optional_mutex_pthread/liball_optional_mutex_pthread.a
 
 all:
 	if [ -z "$${HAVE_BUILD_FLAGS}" ]; then \

@@ -1,8 +1,9 @@
+#include <sys/time.h>
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "monoclock.h"
 #include "warnp.h"
