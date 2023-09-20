@@ -58,7 +58,7 @@ if grep -q pipe_enc_thread "${outfilename}.folded" ; then
 else
 	has_pipe_enc=0
 fi
-if [ "${KEEP_ALL}" -eq "0" -a "${has_pipe_enc}" -gt "0" ]; then
+if [ "${KEEP_ALL}" -eq "0" ] && [ "${has_pipe_enc}" -gt "0" ]; then
 	grep pipe_enc_thread "${outfilename}.folded" > "${outfilename}.tmp"
 	mv "${outfilename}.tmp" "${outfilename}.folded"
 fi

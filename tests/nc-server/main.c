@@ -68,6 +68,9 @@ write_bps(int sock, uint8_t * buf, size_t buflen, size_t bps)
 		actual_sent += to_send;
 	} while (remaining > 0);
 
+	/* Success! */
+	return (0);
+
 err0:
 	/* Failure! */
 	return (-1);

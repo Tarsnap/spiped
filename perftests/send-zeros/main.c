@@ -3,10 +3,10 @@
 
 #include <fcntl.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "monoclock.h"
@@ -42,18 +42,8 @@ main(int argc, char ** argv)
 		warnp("parsenum");
 		goto err0;
 	}
-	if (PARSENUM(&count, argv[3])) {
+	if (PARSENUM(&count, argv[3], 1, SIZE_MAX)) {
 		warnp("parsenum");
-		goto err0;
-	}
-
-	/* Sanity check. */
-	if (buflen <= 0) {
-		warnp("Can't have a buffer length <= 0!");
-		goto err0;
-	}
-	if (count == 0) {
-		warnp("Can't send 0 blocks!");
 		goto err0;
 	}
 

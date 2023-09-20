@@ -170,8 +170,9 @@ callback_read(void * cookie, ssize_t lenread)
 	/* If we have a message. */
 	if (lenread > 0) {
 		/* Handle it with the parent code. */
-		A->callback_nc_message(A->caller_cookie, R->buf,
-		    (size_t)lenread, sock);
+		if (A->callback_nc_message(A->caller_cookie, R->buf,
+		    (size_t)lenread, sock))
+			goto err0;
 
 		/* Try to read some more data. */
 		if ((R->network_read_cookie = network_read(R->sock_read,
