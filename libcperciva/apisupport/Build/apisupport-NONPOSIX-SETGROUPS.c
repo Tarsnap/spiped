@@ -9,5 +9,7 @@ main(void)
 {
 
 	(void)setgroups(0, NULL);
+
+	/* Success! */
 	return (0);
 }

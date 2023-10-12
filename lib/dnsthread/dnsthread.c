@@ -31,13 +31,13 @@ struct dnsthread_internal {
 	int res_errno;		/* Errno to be passed back on failure. */
 
 	/* Callback to occur when resolution is complete. */
-	int (*callback)(void *, struct sock_addr **);	/* Callback. */
+	int (* callback)(void *, struct sock_addr **);	/* Callback. */
 	void * cookie;		/* Cookie. */
 };
 
 /* Cookie used by dnsthread_resolve. */
 struct resolve_cookie {
-	int (*callback)(void *, struct sock_addr **);
+	int (* callback)(void *, struct sock_addr **);
 	void * cookie;
 	DNSTHREAD T;
 };
@@ -310,7 +310,7 @@ callback_resolveone(void * cookie)
 	struct sock_addr ** sas;
 	uint8_t zero;
 	int res_errno = 0;
-	int (*callback)(void *, struct sock_addr **);
+	int (* callback)(void *, struct sock_addr **);
 	void * cb_cookie;
 	int rc;
 
