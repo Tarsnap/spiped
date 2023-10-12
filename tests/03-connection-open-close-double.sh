@@ -18,7 +18,7 @@ scenario_cmd() {
 	setup_spiped_encryption_server
 
 	# Open and close a connection, keeping it open for 2 seconds.
-	setup_check_variables "multi open 2 seconds close"
+	setup_check "multi open 2 seconds close"
 	(
 		( echo "" ; sleep 2 ) |		\
 			 ${nc_client_binary} "${src_sock}"
@@ -28,7 +28,7 @@ scenario_cmd() {
 
 	# Open another connection (before the first has closed).
 	# Don't check that we've already finished the previous test.
-	setup_check_variables "multi open close" 0
+	setup_check "multi open close" 0
 	(
 		echo "" | ${nc_client_binary} "${src_sock}"
 		echo $? > "${c_exitfile}"

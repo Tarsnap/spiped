@@ -18,7 +18,7 @@ scenario_cmd() {
 	setup_spiped_encryption_server
 
 	# Open and close a connection, keeping it open for 2 seconds.
-	setup_check_variables "open 2 seconds close"
+	setup_check "open 2 seconds close"
 	(
 		( echo "" ; sleep 2 ) |		\
 			 ${nc_client_binary} "${src_sock}"

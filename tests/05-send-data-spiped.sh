@@ -18,7 +18,7 @@ scenario_cmd() {
 	setup_spiped_encryption_server
 
 	# Open and close a connection.
-	setup_check_variables "spiped send"
+	setup_check "spiped send"
 	(
 		${nc_client_binary} "${src_sock}" < "${sendfile}"
 		echo $? > "${c_exitfile}"
@@ -27,7 +27,7 @@ scenario_cmd() {
 	# Wait for server(s) to quit.
 	servers_stop
 
-	setup_check_variables "spiped send output"
+	setup_check "spiped send output"
 	if ! cmp -s "${ncat_output}" "${sendfile}"; then
 		if [ "${VERBOSE}" -ne 0 ]; then
 			printf "Test output does not match input;" 1>&2
