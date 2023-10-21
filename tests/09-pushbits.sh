@@ -10,32 +10,32 @@ sendfile=${scriptdir}/shared_test_functions.sh
 ### Actual command
 scenario_cmd() {
 	# Copy a file
-	setup_check_variables "test_pushbits 1"
+	setup_check "test_pushbits 1"
 	${c_valgrind_cmd} "${scriptdir}/pushbits/test_pushbits"		\
 		-i "${sendfile}" -o "${s_basename}-copy" 1
 	echo $? > "${c_exitfile}"
 
-	setup_check_variables "test_pushbits 1 output"
+	setup_check "test_pushbits 1 output"
 	cmp -s "${sendfile}" "${s_basename}-copy"
 	echo $? > "${c_exitfile}"
 
 	# Echo stdin to stdout
-	setup_check_variables "test_pushbits 2"
+	setup_check "test_pushbits 2"
 	${c_valgrind_cmd} "${scriptdir}/pushbits/test_pushbits" 2
 	echo $? > "${c_exitfile}"
 
 	# Copy a message through one pushbits()
-	setup_check_variables "test_pushbits 3"
+	setup_check "test_pushbits 3"
 	${c_valgrind_cmd} "${scriptdir}/pushbits/test_pushbits" 3
 	echo $? > "${c_exitfile}"
 
 	# Copy a message through two pushbits()
-	setup_check_variables "test_pushbits 4"
+	setup_check "test_pushbits 4"
 	${c_valgrind_cmd} "${scriptdir}/pushbits/test_pushbits" 4
 	echo $? > "${c_exitfile}"
 
 	# Echo stdin to stdout, but cancel it immediately after starting
-	setup_check_variables "test_pushbits 5"
+	setup_check "test_pushbits 5"
 	${c_valgrind_cmd} "${scriptdir}/pushbits/test_pushbits" 5
 	echo $? > "${c_exitfile}"
 }

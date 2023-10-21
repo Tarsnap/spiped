@@ -28,7 +28,7 @@ scenario_cmd() {
 
 	for addr in ${addrs}
 	do
-		setup_check_variables "dnsthread-resolve ${addr}"
+		setup_check "dnsthread-resolve ${addr}"
 		${c_valgrind_cmd}				\
 		"${dnsthread_resolve}" "${addr}" >> "${addr_output}"
 		echo $? > "${c_exitfile}"

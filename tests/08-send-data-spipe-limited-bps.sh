@@ -15,14 +15,14 @@ scenario_cmd() {
 	setup_spiped_decryption_server /dev/null 0 1 1000
 
 	# Send a file through the rate-limited echo server.
-	setup_check_variables "spipe send rate-limited"
+	setup_check "spipe send rate-limited"
 	${c_valgrind_cmd}					\
 		"${spipe_binary}" -t "${mid_sock}" -k /dev/null	\
 		< "${sendfile}"					\
 		> "${echo_limited_output}"
 	echo $? > "${c_exitfile}"
 
-	setup_check_variables "spipe send rate-limited output"
+	setup_check "spipe send rate-limited output"
 	cmp -s "${sendfile}" "${echo_limited_output}"
 	echo $? > "${c_exitfile}"
 

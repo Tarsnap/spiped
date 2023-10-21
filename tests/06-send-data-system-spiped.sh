@@ -17,7 +17,7 @@ scenario_cmd() {
 	if [ ! -n "${system_spiped_binary}" ]; then
 		printf "no system spiped, or it is too old... " 1>&2
 		# Suppress warning
-		setup_check_variables "system spiped skip"
+		setup_check "system spiped skip"
 		echo "-1" > "${c_exitfile}"
 		return;
 	fi
@@ -27,7 +27,7 @@ scenario_cmd() {
 	setup_spiped_encryption_server
 
 	# Open and close a connection.
-	setup_check_variables "system spiped"
+	setup_check "system spiped"
 	(
 		${nc_client_binary} "${src_sock}" < "${sendfile}"
 		echo $? > "${c_exitfile}"
@@ -36,7 +36,7 @@ scenario_cmd() {
 	# Wait for server(s) to quit.
 	servers_stop
 
-	setup_check_variables "system spiped output"
+	setup_check "system spiped output"
 	if ! cmp -s "${ncat_output}" "${sendfile}"; then
 		if [ "${VERBOSE}" -ne 0 ]; then
 			printf "Test output does not match input;" 1>&2
