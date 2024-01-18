@@ -101,14 +101,14 @@ servers_stop() {
 	fi
 
 	# Waiting for servers to stop
-	wait_while has_pid "spiped -e -s ${src_sock}"
-	wait_while has_pid "spiped -d -s ${mid_sock}"
+	wait_while 0 has_pid "spiped -e -s ${src_sock}"
+	wait_while 0 has_pid "spiped -d -s ${mid_sock}"
 	if [ -n "${nc_server_binary+set}" ]; then
-		wait_while has_pid "${nc_server_binary} ${dst_sock}"
+		wait_while 0 has_pid "${nc_server_binary} ${dst_sock}"
 	fi
 
 	# Give valgrind a chance to finish writing files
 	if [ -n "${c_valgrind_cmd}" ]; then
-		wait_while valgrind_incomplete
+		wait_while 0 valgrind_incomplete
 	fi
 }
