@@ -42,7 +42,7 @@ pipe_callback_status(void * cookie)
 
 	/* Was there an error? */
 	if (pipeinfo->status) {
-		warn0("proto_pipe callback status: %i", pipeinfo->status);
+		warn0("proto_pipe callback status: %d", pipeinfo->status);
 		return (-1);
 	}
 

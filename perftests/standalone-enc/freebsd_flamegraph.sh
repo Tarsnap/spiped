@@ -17,7 +17,7 @@ outfilename="bench"
 # this script does not handle.
 numchars="$(printf "%s" "${cmd}" | wc -c)"
 if [ "${numchars}" -gt "19" ]; then
-	printf "%s is %i chars; that's too long for dtrace!\n"	\
+	printf "%s is %d chars; that's too long for dtrace!\n"	\
 	    "${cmd}" "${numchars}"
 	exit 1
 fi
