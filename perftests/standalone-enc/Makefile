@@ -47,6 +47,6 @@ perftest:
 		./test_standalone_enc $$N |			\
 		    grep "blocks" |				\
 		    awk -v N="$$N"				\
-		    '{printf "%i\t%i\t%.6f\t%.6f\t%i\n",	\
+		    '{printf "%d\t%d\t%.6f\t%.6f\t%d\n",	\
 			$$1, $$5, $$6, $$8, N}'; \
 	done
