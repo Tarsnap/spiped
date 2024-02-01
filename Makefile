@@ -16,7 +16,7 @@ TESTS=	perftests/recv-zeros			\
 	tests/pushbits				\
 	tests/valgrind
 BINDIR_DEFAULT=	/usr/local/bin
-CFLAGS_DEFAULT=	-O2
+CFLAGS_DEFAULT=	-O2 -g
 LIBCPERCIVA_DIR=	libcperciva
 TEST_CMD=	tests/test_spiped.sh
 
