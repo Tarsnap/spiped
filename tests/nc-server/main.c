@@ -13,7 +13,6 @@
 #include "simple_server.h"
 
 #define MAX_CONNECTIONS 2
-#define SHUTDOWN_AFTER 1
 
 struct nc_cookie {
 	FILE * out;
@@ -107,12 +106,14 @@ main(int argc, char ** argv)
 	struct nc_cookie * C = &cookie;
 	const char * sockname;
 	const char * filename;
+	size_t shutdown_after;
 
 	WARNP_INIT;
 
 	/* Parse command-line arguments. */
 	if (argc < 3) {
-		fprintf(stderr, "usage: %s ADDRESS FILENAME [ECHO_BPS]\n",
+		fprintf(stderr, "usage: %s ADDRESS FILENAME"
+		    " [ECHO_BPS] [SHUTDOWN_AFTER]\n",
 		    argv[0]);
 		goto err0;
 	}
@@ -130,6 +131,13 @@ main(int argc, char ** argv)
 		}
 	} else
 		C->bps = 0;
+	if (argc > 4) {
+		if (PARSENUM(&shutdown_after, argv[4], 0, 100)) {
+			warnp("parsenum");
+			goto err0;
+		}
+	} else
+		shutdown_after = 1;
 
 	/* Open the output file; can be /dev/null. */
 	if ((C->out = fopen(filename, "wb")) == NULL) {
@@ -138,7 +146,7 @@ main(int argc, char ** argv)
 	}
 
 	/* Run the server. */
-	if (simple_server(sockname, MAX_CONNECTIONS, SHUTDOWN_AFTER,
+	if (simple_server(sockname, MAX_CONNECTIONS, shutdown_after,
 	    &callback_snc_response, C)) {
 		warn0("simple_server failed");
 		goto err1;

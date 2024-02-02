@@ -29,19 +29,21 @@ check_leftover_servers() {
 }
 
 ## setup_spiped_decryption_server(nc_output=/dev/null, use_system_spiped=0,
-#      use_nc=1, nc_bps=0):
+#      use_nc=1, nc_bps=0, shutdown_after=1):
 # Set up a spiped decryption server, translating from ${mid_sock}
 # to ${dst_sock}, saving the exit code to ${c_exitfile}.  Also set
 # up a nc-server listening to ${dst_sock}, saving output to
 # ${nc_output}, unless ${use_nc} is 0.  Uses the system's spiped (instead of
 # the version in this source tree) if ${use_system_spiped} is 1.
 # If ${nc_bps} is non-zero, run nc as an echo server which is
-# limited to ${nc_bps} bytes per second.
+# limited to ${nc_bps} bytes per second.  Shut down nc after ${shutdown_after}
+# connections have closed.
 setup_spiped_decryption_server () {
 	nc_output=${1:-/dev/null}
 	use_system_spiped=${2:-0}
 	use_nc=${3:-1}
 	nc_bps=${4:-0}
+	shutdown_after=${5:-1}
 	check_leftover_servers
 
 	# We need to set this up here so that ${c_valgrind_cmd} is set.
@@ -59,7 +61,12 @@ setup_spiped_decryption_server () {
 
 	# Start backend server (if desired).
 	if [ ! "${use_nc}" -eq 0 ]; then
-		${nc_server_binary} "${dst_sock}" "${nc_output}" "${nc_bps}" &
+		${nc_server_binary} "${dst_sock}" "${nc_output}"	\
+		    "${nc_bps}" "${shutdown_after}" &
+		# Store the pid if (and only if) we need it
+		if [ "${shutdown_after}" = 0 ]; then
+			echo "$!" > "${s_basename}-nc-server.pid"
+		fi
 	fi
 
 	# Start spiped to connect middle port to backend.
@@ -98,6 +105,10 @@ servers_stop() {
 	if [ -e "${s_basename}-spiped-d.pid" ]; then
 		kill "$(cat "${s_basename}-spiped-d.pid")"
 		rm "${s_basename}-spiped-d.pid"
+	fi
+	if [ -e "${s_basename}-nc-server.pid" ]; then
+		kill "$(cat "${s_basename}-nc-server.pid")"
+		rm "${s_basename}-nc-server.pid"
 	fi
 
 	# Waiting for servers to stop
