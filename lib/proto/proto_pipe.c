@@ -48,6 +48,7 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 {
 	struct pipe_cookie * P;
 
+	warn0("proto_pipe with s_in, s_out: %i %i", s_in, s_out);
 	/* Bake a cookie. */
 	if ((P = malloc(sizeof(struct pipe_cookie))) == NULL)
 		goto err0;
@@ -164,8 +165,9 @@ fail:
 
 eof:
 	/* We aren't going to write any more. */
+	warn0("got eof, going to close %i", P->s_out);
 	if (shutdown(P->s_out, SHUT_WR)) {
-		warnp("shutdown");
+		warnp("shutdown after eof");
 		goto err0;
 	}
 
