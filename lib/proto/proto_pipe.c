@@ -48,7 +48,6 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 {
 	struct pipe_cookie * P;
 
-	warn0("proto_pipe with s_in, s_out: %i %i", s_in, s_out);
 	/* Bake a cookie. */
 	if ((P = malloc(sizeof(struct pipe_cookie))) == NULL)
 		goto err0;
@@ -60,6 +59,7 @@ proto_pipe(int s_in, int s_out, int decr, struct proto_keys * k,
 	P->decr = decr;
 	P->k = k;
 	P->write_cookie = NULL;
+	warn0("proto_pipe with s_in, s_out: %i %i %p", s_in, s_out, P);
 
 	/* Initialize reader. */
 	if ((P->R = netbuf_read_init(P->s_in)) == NULL)
@@ -99,9 +99,12 @@ callback_pipe_read(void * cookie, int status)
 	size_t loop_inlen;
 	ssize_t loop_outlen;
 
+	warn0("callback_pipe_read %p %i", P, status);
 	/* Did we read EOF? */
-	if (status == 1)
+	if (status == 1) {
+		warn0("got eof, going to close %i %p", P->s_out, P);
 		goto eof;
+	}
 
 	/* Did the read fail? */
 	if (status == -1)
@@ -165,7 +168,6 @@ fail:
 
 eof:
 	/* We aren't going to write any more. */
-	warn0("got eof, going to close %i", P->s_out);
 	if (shutdown(P->s_out, SHUT_WR)) {
 		warnp("shutdown after eof");
 		goto err0;
