@@ -147,6 +147,7 @@ proto_conn_drop(void * conn_cookie, int reason)
 	struct conn_state * C = conn_cookie;
 	int rc;
 
+	assert(C != NULL);
 	/* Close the incoming connection. */
 	if (close(C->s))
 		warnp("close");

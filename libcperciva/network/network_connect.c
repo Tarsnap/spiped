@@ -283,6 +283,7 @@ network_connect_cancel(void * cookie)
 	struct connect_cookie * C = cookie;
 
 	/* We should have either an immediate callback or a socket. */
+	assert(C != NULL);
 	assert((C->cookie_immediate != NULL) || (C->s != -1));
 	assert((C->cookie_immediate == NULL) || (C->s == -1));
 
