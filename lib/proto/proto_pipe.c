@@ -167,6 +167,10 @@ fail:
 	return ((P->callback)(P->cookie));
 
 eof:
+	/* FIXME special debug */
+	if (P->s_out == 6)
+		abort();
+
 	/* We aren't going to write any more. */
 	if (shutdown(P->s_out, SHUT_WR)) {
 		warnp("shutdown after eof");
