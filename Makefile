@@ -42,6 +42,7 @@ toplevel:	apisupport-config.h cflags-filter.sh	\
 # For "loop-back" building of a subdirectory
 .PHONY:	buildsubdir
 buildsubdir: toplevel
+	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
 	. ./cflags-filter.sh;				\
@@ -52,6 +53,7 @@ buildsubdir: toplevel
 # For "loop-back" building of libraries
 .PHONY:	libs
 libs: apisupport-config.h cflags-filter.sh cpusupport-config.h posix-flags.sh
+	export CFLAGS="$${CFLAGS:-${CFLAGS_DEFAULT}}";	\
 	. ./posix-flags.sh;				\
 	. ./cpusupport-config.h;			\
 	. ./cflags-filter.sh;				\
