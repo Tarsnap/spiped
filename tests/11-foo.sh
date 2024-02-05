@@ -5,7 +5,7 @@
 
 ### Constants
 c_valgrind_min=1
-num_conn=3
+num_conn=1
 ncat_output="${s_basename}-ncat-output.txt"
 sendfile=${scriptdir}/shared_test_functions.sh
 
@@ -13,12 +13,13 @@ sendfile=${scriptdir}/shared_test_functions.sh
 ### Helper functions
 run_test() {
 	# Set up infrastructure.
-	setup_spiped_decryption_server "${ncat_output}" 0 1 0 "${num_conn}"
+	setup_spiped_decryption_server "${ncat_output}" 1 1 0 "${num_conn}"
 	setup_spiped_encryption_server
 
+	echo ""
 	# Open and close a connection.
 	for i in `seq ${num_conn}`; do
-		echo "doing $i" 1>&2
+		#echo "doing $i" 1>&2
 		setup_check "11-foo $i"
 		${nc_client_binary} "${src_sock}" < "${sendfile}"
 		#echo "a" | ${nc_client_binary} "${src_sock}"
@@ -26,7 +27,7 @@ run_test() {
 	done
 
 	# Wait for server(s) to quit.
-	echo "doing servers_stop" 1>&2
+	#echo "doing servers_stop" 1>&2
 	servers_stop
 }
 

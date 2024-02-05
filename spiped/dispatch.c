@@ -193,6 +193,7 @@ err2:
 	sock_addr_freelist(sas);
 err1:
 	A->nconn -= 1;
+	warn0("callback_gotconn going to close %i", s);
 	if (close(s))
 		warnp("close");
 err0:
@@ -306,6 +307,7 @@ dispatch_shutdown(void * dispatch_cookie)
 	if (A->T != NULL)
 		dnsthread_kill(A->T);
 	sock_addr_freelist(A->sas);
+	warn0("dispatch_shutdown going to close %i", A->s);
 	if (close(A->s))
 		warnp("close");
 	free(A);

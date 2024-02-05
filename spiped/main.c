@@ -390,6 +390,7 @@ main(int argc, char * argv[])
 err7:
 	dispatch_shutdown(dispatch_cookie);
 err6:
+	warn0("main.c going to close %i", s);
 	if ((s != -1) && close(s))
 		warnp("close");
 err5:

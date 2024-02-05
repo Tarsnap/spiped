@@ -99,12 +99,11 @@ callback_pipe_read(void * cookie, int status)
 	size_t loop_inlen;
 	ssize_t loop_outlen;
 
-	warn0("callback_pipe_read %p %i", P, status);
+	netbuf_read_peek(P->R, &inbuf, &inlen);
+	warn0("callback_pipe_read %p %i %zu", P, status, inlen);
 	/* Did we read EOF? */
-	if (status == 1) {
-		warn0("got eof, going to close %i %p", P->s_out, P);
+	if (status == 1)
 		goto eof;
-	}
 
 	/* Did the read fail? */
 	if (status == -1)
@@ -168,12 +167,13 @@ fail:
 
 eof:
 	/* FIXME special debug */
-	if (P->s_out == 6)
-		abort();
+	if (P->s_out == 7)
+		sleep(1);
 
+	warn0("callback_pipe_read %p going to shutdown %i", P, P->s_out);
 	/* We aren't going to write any more. */
 	if (shutdown(P->s_out, SHUT_WR)) {
-		warnp("shutdown after eof");
+		warnp("callback_pipe_read %p shutdown after eof", P);
 		goto err0;
 	}
 

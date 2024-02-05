@@ -148,11 +148,13 @@ proto_conn_drop(void * conn_cookie, int reason)
 	int rc;
 
 	assert(C != NULL);
+	warn0("proto_conn_drop going to close C->s %i", C->s);
 	/* Close the incoming connection. */
 	if (close(C->s))
 		warnp("close");
 
 	/* Close the outgoing connection if it is open. */
+	warn0("proto_conn_drop going to close C->t %i", C->t);
 	if ((C->t != -1) && close(C->t))
 		warnp("close");
 
