@@ -165,8 +165,14 @@ fail:
 eof:
 	/* We aren't going to write any more. */
 	if (shutdown(P->s_out, SHUT_WR)) {
-		warnp("shutdown");
-		goto err0;
+		/*
+		 * We've already received an EOF, so it's no cause for concern
+		 * if the other side has already closed the connection.
+		 */
+		if (errno != ENOTCONN) {
+			warnp("shutdown");
+			goto err0;
+		}
 	}
 
 	/* Record that we have reached EOF. */
