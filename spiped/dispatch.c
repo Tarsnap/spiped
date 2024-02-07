@@ -297,7 +297,7 @@ dispatch_shutdown(void * dispatch_cookie)
 	 * the list of conn_cookies.
 	 */
 	while ((C = LIST_FIRST(&A->conn_cookies)) != NULL)
-		proto_conn_drop(C, PROTO_CONN_CANCELLED);
+		proto_conn_drop(C->conn_cookie, PROTO_CONN_CANCELLED);
 
 	if (A->accept_cookie != NULL)
 		network_accept_cancel(A->accept_cookie);
