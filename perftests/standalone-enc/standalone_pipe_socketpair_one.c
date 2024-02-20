@@ -1,18 +1,17 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "events.h"
+#include "fork_func.h"
 #include "noeintr.h"
 #include "perftest.h"
 #include "proto_crypt.h"
 #include "proto_pipe.h"
-#include "pthread_create_blocking_np.h"
 #include "warnp.h"
 
 #include "standalone.h"
@@ -27,8 +26,8 @@
 /* Cookie for proto_pipe */
 struct pipeinfo {
 	struct proto_keys * k;
-	pthread_t enc_thr;
-	pthread_t output_thr;
+	pid_t out_pid;
+	pid_t enc_pid;
 	int in[2];
 	int out[2];
 	int status;
@@ -54,7 +53,7 @@ pipe_callback_status(void * cookie)
 }
 
 /* Encrypt bytes sent to a socket, and send them to another socket. */
-static void *
+static int
 pipe_enc(void * cookie)
 {
 	struct pipeinfo * pipeinfo = cookie;
@@ -75,13 +74,16 @@ pipe_enc(void * cookie)
 	/* Clean up the pipe. */
 	proto_pipe_cancel(cancel_cookie);
 
+	/* Success! */
+	return (0);
+
 err0:
-	/* Finished! */
-	return (NULL);
+	/* Failure!  This value will be the pid's exit code. */
+	return (1);
 }
 
 /* Drain bytes from pipeinfo->out[R] as quickly as possible. */
-static void *
+static int
 pipe_output(void * cookie)
 {
 	struct pipeinfo * pipeinfo = cookie;
@@ -102,9 +104,12 @@ pipe_output(void * cookie)
 		}
 	} while (readlen != 0);
 
+	/* Success! */
+	return (0);
+
 err0:
-	/* Finished! */
-	return (NULL);
+	/* Failure!  This value will be the pid's exit code. */
+	return (1);
 }
 
 static int
@@ -113,7 +118,6 @@ pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 	struct pipeinfo * pipeinfo = cookie;
 	uint8_t kbuf[64];
 	size_t i;
-	int rc;
 
 	/* Sanity check for pipe_output(). */
 	assert(buflen <= MAXOUTSIZE);
@@ -140,17 +144,11 @@ pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 	/* We haven't finished the event loop. */
 	pipeinfo->done = 0;
 
-	/* Create the pipe threads. */
-	if ((rc = pthread_create_blocking_np(&pipeinfo->output_thr, NULL,
-	    pipe_output, pipeinfo))) {
-		warn0("pthread_create: %s", strerror(rc));
+	/* Create the pipe processes. */
+	if ((pipeinfo->out_pid = fork_func(pipe_output, pipeinfo)) == -1)
 		goto err0;
-	}
-	if ((rc = pthread_create_blocking_np(&pipeinfo->enc_thr, NULL,
-	    pipe_enc, pipeinfo))) {
-		warn0("pthread_create: %s", strerror(rc));
+	if ((pipeinfo->enc_pid = fork_func(pipe_enc, pipeinfo)) == -1)
 		goto err0;
-	}
 
 	/* Success! */
 	return (0);
@@ -165,7 +163,6 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 {
 	struct pipeinfo * pipeinfo = cookie;
 	size_t i;
-	int rc;
 
 	/* Send bytes. */
 	for (i = 0; i < nreps; i++) {
@@ -182,15 +179,11 @@ pipe_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 		goto err0;
 	}
 
-	/* Wait for threads to finish. */
-	if ((rc = pthread_join(pipeinfo->enc_thr, NULL))) {
-		warn0("pthread_join: %s", strerror(rc));
+	/* Wait for the processes to finish. */
+	if (fork_func_wait(pipeinfo->enc_pid))
 		goto err0;
-	}
-	if ((rc = pthread_join(pipeinfo->output_thr, NULL))) {
-		warn0("pthread_join: %s", strerror(rc));
+	if (fork_func_wait(pipeinfo->out_pid))
 		goto err0;
-	}
 
 	/* Success! */
 	return (0);
