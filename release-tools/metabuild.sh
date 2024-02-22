@@ -176,6 +176,9 @@ printf "RELATIVE_DIR=%s\n" "${D}" >> "${OUT}"
 if [ -n "$(${MAKEBSD} -v LIB)" ]; then
 	cat "${SUBDIR_DEPTH}/release-tools/Makefile.lib" >> "${OUT}"
 elif [ -n "$(${MAKEBSD} -v SRCS)" ]; then
+	# This *must* come after SUBDIR_DEPTH has been copied into
+	# the Makefile, because it depends on being able to run:
+	#     make -v SUBDIR_DEPTH
 	copyvar_LIBALL_optional_mutex
 	add_makefile_prog
 else
