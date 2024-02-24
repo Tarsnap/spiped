@@ -20,15 +20,15 @@ extern void (* netbuf_write_ssl_cancel_func)(void *);
 
 /**
  * netbuf_read_init2(s, ssl):
- * Behave like netbuf_read_init if ${ssl} is NULL.  If the SSL context ${ssl}
- * is not NULL, use it and ignore ${s}.
+ * Behave like netbuf_read_init() if ${ssl} is NULL.  If the SSL context
+ * ${ssl} is not NULL, use it and ignore ${s}.
  */
 struct netbuf_read * netbuf_read_init2(int, struct network_ssl_ctx *);
 
 /**
  * netbuf_write_init2(s, ssl, fail_callback, fail_cookie):
- * Behave like netbuf_write_init if ${ssl} is NULL.  If the SSL context ${ssl}
- * is not NULL, use it and ignore ${s}.
+ * Behave like netbuf_write_init() if ${ssl} is NULL.  If the SSL context
+ * ${ssl} is not NULL, use it and ignore ${s}.
  */
 struct netbuf_write * netbuf_write_init2(int, struct network_ssl_ctx *,
     int (*)(void *), void *);

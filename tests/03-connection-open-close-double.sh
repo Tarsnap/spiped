@@ -36,8 +36,8 @@ scenario_cmd() {
 	) &
 
 	# Wait for both connections to have closed.
-	wait_while test ! -e "${flag_1}"
-	wait_while test ! -e "${flag_2}"
+	wait_while 0 test ! -e "${flag_1}"
+	wait_while 0 test ! -e "${flag_2}"
 
 	# Wait for server(s) to quit.
 	servers_stop
