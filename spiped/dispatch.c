@@ -296,8 +296,15 @@ dispatch_shutdown(void * dispatch_cookie)
 	 * callback_conndied(), which removes the relevant conn_list_node from
 	 * the list of conn_cookies.
 	 */
-	while ((C = LIST_FIRST(&A->conn_cookies)) != NULL)
+	while ((C = LIST_FIRST(&A->conn_cookies)) != NULL) {
 		proto_conn_drop(C->conn_cookie, PROTO_CONN_CANCELLED);
+
+		/*
+		 * Convince static analyzers that C->conn_cookie is no longer
+		 * in the list.
+		 */
+		assert(C != LIST_FIRST(&A->conn_cookies));
+	}
 
 	if (A->accept_cookie != NULL)
 		network_accept_cancel(A->accept_cookie);
