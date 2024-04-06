@@ -55,8 +55,8 @@ netbuf_read_init(int s)
 
 /**
  * netbuf_read_init2(s, ssl):
- * Behave like netbuf_read_init if ${ssl} is NULL.  If the SSL context ${ssl}
- * is not NULL, use it and ignore ${s}.
+ * Behave like netbuf_read_init() if ${ssl} is NULL.  If the SSL context
+ * ${ssl} is not NULL, use it and ignore ${s}.
  */
 struct netbuf_read *
 netbuf_read_init2(int s, struct network_ssl_ctx * ssl)
