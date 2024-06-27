@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -53,7 +54,7 @@ writepid(const char * spid)
 		warnp("fopen(%s)", spid);
 		goto err0;
 	}
-	if (fprintf(f, "%d", getpid()) < 0) {
+	if (fprintf(f, "%jd", (intmax_t)getpid()) < 0) {
 		warnp("fprintf");
 		goto err1;
 	}
