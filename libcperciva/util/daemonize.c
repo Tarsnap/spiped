@@ -1,47 +1,11 @@
-#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
-#include "noeintr.h"
+#include "ipc_sync.h"
 #include "warnp.h"
 
 #include "daemonize.h"
-
-/* Read and discard one byte from ${fd}, looping upon EINTR. */
-static int
-readbyte(int fd)
-{
-	char dummy;
-	char done = 0;
-
-	do {
-		switch (read(fd, &dummy, 1)) {
-		case -1:
-			/* Anything other than EINTR is bad. */
-			if (errno != EINTR) {
-				warnp("read");
-				goto err0;
-			}
-
-			/* Otherwise, loop and read again. */
-			break;
-		case 0:
-			warn0("Unexpected EOF in pipe");
-			goto err0;
-		case 1:
-			/* Expected value; quit the loop. */
-			done = 1;
-		}
-	} while (!done);
-
-	/* Success! */
-	return (0);
-
-err0:
-	/* Failure! */
-	return (-1);
-}
 
 /* Write the process' pid to a file called ${spid}. */
 static int
@@ -84,17 +48,14 @@ err0:
 int
 daemonize(const char * spid)
 {
-	int fd[2];
-	char dummy = 0;
+	struct ipc_sync * IS;
 
 	/*
 	 * Create a pipe for the child to notify the parent when it has
 	 * finished daemonizing.
 	 */
-	if (pipe(fd)) {
-		warnp("pipe");
+	if ((IS = ipc_sync_init()) == NULL)
 		goto err0;
-	}
 
 	/*
 	 * Fork into the parent process (which waits for a poke and exits)
@@ -104,35 +65,22 @@ daemonize(const char * spid)
 	case -1:
 		/* Fork failed. */
 		warnp("fork");
-		goto err2;
+		goto err1;
 	case 0:
 		/* In child process. */
 		break;
 	default:
-		/*
-		 * In parent process.  Close write end of pipe so that if the
-		 * client dies we will notice the pipe being reset.
-		 */
-		while (close(fd[1])) {
-			if (errno == EINTR)
-				continue;
-			warnp("close");
-			goto err1;
-		}
-
-		/* Read and discard a byte from the read end of the pipe. */
-		if (readbyte(fd[0]))
+		/* In parent process; wait for the child to start. */
+		if (ipc_sync_wait(IS))
 			goto err1;
 
 		/*
-		 * We don't need to read from this any more.  The pipe would
-		 * be implicitly closed by the following _exit(), but we're
-		 * explicitly closing it for the benefit of leak checkers.
+		 * Free resources associated with ${IS}.  These would be
+		 * released by the following _exit(), but we're explicitly
+		 * releasing them for the benefit of leak checkers.
 		 */
-		if (close(fd[0])) {
-			warnp("close");
-			goto err0;
-		}
+		if (ipc_sync_done(IS))
+			goto err1;
 
 		/* We have been poked by the child.  Exit. */
 		_exit(0);
@@ -148,35 +96,19 @@ daemonize(const char * spid)
 	if (writepid(spid))
 		goto die;
 
-	/* Tell the parent to suicide. */
-	if (noeintr_write(fd[1], &dummy, 1) == -1) {
-		warnp("write");
+	/* Tell the parent that we've started. */
+	if (ipc_sync_signal(IS))
 		goto die;
-	}
 
-	/* Close the pipe. */
-	while (close(fd[0])) {
-		if (errno == EINTR)
-			continue;
-		warnp("close");
+	/* Clean up. */
+	if (ipc_sync_done(IS))
 		goto die;
-	}
-	while (close(fd[1])) {
-		if (errno == EINTR)
-			continue;
-		warnp("close");
-		goto die;
-	}
 
 	/* Success! */
 	return (0);
 
-err2:
-	if (close(fd[1]))
-		warnp("close");
 err1:
-	if (close(fd[0]))
-		warnp("close");
+	ipc_sync_done(IS);
 err0:
 	/* Failure! */
 	return (-1);
