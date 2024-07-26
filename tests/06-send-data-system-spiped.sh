@@ -14,7 +14,7 @@ sendfile=${scriptdir}/shared_test_functions.sh
 
 ### Actual command
 scenario_cmd() {
-	if [ ! -n "${system_spiped_binary}" ]; then
+	if [ -z "${system_spiped_binary}" ]; then
 		printf "no system spiped, or it is too old... " 1>&2
 		# Suppress warning
 		setup_check "system spiped skip"
