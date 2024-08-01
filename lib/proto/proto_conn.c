@@ -92,7 +92,7 @@ launchpipes(struct conn_state * C)
 	(void)setsockopt(C->s, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
 	(void)setsockopt(C->t, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
 
-	/**
+	/*-
 	 * Attempt to turn off nagling on both sockets.  If the TCP stack has
 	 * enough window space that it is always able to send packets, then on
 	 * the encrypted end this will result in every 1060-byte spiped packet

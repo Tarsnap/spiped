@@ -76,6 +76,7 @@ SRCS	+=	entropy.c
 SRCS	+=	fork_func.c
 SRCS	+=	getopt.c
 SRCS	+=	insecure_memzero.c
+SRCS	+=	ipc_sync.c
 SRCS	+=	monoclock.c
 SRCS	+=	noeintr.c
 SRCS	+=	perftest.c
