@@ -221,7 +221,7 @@ main(int argc, char * argv[])
 		usage();
 	if (!(opt_o > 0.0))
 		usage();
-	if (opt_t == NULL)
+	if ((opt_t == NULL) || (opt_t[0] == ':'))
 		usage();
 
 	/* Initialize the "events & threads" cookie. */

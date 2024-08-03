@@ -239,9 +239,9 @@ main(int argc, char * argv[])
 		usage();
 	if ((opt_r != 60.0) && opt_R)
 		usage();
-	if (opt_s == NULL)
+	if ((opt_s == NULL) || (opt_s[0] == ':'))
 		usage();
-	if (opt_t == NULL)
+	if ((opt_t == NULL) || (opt_t[0] == ':'))
 		usage();
 
 	/*
