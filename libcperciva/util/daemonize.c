@@ -80,7 +80,7 @@ daemonize(const char * spid)
 		 * releasing them for the benefit of leak checkers.
 		 */
 		if (ipc_sync_done(IS))
-			goto err1;
+			goto err0;
 
 		/* We have been poked by the child.  Exit. */
 		_exit(0);
