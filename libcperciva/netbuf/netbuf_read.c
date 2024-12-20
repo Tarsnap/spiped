@@ -297,7 +297,7 @@ void
 netbuf_read_free(struct netbuf_read * R)
 {
 
-        /* Behave consistently with free(NULL). */
+	/* Behave consistently with free(NULL). */
 	if (R == NULL)
 		return;
 
