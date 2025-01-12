@@ -50,6 +50,7 @@ struct netbuf_read *
 netbuf_read_init(int s)
 {
 
+	/* Call the real function (without SSL). */
 	return (netbuf_read_init2(s, NULL));
 }
 

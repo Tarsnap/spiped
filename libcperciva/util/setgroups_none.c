@@ -56,6 +56,7 @@ setgroups_none(void)
 	/* Not supported. */
 	return (0);
 #else
+	/* Attempt to leave all supplementary groups. */
 	return (setgroups(0, NULL));
 #endif
 }
