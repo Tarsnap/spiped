@@ -13,6 +13,7 @@
 #include "parsenum.h"
 #include "setuidgid.h"
 #include "sock.h"
+#include "sock_util.h"
 #include "warnp.h"
 
 #include "dispatch.h"
@@ -239,9 +240,11 @@ main(int argc, char * argv[])
 		usage();
 	if ((opt_r != 60.0) && opt_R)
 		usage();
-	if (opt_s == NULL)
+	if ((opt_s == NULL) || sock_addr_validate(opt_s))
 		usage();
-	if (opt_t == NULL)
+	if ((opt_t == NULL) || sock_addr_validate(opt_t))
+		usage();
+	if (opt_b && sock_addr_validate(opt_b))
 		usage();
 
 	/*

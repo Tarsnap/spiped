@@ -13,6 +13,7 @@
 #include "graceful_shutdown.h"
 #include "parsenum.h"
 #include "sock.h"
+#include "sock_util.h"
 #include "warnp.h"
 
 #include "proto_conn.h"
@@ -221,7 +222,9 @@ main(int argc, char * argv[])
 		usage();
 	if (!(opt_o > 0.0))
 		usage();
-	if (opt_t == NULL)
+	if ((opt_t == NULL) || sock_addr_validate(opt_t))
+		usage();
+	if (opt_b && sock_addr_validate(opt_b))
 		usage();
 
 	/* Initialize the "events & threads" cookie. */
