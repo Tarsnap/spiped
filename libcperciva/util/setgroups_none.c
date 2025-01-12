@@ -53,6 +53,7 @@ setgroups_none(void)
 {
 
 #ifdef NO_SETGROUPS
+	/* Not supported. */
 	return (0);
 #else
 	return (setgroups(0, NULL));
