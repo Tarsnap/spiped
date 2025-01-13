@@ -71,7 +71,7 @@ main(int argc, char ** argv)
 	do {
 		r = recv(socket_recv, buffer, buflen, MSG_WAITALL);
 	} while (r == (ssize_t)buflen);
-	if (r != 0) {
+	if (r == -1) {
 		warnp("recv");
 		goto err4;
 	}
