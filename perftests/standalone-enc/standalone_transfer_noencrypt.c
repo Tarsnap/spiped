@@ -1,7 +1,6 @@
 #include <sys/socket.h>
 
 #include <assert.h>
-#include <errno.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -11,6 +10,7 @@
 #include "noeintr.h"
 #include "perftest.h"
 #include "pthread_create_blocking_np.h"
+#include "thread_sync.h"
 #include "warnp.h"
 
 #include "standalone.h"
@@ -28,44 +28,9 @@ struct shared {
 	pthread_t output_thr;
 	int in[2];
 	int out[2];
-	int finished[2];
+	struct thread_sync * finished;
 	int method;
 };
-
-/* Read and discard one byte from ${fd}, looping upon EINTR. */
-static int
-readbyte(int fd)
-{
-	char dummy;
-	char done = 0;
-
-	do {
-		switch (read(fd, &dummy, 1)) {
-		case -1:
-			/* Anything other than EINTR is bad. */
-			if (errno != EINTR) {
-				warnp("read");
-				goto err0;
-			}
-
-			/* Otherwise, loop and read again. */
-			break;
-		case 0:
-			warn0("Unexpected EOF in pipe");
-			goto err0;
-		case 1:
-			/* Expected value; quit the loop. */
-			done = 1;
-		}
-	} while (!done);
-
-	/* Success! */
-	return (0);
-
-err0:
-	/* Failure! */
-	return (-1);
-}
 
 /* Transfer bytes from ->in to ->out. */
 static void *
@@ -111,7 +76,6 @@ drain_output(void * cookie)
 	struct shared * shared = cookie;
 	uint8_t mybuf[MAXOUTSIZE];
 	ssize_t readlen;
-	char dummy = 0;
 
 	/* Loop until we hit EOF. */
 	do {
@@ -123,10 +87,8 @@ drain_output(void * cookie)
 	} while (readlen != 0);
 
 	/* Notify that we've finished. */
-	if (noeintr_write(shared->finished[W], &dummy, 1) != 1) {
-		warnp("network_write");
+	if (thread_sync_signal(shared->finished))
 		goto err0;
-	}
 
 err0:
 	/* Finished! */
@@ -143,6 +105,10 @@ perftest_init(void * cookie, uint8_t * buf, size_t buflen)
 	/* Sanity checks. */
 	assert(buflen <= MAXOUTSIZE);
 
+	/* Set up thread_sync. */
+	if ((shared->finished = thread_sync_init()) == NULL)
+		goto err0;
+
 	/* Create communication endpoints. */
 	if (shared->method == 0) {
 		/* Use pipes. */
@@ -154,10 +120,6 @@ perftest_init(void * cookie, uint8_t * buf, size_t buflen)
 			warnp("pipe");
 			goto err0;
 		}
-		if (pipe(shared->finished)) {
-			warnp("pipe");
-			goto err0;
-		}
 	} else if (shared->method == 1) {
 		/* Use socketpairs. */
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, shared->in)) {
@@ -165,10 +127,6 @@ perftest_init(void * cookie, uint8_t * buf, size_t buflen)
 			goto err0;
 		}
 		if (socketpair(AF_UNIX, SOCK_STREAM, 0, shared->out)) {
-			warnp("socketpair");
-			goto err0;
-		}
-		if (socketpair(AF_UNIX, SOCK_STREAM, 0, shared->finished)) {
 			warnp("socketpair");
 			goto err0;
 		}
@@ -221,7 +179,7 @@ perftest_func(void * cookie, uint8_t * buf, size_t buflen, size_t nreps)
 	}
 
 	/* Wait until transfer_data has finished. */
-	if (readbyte(shared->finished[R]))
+	if (thread_sync_wait(shared->finished))
 		goto err0;
 
 	/* Success! */
@@ -257,14 +215,8 @@ perftest_cleanup(void * cookie)
 		warnp("close");
 		goto err0;
 	}
-	if (close(shared->finished[W])) {
-		warnp("close");
+	if (thread_sync_done(shared->finished))
 		goto err0;
-	}
-	if (close(shared->finished[R])) {
-		warnp("close");
-		goto err0;
-	}
 
 	/* Success! */
 	return (0);

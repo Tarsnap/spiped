@@ -84,6 +84,7 @@ SRCS	+=	setgroups_none.c
 SRCS	+=	setuidgid.c
 SRCS	+=	sock.c
 SRCS	+=	sock_util.c
+SRCS	+=	thread_sync.c
 SRCS	+=	warnp.c
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/util
 
