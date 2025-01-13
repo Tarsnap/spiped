@@ -117,7 +117,7 @@ setuidgid.o: ../libcperciva/util/setuidgid.c ../libcperciva/util/parsenum.h ../l
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -DAPISUPPORT_CONFIG_FILE=\"apisupport-config.h\" -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/util/setuidgid.c -o setuidgid.o
 sock.o: ../libcperciva/util/sock.c ../libcperciva/util/imalloc.h ../libcperciva/util/parsenum.h ../libcperciva/util/warnp.h ../libcperciva/util/sock.h ../libcperciva/util/sock_internal.h ../libcperciva/util/sock_util.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -DAPISUPPORT_CONFIG_FILE=\"apisupport-config.h\" -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/util/sock.c -o sock.o
-sock_util.o: ../libcperciva/util/sock_util.c ../libcperciva/util/asprintf.h ../libcperciva/util/sock.h ../libcperciva/util/sock_internal.h ../libcperciva/util/sock_util.h
+sock_util.o: ../libcperciva/util/sock_util.c ../libcperciva/util/asprintf.h ../libcperciva/util/sock.h ../libcperciva/util/warnp.h ../libcperciva/util/sock_internal.h ../libcperciva/util/sock_util.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -DAPISUPPORT_CONFIG_FILE=\"apisupport-config.h\" -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/util/sock_util.c -o sock_util.o
 warnp.o: ../libcperciva/util/warnp.c ../libcperciva/util/warnp.h
 	${CC} ${CFLAGS_POSIX} -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DCPUSUPPORT_CONFIG_FILE=\"cpusupport-config.h\" -DAPISUPPORT_CONFIG_FILE=\"apisupport-config.h\" -I.. ${IDIRS} ${CPPFLAGS} ${CFLAGS} -c ../libcperciva/util/warnp.c -o warnp.o
