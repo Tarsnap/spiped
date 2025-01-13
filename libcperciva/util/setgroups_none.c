@@ -53,8 +53,10 @@ setgroups_none(void)
 {
 
 #ifdef NO_SETGROUPS
+	/* Not supported. */
 	return (0);
 #else
+	/* Attempt to leave all supplementary groups. */
 	return (setgroups(0, NULL));
 #endif
 }

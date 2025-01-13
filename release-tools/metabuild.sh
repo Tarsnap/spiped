@@ -113,6 +113,22 @@ get_apisupport_cflags() {
 	done | sed 's/^ //'
 }
 
+join_str() {
+	out=""
+	for text in "$@"; do
+		if [ -n "${out}" ]; then
+			# If we already have something in ${out}, add a space.
+			if [ -n "${text}" ]; then
+				out="${out} ${text}"
+			fi
+		else
+			# If ${out} is empty, set it to the first item.
+			out="${text}"
+		fi
+	done
+	printf "%s" "${out}"
+}
+
 add_object_files() {
 	# Set up useful variables
 	OBJ=$(${MAKEBSD} -v SRCS |				\
@@ -131,8 +147,8 @@ add_object_files() {
 		CF_MANUAL=$(${MAKEBSD} -v CFLAGS."$(basename "${S}")")
 		CF_CPUSUPPORT=$(get_cpusupport_cflags "${S}")
 		CF_APISUPPORT=$(get_apisupport_cflags "${S}")
-		CF=$(echo "${CF_CPUSUPPORT} ${CF_APISUPPORT} ${CF_MANUAL}" | \
-		    sed 's/^ //' | sed 's/ $//')
+		CF=$(join_str "${CF_CPUSUPPORT}" "${CF_APISUPPORT}"	\
+			"${CF_MANUAL}")
 		IDIRS=$(${MAKEBSD} -v IDIRS)
 		# Get the build dependencies, then remove newlines, condense
 		# multiple spaces, remove line continuations, and replace the
@@ -145,8 +161,9 @@ add_object_files() {
 		    sed -e 's| $||g'
 		printf "\n"
 		# Print the build instructions
-		echo "	${OUT_CC_BEGIN} ${OUT_CC_MID} ${CF} -c ${S} -o ${F}" |
-		    tr -s ' '
+		line=$(join_str	"${OUT_CC_BEGIN}" "${OUT_CC_MID}"	\
+			"${CF}"	"-c" "${S}" "-o" "${F}")
+		printf "\t%s\n" "${line}"
 	done >> "${OUT}"
 }
 
