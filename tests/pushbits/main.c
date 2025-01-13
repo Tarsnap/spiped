@@ -177,7 +177,7 @@ chain_one(void)
 		warn0("Message is not the expected length");
 		goto err2;
 	}
-	if (strncmp(buf, msg, msglen) != 0) {
+	if (memcmp(buf, msg, msglen) != 0) {
 		warn0("failed to get the (full?) message");
 		goto err2;
 	}
@@ -295,7 +295,7 @@ chain_two(void)
 		warn0("Message is not the expected length");
 		goto err2;
 	}
-	if (strncmp(buf, msg, msglen) != 0) {
+	if (memcmp(buf, msg, msglen) != 0) {
 		warn0("failed to get the (full?) message");
 		goto err2;
 	}
