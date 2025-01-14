@@ -7,6 +7,13 @@
 #define FD_DRAIN_MAX_SIZE 16384
 
 /**
+ * fd_drain(fd_p):
+ * Drain bytes from the file descriptor ${*fd_p} -- passed as an (int *) -- as
+ * quickly as possible.
+ */
+int fd_drain(void *);
+
+/**
  * fd_drain_fork(fd):
  * Create a new process to drain bytes from the file descriptor ${fd} until it
  * receives an EOF.  Return the process ID of the new process, or -1 upon

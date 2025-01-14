@@ -11,7 +11,7 @@
  * Drain bytes from the file descriptor ${*fd_p} -- passed as an (int *) -- as
  * quickly as possible.
  */
-static int
+int
 fd_drain(void * cookie)
 {
 	int fd = *((int *)cookie);
