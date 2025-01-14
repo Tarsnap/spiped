@@ -13,6 +13,7 @@ LIB_DIR	=	../../lib
 
 # Main test code
 SRCS	=	main.c
+SRCS	+=	fd_drain.c
 SRCS	+=	standalone_aesctr.c
 SRCS	+=	standalone_aesctr_hmac.c
 SRCS	+=	standalone_hmac.c
