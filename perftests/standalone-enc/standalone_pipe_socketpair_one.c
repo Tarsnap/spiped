@@ -1,6 +1,5 @@
 #include <sys/socket.h>
 
-#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -17,7 +16,7 @@
 #include "standalone.h"
 
 /* The smallest this can be is PCRYPT_ESZ (which is 1060). */
-#define MAXOUTSIZE 16384
+#define FD_DRAIN_MAX_SIZE 16384
 
 /* Ends of socketpairs (convention, not a firm requirement). */
 #define R 0
@@ -82,27 +81,28 @@ err0:
 	return (1);
 }
 
-/* Drain bytes from pipeinfo->out[R] as quickly as possible. */
+/**
+ * fd_drain_internal(fd_p):
+ * Drain bytes from the file descriptor ${*fd_p} -- passed as an (int *) -- as
+ * quickly as possible.
+ */
 static int
-pipe_output(void * cookie)
+fd_drain_internal(void * cookie)
 {
-	struct pipeinfo * pipeinfo = cookie;
-	uint8_t mybuf[MAXOUTSIZE];
+	int fd = *((int *)cookie);
+	uint8_t mybuf[FD_DRAIN_MAX_SIZE];
 	ssize_t readlen;
 
-	/* Loop until we hit EOF. */
+	/* Loop until we hit EOF or an error. */
 	do {
-		/*
-		 * This will almost always read 1060 bytes (size of an
-		 * encrypted packet, PCRYPT_ESZ in proto_crypt.h), but it's
-		 * not impossible to have more than that.
-		 */
-		if ((readlen = read(pipeinfo->out[R], mybuf, MAXOUTSIZE))
-		    == -1) {
-			warnp("read");
-			goto err0;
-		}
-	} while (readlen != 0);
+		readlen = read(fd, mybuf, FD_DRAIN_MAX_SIZE);
+	} while (readlen > 0);
+
+	/* Check for an error. */
+	if (readlen == -1) {
+		warnp("read");
+		goto err0;
+	}
 
 	/* Success! */
 	return (0);
@@ -112,15 +112,35 @@ err0:
 	return (1);
 }
 
+/**
+ * fd_drain_fork(fd):
+ * Create a new process to drain bytes from the file descriptor ${fd} until it
+ * receives an EOF.  Return the process ID of the new process, or -1 upon
+ * error.
+ */
+static pid_t
+fd_drain_fork(int fd)
+{
+	pid_t pid;
+
+	/* Fork a new process to run the function. */
+	if ((pid = fork_func(fd_drain_internal, &fd)) == -1)
+		goto err0;
+
+	/* Success! */
+	return (pid);
+
+err0:
+	/* Failure! */
+	return (-1);
+}
+
 static int
 pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 {
 	struct pipeinfo * pipeinfo = cookie;
 	uint8_t kbuf[64];
 	size_t i;
-
-	/* Sanity check for pipe_output(). */
-	assert(buflen <= MAXOUTSIZE);
 
 	/* Set up encryption key. */
 	memset(kbuf, 0, 64);
@@ -145,7 +165,7 @@ pipe_init(void * cookie, uint8_t * buf, size_t buflen)
 	pipeinfo->done = 0;
 
 	/* Create the pipe processes. */
-	if ((pipeinfo->out_pid = fork_func(pipe_output, pipeinfo)) == -1)
+	if ((pipeinfo->out_pid = fd_drain_fork(pipeinfo->out[R])) == -1)
 		goto err0;
 	if ((pipeinfo->enc_pid = fork_func(pipe_enc, pipeinfo)) == -1)
 		goto err0;
