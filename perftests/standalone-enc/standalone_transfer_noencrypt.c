@@ -13,6 +13,7 @@
 #include "pthread_create_blocking_np.h"
 #include "warnp.h"
 
+#include "fd_drain.h"
 #include "standalone.h"
 
 /* The smallest this can be is PCRYPT_ESZ (which is 1060). */
@@ -109,18 +110,11 @@ static void *
 drain_output(void * cookie)
 {
 	struct shared * shared = cookie;
-	uint8_t mybuf[MAXOUTSIZE];
-	ssize_t readlen;
 	char dummy = 0;
 
-	/* Loop until we hit EOF. */
-	do {
-		/* Read from ->out. */
-		if ((readlen = read(shared->out[R], mybuf, MAXOUTSIZE)) == -1) {
-			warnp("read");
-			goto err0;
-		}
-	} while (readlen != 0);
+	/* Read until we get an EOF. */
+	if (fd_drain(shared->out[R]))
+		goto err0;
 
 	/* Notify that we've finished. */
 	if (noeintr_write(shared->finished[W], &dummy, 1) != 1) {
