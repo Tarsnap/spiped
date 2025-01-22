@@ -1,4 +1,4 @@
-(unreleased)
+spiped-1.6.3
 * Add -b <bind address> (spiped and spipe) to bind the outgoing address.
 spiped-1.6.2
 * Warn if the maximum number of connections is reached in spiped.
