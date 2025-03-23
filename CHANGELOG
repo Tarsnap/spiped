@@ -1,3 +1,7 @@
+spiped-1.6.4
+* Fixes a bug which can cause spiped to abort if a RST packet arrives
+  from one side of a pipe at the same time as a FIN packet arrives from
+  the other end.
 spiped-1.6.3
 * Add -b <bind address> (spiped and spipe) to bind the outgoing address.
 spiped-1.6.2

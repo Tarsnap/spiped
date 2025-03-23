@@ -159,13 +159,24 @@ callback_pipe_read(void * cookie, int status)
 eof:
 	/* We aren't going to write any more. */
 	if (shutdown(P->s_out, SHUT_WR)) {
-		/*
-		 * We've already received an EOF, so it's no cause for concern
-		 * if the other side has already closed the connection.
-		 */
-		if (errno != ENOTCONN) {
-			warnp("shutdown");
+		switch (errno) {
+		case EBADF:
+		case EINVAL:
+		case ENOTSOCK:
+			/* Should never happen. */
 			goto err0;
+		case ENOTCONN:
+		case ECONNRESET:
+			/* Simultaneous closes; not a problem. */
+			break;
+		default:
+			/*
+			 * Unexpected error; treat this as a broken connection
+			 * but don't die in case the error originates from some
+			 * sort of network issue rather than from an error in
+			 * spiped itself.
+			 */
+			goto fail;
 		}
 	}
 
