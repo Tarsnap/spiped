@@ -156,13 +156,6 @@ callback_pipe_read(void * cookie, int status)
 	/* Success! */
 	return (0);
 
-fail:
-	/* Record that this connection is broken. */
-	*(P->status) = -1;
-
-	/* Inform the upstream that our status has changed. */
-	return ((P->callback)(P->cookie));
-
 eof:
 	/* We aren't going to write any more. */
 	if (shutdown(P->s_out, SHUT_WR)) {
@@ -178,6 +171,13 @@ eof:
 
 	/* Record that we have reached EOF. */
 	*(P->status) = 0;
+
+	/* Inform the upstream that our status has changed. */
+	return ((P->callback)(P->cookie));
+
+fail:
+	/* Record that this connection is broken. */
+	*(P->status) = -1;
 
 	/* Inform the upstream that our status has changed. */
 	return ((P->callback)(P->cookie));
