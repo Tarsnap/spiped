@@ -32,7 +32,7 @@ check_supplementary_groups_none(void)
 
 	/* Find number of groups. */
 	if ((ngroups = getgroups(0, NULL)) < 0) {
-		warnp("getgroups()");
+		warnp("getgroups");
 		goto err0;
 	}
 
@@ -46,7 +46,7 @@ check_supplementary_groups_none(void)
 		 * so if we're in exactly one group, we need to check that GID.
 		 */
 		if (getgroups(1, grouplist) != 1) {
-			warnp("getgroups()");
+			warnp("getgroups");
 			goto err0;
 		}
 		/* POSIX: getegid() shall not modify errno. */
@@ -236,7 +236,7 @@ setuidgid(const char * user_group_string, int leave_suppgrp)
 		/* Attempt to leave all supplementary groups. */
 		if (setgroups_none()) {
 			if (errno != EPERM) {
-				warnp("setgroups()");
+				warnp("setgroups");
 				goto err1;
 			}
 

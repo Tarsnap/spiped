@@ -30,7 +30,7 @@ found(void * cookie, struct sock_addr ** sas)
 
 		/* Extract address and print it. */
 		if ((addr = sock_addr_prettyprint(sas[i])) == NULL) {
-			warn0("sock_addr_prettyprint()");
+			warn0("sock_addr_prettyprint");
 			goto err1;
 		}
 		printf("%s\n", addr);
