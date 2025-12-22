@@ -25,9 +25,9 @@ env:
                         -Wno-reserved-identifier
   CFLAGS_GCC_PROJECT:
   CFLAGS_OSX: -Wno-poison-system-directories
-              -I/usr/local/opt/openssl@1.1/include
+              -I/opt/homebrew/opt/openssl@3/include
               -Wno-reserved-id-macro
-  LDFLAGS_OSX: -L/usr/local/opt/openssl@1.1/lib
+  LDFLAGS_OSX: -L/opt/homebrew/opt/openssl@3/lib
 
 jobs:
   Ubuntu:
@@ -68,7 +68,7 @@ jobs:
       run: test -z "$(git status --porcelain=v1)"
   macOS:
     name: macOS
-    runs-on: macOS-13
+    runs-on: macOS-14
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
