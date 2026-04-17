@@ -1,3 +1,6 @@
+.if !defined(_MAKEFILE_INC)
+_MAKEFILE_INC=1
+
 # Used by Makefile code which generates POSIX Makefiles
 .for X in ${SRCS}
 source-${X:.c=.o}: ${X}
@@ -44,3 +47,5 @@ CFLAGS	+=	-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700
 # Make logic
 CFLAGS	+=	${IDIRS}
 LDADD	+=	${LDADD_REQ}
+
+.endif # !_MAKEFILE_INC
