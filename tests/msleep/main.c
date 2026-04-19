@@ -20,7 +20,7 @@ main(int argc, char * argv[])
 		goto err0;
 	}
 	if (PARSENUM(&msec, argv[1], 0, INT_MAX)) {
-		warnp("PARSNEUM");
+		warnp("PARSENUM");
 		goto err0;
 	}
 

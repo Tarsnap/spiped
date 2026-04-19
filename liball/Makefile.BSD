@@ -109,4 +109,9 @@ SRCS	+=	graceful_shutdown.c
 SRCS	+=	pthread_create_blocking_np.c
 IDIRS	+=	-I${LIB_DIR}/util
 
+# Forbid including the Makefile.inc in this directory.
+# This doesn't happen on FreeBSD, but on some other systems,
+# <bsd.lib.mk> will include ./Makefile.inc (?!).
+_LIBALL_MAKEFILE_INC=1
+
 .include <bsd.lib.mk>

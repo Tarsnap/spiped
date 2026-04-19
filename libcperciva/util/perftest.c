@@ -87,12 +87,12 @@ perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
 		/* Get beginning time. */
 		if (cputime) {
 			if (monoclock_get_cputime(&begin)) {
-				warnp("monoclock_get_cputime()");
+				warnp("monoclock_get_cputime");
 				goto err3;
 			}
 		} else {
 			if (monoclock_get(&begin)) {
-				warnp("monoclock_get()");
+				warnp("monoclock_get");
 				goto err3;
 			}
 		}
@@ -104,12 +104,12 @@ perftest_buffers(size_t nbytes, const size_t * sizes, size_t nsizes,
 		/* Get ending time. */
 		if (cputime) {
 			if (monoclock_get_cputime(&end)) {
-				warnp("monoclock_get_cputime()");
+				warnp("monoclock_get_cputime");
 				goto err3;
 			}
 		} else {
 			if (monoclock_get(&end)) {
-				warnp("monoclock_get()");
+				warnp("monoclock_get");
 				goto err3;
 			}
 		}
