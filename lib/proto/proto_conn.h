@@ -38,7 +38,8 @@ void * proto_conn_create(int, struct sock_addr **, const struct sock_addr *,
 /**
  * proto_conn_drop(conn_cookie, reason):
  * Drop connection and free memory associated with ${conn_cookie}, due to
- * ${reason}.  Return success or failure.
+ * ${reason}.  Return 0 on success, or the return value of the callback_dead
+ * function on failure.
  */
 int proto_conn_drop(void *, int);
 
