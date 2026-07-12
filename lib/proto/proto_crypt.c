@@ -292,7 +292,7 @@ proto_crypt_mkkeys(const struct proto_secret * K,
 		/* Perform the diffie-hellman computation. */
 		if (crypto_dh_compute(yh_r, x,
 		    &nonce_y[PCRYPT_NONCE_LEN * 2]))
-			goto err0;
+			goto err1;
 	}
 
 	/* Compute dk_2. */
@@ -301,16 +301,23 @@ proto_crypt_mkkeys(const struct proto_secret * K,
 
 	/* Create key structures. */
 	if ((*eh_c = mkkeypair(&dk_2[0])) == NULL)
-		goto err0;
-	if ((*eh_s = mkkeypair(&dk_2[64])) == NULL)
 		goto err1;
+	if ((*eh_s = mkkeypair(&dk_2[64])) == NULL)
+		goto err2;
+
+	/* Clear sensitive material from the stack. */
+	insecure_memzero(dk_2, sizeof(dk_2));
+	insecure_memzero(nonce_y, sizeof(nonce_y));
 
 	/* Success! */
 	return (0);
 
-err1:
+err2:
 	proto_crypt_free(*eh_c);
-err0:
+err1:
+	insecure_memzero(dk_2, sizeof(dk_2));
+	insecure_memzero(nonce_y, sizeof(nonce_y));
+
 	/* Failure! */
 	return (-1);
 }
