@@ -343,7 +343,7 @@ main(int argc, char * argv[])
 	/* Drop privileges (if applicable). */
 	if (opt_u && setuidgid(opt_u, SETUIDGID_SGROUP_LEAVE_WARN)) {
 		warnp("Failed to drop privileges");
-		goto err7;
+		goto err6;
 	}
 
 	/* Start accepting connections. */
@@ -351,7 +351,7 @@ main(int argc, char * argv[])
 	    sas_t, sa_b, opt_d, opt_f, opt_g, opt_j, K, opt_n, opt_o,
 	    &conndone)) == NULL) {
 		warnp("Failed to initialize connection acceptor");
-		goto err7;
+		goto err6;
 	}
 
 	/* dispatch is now maintaining sas_t and s. */
