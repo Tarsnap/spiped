@@ -293,7 +293,7 @@ handshakedone(struct handshake_cookie * H)
 	/* Perform the final computation. */
 	if (proto_crypt_mkkeys(H->K, H->nonce_local, H->nonce_remote,
 	    H->yh_remote, H->x, H->nopfs, H->decr, &c, &s))
-		goto err0;
+		goto err1;
 
 	/* Perform the callback. */
 	rc = (H->callback)(H->cookie, c, s);
@@ -304,7 +304,9 @@ handshakedone(struct handshake_cookie * H)
 	/* Return status code from callback. */
 	return (rc);
 
-err0:
+err1:
+	handshakefail(H);
+
 	/* Failure! */
 	return (-1);
 }
