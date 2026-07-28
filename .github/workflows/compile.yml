@@ -38,7 +38,7 @@ jobs:
     - name: Install software
       run: sudo apt-get install --no-install-recommends valgrind
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: Compile with clang
       env:
         CC: clang-13
@@ -64,13 +64,18 @@ jobs:
         USE_VALGRIND: 1
       run: make test VERBOSE=1
     - name: Check for untracked files
-      run: test -z "$(git status --porcelain=v1)"
+      run: |
+        status="$(git status --porcelain=v1)"
+        if [ -n "${status}" ]; then
+          echo "${status}"
+          exit 1
+        fi
   macOS:
     name: macOS
     runs-on: macos-14
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: Compile with clang
       env:
         CC: clang
@@ -82,3 +87,10 @@ jobs:
       run: make
     - name: Test clang binaries
       run: make test VERBOSE=1
+    - name: Check for untracked files
+      run: |
+        status="$(git status --porcelain=v1)"
+        if [ -n "${status}" ]; then
+          echo "${status}"
+          exit 1
+        fi
