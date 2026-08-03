@@ -306,11 +306,11 @@ main(int argc, char * argv[])
 	if (ET.stopped == 0) {
 		if ((rc = pthread_join(ET.threads[0], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
-			goto err3;
+			goto err4;
 		}
 		if ((rc = pthread_join(ET.threads[1], NULL)) != 0) {
 			warn0("pthread_join: %s", strerror(rc));
-			goto err3;
+			goto err4;
 		}
 	}
 
