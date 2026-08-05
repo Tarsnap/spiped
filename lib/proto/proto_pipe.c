@@ -151,7 +151,7 @@ callback_pipe_read(void * cookie, int status)
 	if ((P->write_cookie = network_write(P->s_out, P->outbuf,
 	    (size_t)P->wlen, (size_t)P->wlen, callback_pipe_write,
 	    P)) == NULL)
-		goto err0;
+		goto err1;
 
 	/* Success! */
 	return (0);
@@ -164,7 +164,7 @@ eof:
 		case EINVAL:
 		case ENOTSOCK:
 			/* Should never happen. */
-			goto err0;
+			goto err1;
 		case ENOTCONN:
 		case ECONNRESET:
 			/* Simultaneous closes; not a problem. */
@@ -193,7 +193,13 @@ fail:
 	/* Inform the upstream that our status has changed. */
 	return ((P->callback)(P->cookie));
 
-err0:
+err1:
+	/* Record that this connection is broken. */
+	*(P->status) = -1;
+
+	/* Inform the upstream that our status has changed. */
+	P->callback(P->cookie);
+
 	/* Failure! */
 	return (-1);
 }
@@ -212,7 +218,7 @@ callback_pipe_write(void * cookie, ssize_t len)
 
 	/* Launch another read. */
 	if (netbuf_read_wait(P->R, P->minread, callback_pipe_read, P))
-		goto err0;
+		goto err1;
 
 	/* Success! */
 	return (0);
@@ -224,7 +230,13 @@ fail:
 	/* Inform the upstream that our status has changed. */
 	return ((P->callback)(P->cookie));
 
-err0:
+err1:
+	/* Record that this connection is broken. */
+	*(P->status) = -1;
+
+	/* Inform the upstream that our status has changed. */
+	P->callback(P->cookie);
+
 	/* Failure! */
 	return (-1);
 }
