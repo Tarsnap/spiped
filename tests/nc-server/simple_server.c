@@ -205,13 +205,15 @@ drop(struct conn_list_node * node_ptr)
 {
 
 	/* If we still have an active read cookie, cancel it. */
-	if (node_ptr->network_read_cookie != NULL)
+	if (node_ptr->network_read_cookie != NULL) {
 		network_read_cancel(node_ptr->network_read_cookie);
+		node_ptr->network_read_cookie = NULL;
+	}
 
 	/* Close the incoming connection. */
 	if (close(node_ptr->sock_read) == -1) {
 		warnp("close");
-		goto err0;
+		goto err1;
 	}
 
 	/* Clean up the node. */
@@ -220,7 +222,9 @@ drop(struct conn_list_node * node_ptr)
 	/* Success! */
 	return (0);
 
-err0:
+err1:
+	conndied(node_ptr);
+
 	/* Failure! */
 	return (-1);
 }
