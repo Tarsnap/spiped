@@ -311,6 +311,9 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	A->caller_cookie = caller_cookie;
 	LIST_INIT(&A->conn_cookies);
 
+	/* sock is now owned by A. */
+	sock = -1;
+
 	/* Accept a connection. */
 	if (doaccept(A)) {
 		warn0("doaccept");
@@ -320,7 +323,7 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	/* Loop until we die. */
 	if (events_spin(&A->conndone)) {
 		warnp("Error running event loop");
-		goto err4;
+		goto err3;
 	}
 
 	/* Clean up. */
@@ -330,13 +333,10 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	/* Success! */
 	return (0);
 
-err4:
-	if (A->accept_cookie != NULL)
-		network_accept_cancel(A->accept_cookie);
 err3:
-	free(A);
+	simple_server_shutdown(A);
 err2:
-	if (close(sock))
+	if ((sock >= 0) && close(sock))
 		warnp("close");
 err1:
 	sock_addr_free(sa);
