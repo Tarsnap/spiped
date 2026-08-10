@@ -180,15 +180,13 @@ callback_read(void * cookie, ssize_t lenread)
 			warnp("network_read");
 			goto err0;
 		}
-	} else if (lenread == 0) {
+	} else {
+		if (lenread < 0)
+			warn0("Failed to read from network");
 		if (drop(R)) {
 			warn0("drop");
 			goto err0;
 		}
-	} else {
-		warn0("Failed to read from network");
-		A->conndone = 1;
-		goto err0;
 	}
 
 	/* Success! */
