@@ -252,8 +252,8 @@ simple_server_shutdown(void * cookie)
 	 * from the list of conn_cookies.
 	 */
 	while ((node_ptr = LIST_FIRST(&A->conn_cookies)) != NULL) {
-		/* Remove nodes from the list. */
-		if (drop(LIST_FIRST(&A->conn_cookies)))
+		/* Remove the first node from the list. */
+		if (drop(node_ptr))
 			warn0("drop");
 
 		/*
