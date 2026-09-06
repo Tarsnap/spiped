@@ -113,6 +113,9 @@ proto_crypt_secret(const char * filename)
 	/* Compute the final hash and wipe context state. */
 	SHA256_Final(K->K, &ctx);
 
+	/* Clear sensitive material from the stack. */
+	insecure_memzero(buf, sizeof(buf));
+
 	/* Success! */
 	return (K);
 
@@ -123,6 +126,9 @@ err2:
 
 	/* Wipe context state. */
 	SHA256_Final(K->K, &ctx);
+
+	/* Clear sensitive material from the stack. */
+	insecure_memzero(buf, sizeof(buf));
 err1:
 	proto_crypt_secret_free(K);
 err0:
@@ -166,6 +172,9 @@ proto_crypt_dhmac(const struct proto_secret * K,
 	/* Copy out diffie-hellman parameter MAC keys (in the right order). */
 	memcpy(dhmac_c, &dk_1[0], PCRYPT_DHMAC_LEN);
 	memcpy(dhmac_s, &dk_1[PCRYPT_DHMAC_LEN], PCRYPT_DHMAC_LEN);
+
+	/* Clear sensitive material from the stack. */
+	insecure_memzero(dk_1, sizeof(dk_1));
 }
 
 /**
