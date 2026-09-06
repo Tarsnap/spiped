@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "crypto_entropy.h"
+#include "insecure_memzero.h"
 #include "network.h"
 
 #include "proto_crypt.h"
@@ -53,7 +54,8 @@ handshakefail(struct handshake_cookie * H)
 	/* Perform the callback. */
 	rc = (H->callback)(H->cookie, NULL, NULL);
 
-	/* Free the cookie. */
+	/* Clear sensitive material and free the cookie. */
+	insecure_memzero(H, sizeof(struct handshake_cookie));
 	free(H);
 
 	/* Return status from callback. */
@@ -112,6 +114,7 @@ proto_handshake(int s, int decr, int nopfs, int requirepfs,
 err2:
 	network_write_cancel(H->write_cookie);
 err1:
+	insecure_memzero(H, sizeof(struct handshake_cookie));
 	free(H);
 err0:
 	/* Failure! */
@@ -298,7 +301,8 @@ handshakedone(struct handshake_cookie * H)
 	/* Perform the callback. */
 	rc = (H->callback)(H->cookie, c, s);
 
-	/* Free the cookie. */
+	/* Clear sensitive material and free the cookie. */
+	insecure_memzero(H, sizeof(struct handshake_cookie));
 	free(H);
 
 	/* Return status code from callback. */
@@ -326,6 +330,7 @@ proto_handshake_cancel(void * cookie)
 	if (H->write_cookie != NULL)
 		network_write_cancel(H->write_cookie);
 
-	/* Free the cookie. */
+	/* Clear sensitive material and free the cookie. */
+	insecure_memzero(H, sizeof(struct handshake_cookie));
 	free(H);
 }
