@@ -238,7 +238,7 @@ main(int argc, char * argv[])
 		usage();
 	if (!(opt_o > 0.0))
 		usage();
-	if ((opt_r != 60.0) && opt_R)
+	if (opt_r_set && opt_R)
 		usage();
 	if ((opt_s == NULL) || sock_addr_validate(opt_s))
 		usage();
