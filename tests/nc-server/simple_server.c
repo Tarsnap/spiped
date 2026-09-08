@@ -180,15 +180,13 @@ callback_read(void * cookie, ssize_t lenread)
 			warnp("network_read");
 			goto err0;
 		}
-	} else if (lenread == 0) {
+	} else {
+		if (lenread < 0)
+			warn0("Failed to read from network");
 		if (drop(R)) {
 			warn0("drop");
 			goto err0;
 		}
-	} else {
-		warn0("Failed to read from network");
-		A->conndone = 1;
-		goto err0;
 	}
 
 	/* Success! */
@@ -205,13 +203,15 @@ drop(struct conn_list_node * node_ptr)
 {
 
 	/* If we still have an active read cookie, cancel it. */
-	if (node_ptr->network_read_cookie != NULL)
+	if (node_ptr->network_read_cookie != NULL) {
 		network_read_cancel(node_ptr->network_read_cookie);
+		node_ptr->network_read_cookie = NULL;
+	}
 
 	/* Close the incoming connection. */
 	if (close(node_ptr->sock_read) == -1) {
 		warnp("close");
-		goto err0;
+		goto err1;
 	}
 
 	/* Clean up the node. */
@@ -220,7 +220,9 @@ drop(struct conn_list_node * node_ptr)
 	/* Success! */
 	return (0);
 
-err0:
+err1:
+	conndied(node_ptr);
+
 	/* Failure! */
 	return (-1);
 }
@@ -235,9 +237,14 @@ simple_server_shutdown(void * cookie)
 	struct accept_state * A = cookie;
 	struct conn_list_node * node_ptr;
 
+	/* Stop "drop()->conndied()->doaccept()" from arming a new accept. */
+	A->shutdown_requested = 1;
+
 	/* Cancel any further accepts. */
-	if (A->accept_cookie != NULL)
+	if (A->accept_cookie != NULL) {
 		network_accept_cancel(A->accept_cookie);
+		A->accept_cookie = NULL;
+	}
 
 	/*
 	 * Shut down any open connections.  drop() will call
@@ -245,8 +252,8 @@ simple_server_shutdown(void * cookie)
 	 * from the list of conn_cookies.
 	 */
 	while ((node_ptr = LIST_FIRST(&A->conn_cookies)) != NULL) {
-		/* Remove nodes from the list. */
-		if (drop(LIST_FIRST(&A->conn_cookies)))
+		/* Remove the first node from the list. */
+		if (drop(node_ptr))
 			warn0("drop");
 
 		/*
@@ -307,6 +314,9 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	A->caller_cookie = caller_cookie;
 	LIST_INIT(&A->conn_cookies);
 
+	/* sock is now owned by A. */
+	sock = -1;
+
 	/* Accept a connection. */
 	if (doaccept(A)) {
 		warn0("doaccept");
@@ -316,7 +326,7 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	/* Loop until we die. */
 	if (events_spin(&A->conndone)) {
 		warnp("Error running event loop");
-		goto err4;
+		goto err3;
 	}
 
 	/* Clean up. */
@@ -326,13 +336,10 @@ simple_server(const char * addr, size_t nconn_max, size_t shutdown_after,
 	/* Success! */
 	return (0);
 
-err4:
-	if (A->accept_cookie != NULL)
-		network_accept_cancel(A->accept_cookie);
 err3:
-	free(A);
+	simple_server_shutdown(A);
 err2:
-	if (close(sock))
+	if ((sock >= 0) && close(sock))
 		warnp("close");
 err1:
 	sock_addr_free(sa);

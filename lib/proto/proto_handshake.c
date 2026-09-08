@@ -190,12 +190,14 @@ dhread(struct handshake_cookie * H)
 	/* Read the remote signed diffie-hellman parameter. */
 	if ((H->read_cookie = network_read(H->s, H->yh_remote, PCRYPT_YH_LEN,
 	    PCRYPT_YH_LEN, callback_dh_read, H)) == NULL)
-		goto err0;
+		goto err1;
 
 	/* Success! */
 	return (0);
 
-err0:
+err1:
+	handshakefail(H);
+
 	/* Failure! */
 	return (-1);
 }
@@ -238,17 +240,19 @@ dhwrite(struct handshake_cookie * H)
 	/* Generate a signed diffie-hellman parameter. */
 	if (proto_crypt_dh_generate(H->yh_local, H->x, H->dhmac_local,
 	    H->nopfs))
-		goto err0;
+		goto err1;
 
 	/* Write our signed diffie-hellman parameter. */
 	if ((H->write_cookie = network_write(H->s, H->yh_local, PCRYPT_YH_LEN,
 	    PCRYPT_YH_LEN, callback_dh_write, H)) == NULL)
-		goto err0;
+		goto err1;
 
 	/* Success! */
 	return (0);
 
-err0:
+err1:
+	handshakefail(H);
+
 	/* Failure! */
 	return (-1);
 }
