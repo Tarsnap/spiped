@@ -11,7 +11,8 @@ int graceful_shutdown_initialize(int (*)(void *), void *);
 
 /**
  * graceful_shutdown_manual(void):
- * Shutdown immediately, without needing a SIGTERM.
+ * Shutdown immediately, without needing a SIGTERM.  This must be called from
+ * the thread which called graceful_shutdown_initialize().
  */
 void graceful_shutdown_manual(void);
 

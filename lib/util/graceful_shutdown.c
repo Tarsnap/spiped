@@ -115,7 +115,8 @@ err0:
 
 /**
  * graceful_shutdown_manual(void):
- * Shutdown immediately, without needing a SIGTERM.
+ * Shutdown immediately, without needing a SIGTERM.  This must be called from
+ * the thread which called graceful_shutdown_initialize().
  */
 void
 graceful_shutdown_manual(void)
@@ -123,7 +124,6 @@ graceful_shutdown_manual(void)
 
 	/* Sanity check: we must be initialized. */
 	assert(begin_shutdown != NULL);
-	assert(caller_cookie != NULL);
 
 	/* Stop the timer. */
 	if (timer_cookie != NULL) {
