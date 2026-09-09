@@ -14,6 +14,7 @@ static void (* sighandler_sigterm_orig)(int);
 static void * caller_cookie;
 static void * timer_cookie = NULL;
 static int shutdown_started = 0;
+static int initialized = 0;
 
 /* Flag to show that SIGTERM was received. */
 static volatile sig_atomic_t should_shutdown = 0;
@@ -112,6 +113,9 @@ graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
 		goto err0;
 	}
 
+	/* We completed the initialization. */
+	initialized = 1;
+
 	/* Success! */
 	return (0);
 
@@ -131,7 +135,7 @@ graceful_shutdown_manual(void)
 {
 
 	/* Sanity check: we must be initialized. */
-	assert(begin_shutdown != NULL);
+	assert(initialized);
 
 	/* Bail if we've already started a shutdown. */
 	if (shutdown_started)
