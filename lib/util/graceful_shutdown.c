@@ -9,7 +9,7 @@
 #include "graceful_shutdown.h"
 
 /* Data from parent code. */
-static int (* begin_shutdown)(void *);
+static int (* begin_shutdown)(void *) = NULL;
 static void (* sighandler_sigterm_orig)(int);
 static void * caller_cookie;
 static void * timer_cookie = NULL;
@@ -84,12 +84,18 @@ err0:
  * graceful_shutdown_initialize(callback, caller_cookie):
  * Initialize a signal handler for SIGTERM, and start a continuous 1-second
  * timer which checks if SIGTERM was given; if detected, call ${callback} and
- * give it the ${caller_cookie}.
+ * give it the ${caller_cookie}.  Do not retry this function upon failure.
  */
 int
 graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
     void * caller_cookie_parent)
 {
+
+	/* Sanity check; we can only have one (global) graceful_shutdown. */
+	if (begin_shutdown != NULL) {
+		warn0("graceful_shutdown_initialize() already called");
+		goto err0;
+	}
 
 	/* Record callback data. */
 	begin_shutdown = begin_shutdown_parent;
