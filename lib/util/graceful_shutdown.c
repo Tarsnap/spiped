@@ -13,6 +13,7 @@ static int (* begin_shutdown)(void *);
 static void (* sighandler_sigterm_orig)(int);
 static void * caller_cookie;
 static void * timer_cookie = NULL;
+static int shutdown_started = 0;
 
 /* Flag to show that SIGTERM was received. */
 static volatile sig_atomic_t should_shutdown = 0;
@@ -43,11 +44,17 @@ graceful_shutdown(void * cookie)
 
 	(void)cookie; /* UNUSED */
 
+	/* Bail if we've already started a shutdown. */
+	if (shutdown_started)
+		return (0);
+
 	/* This timer has expired. */
 	timer_cookie = NULL;
 
 	/* Use the callback function, or schedule another check in 1 second. */
 	if (should_shutdown) {
+		shutdown_started = 1;
+
 		if (begin_shutdown(caller_cookie) != 0) {
 			warn0("Failed to begin shutdown");
 			goto err0;
@@ -116,7 +123,8 @@ err0:
 /**
  * graceful_shutdown_manual(void):
  * Shutdown immediately, without needing a SIGTERM.  This must be called from
- * the thread which called graceful_shutdown_initialize().
+ * the thread which called graceful_shutdown_initialize().  If a shutdown
+ * has already been started, do nothing.
  */
 void
 graceful_shutdown_manual(void)
@@ -124,6 +132,10 @@ graceful_shutdown_manual(void)
 
 	/* Sanity check: we must be initialized. */
 	assert(begin_shutdown != NULL);
+
+	/* Bail if we've already started a shutdown. */
+	if (shutdown_started)
+		return;
 
 	/* Stop the timer. */
 	if (timer_cookie != NULL) {
