@@ -104,13 +104,13 @@ graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
 
 	/* Clean up the timer cookie at exit. */
 	if (atexit(graceful_shutdown_atexit))
-		goto err0;
+		goto err1;
 
 	/* Periodically check whether a signal was received. */
 	if ((timer_cookie = events_timer_register_double(
 	    graceful_shutdown, NULL, 1.0)) == NULL) {
 		warnp("Failed to register the graceful shutdown timer");
-		goto err0;
+		goto err1;
 	}
 
 	/* We completed the initialization. */
@@ -119,6 +119,10 @@ graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
 	/* Success! */
 	return (0);
 
+err1:
+	/* Restore original SIGTERM handler. */
+	if (signal(SIGTERM, sighandler_sigterm_orig) == SIG_ERR)
+		warnp("Failed to restore original SIGTERM handler");
 err0:
 	/* Failure! */
 	return (-1);
