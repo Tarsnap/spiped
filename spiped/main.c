@@ -58,8 +58,8 @@ diediedie_handler(int signo)
 
 /* Simplify error-handling in command-line parse loop. */
 #define OPT_EPARSE(opt, arg) do {					\
-	warnp("Error parsing argument: %s %s", opt, arg);		\
-	exit(1);							\
+	warnp("Error parsing argument: %s %s", opt, arg);			\
+	exit(1);								\
 } while (0)
 
 int
@@ -175,6 +175,8 @@ main(int argc, char * argv[])
 				usage();
 			opt_r_set = 1;
 			if (PARSENUM(&opt_r, optarg, 0, INFINITY))
+				OPT_EPARSE(ch, optarg);
+			if (!isfinite(opt_r) || (opt_r > 1e9))
 				OPT_EPARSE(ch, optarg);
 			break;
 		GETOPT_OPT("-R"):
