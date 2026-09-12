@@ -140,7 +140,7 @@ err0:
  * the thread which called graceful_shutdown_initialize().  If a shutdown
  * has already been started, do nothing.
  */
-void
+int
 graceful_shutdown_manual(void)
 {
 
@@ -149,7 +149,7 @@ graceful_shutdown_manual(void)
 
 	/* Bail if we've already started a shutdown. */
 	if (shutdown_started)
-		return;
+		return (0);
 
 	/* Stop the timer. */
 	if (timer_cookie != NULL) {
@@ -159,5 +159,5 @@ graceful_shutdown_manual(void)
 
 	/* Shut down. */
 	should_shutdown = 1;
-	graceful_shutdown(NULL);
+	return (graceful_shutdown(NULL));
 }

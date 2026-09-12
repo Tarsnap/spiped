@@ -15,6 +15,6 @@ int graceful_shutdown_init(int (*)(void *), void *);
  * the thread which called graceful_shutdown_initialize().  If a shutdown
  * has already been started, do nothing.
  */
-void graceful_shutdown_manual(void);
+int graceful_shutdown_manual(void);
 
 #endif /* !GRACEFUL_SHUTDOWN_H_ */

@@ -54,7 +54,7 @@ callback_conndied(void * cookie, int reason)
 
 	/* Shut it down if there's an error. */
 	if (ET->connection_error)
-		graceful_shutdown_manual();
+		(void)graceful_shutdown_manual();
 
 	/* Quit event loop. */
 	ET->conndone = 1;
