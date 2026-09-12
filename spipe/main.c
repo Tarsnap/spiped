@@ -291,7 +291,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Register a handler for SIGTERM. */
-	if (graceful_shutdown_initialize(&callback_graceful_shutdown, &ET)) {
+	if (graceful_shutdown_init(&callback_graceful_shutdown, &ET)) {
 		warn0("Failed to start graceful_shutdown timer");
 		goto err7;
 	}
