@@ -153,6 +153,16 @@ callback_pipe_read(void * cookie, int status)
 	/* Let netbuf layer know what we've used. */
 	netbuf_read_consume(P->R, inpos);
 
+	/*
+	 * A short decrypt-side read leaves ciphertext buffered.  Wait for
+	 * more bytes or EOF instead of issuing a zero-length write.
+	 */
+	if (outpos == 0) {
+		if (netbuf_read_wait(P->R, P->minread, callback_pipe_read, P))
+			goto err1;
+		return (0);
+	}
+
 	/* Write the encrypted or decrypted data. */
 	P->wlen = (ssize_t)outpos;
 	if ((P->write_cookie = network_write(P->s_out, P->outbuf,
