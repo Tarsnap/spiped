@@ -1,6 +1,9 @@
 #include <errno.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "warnp.h"
 
 #include "pthread_create_blocking_np.h"
 
@@ -78,6 +81,7 @@ pthread_create_blocking_np(pthread_t * restrict thread,
 {
 	struct wrapped_cookie * U;
 	int rc;
+	int rc_cleanup;
 
 	/*
 	 * Allocate our cookie and store parameters.  The C standard does not
@@ -126,15 +130,31 @@ pthread_create_blocking_np(pthread_t * restrict thread,
 		if ((rc = U->rc_sync) != 0)
 			goto err5;
 	}
-	if ((rc = pthread_mutex_unlock(&U->mutex)) != 0)
-		goto err4;
 
-	/* Clean up synchronization-related variables. */
-	if ((rc = pthread_cond_destroy(&U->cond)) != 0)
-		goto err2;
-	if ((rc = pthread_mutex_destroy(&U->mutex)) != 0)
-		goto err1;
+	/*
+	 * The thread is running, so it owns ${arg} and will run
+	 * ${start_routine} to completion.  From here we must report
+	 * success: this function promises that on failure the provided
+	 * routine was not run, and a caller which frees ${arg} after an
+	 * error return would be freeing memory the thread is still using.
+	 *
+	 * Anything which fails below is one of our own synchronization
+	 * variables.  The caller cannot act on that, so warn and carry on.
+	 */
+	if ((rc_cleanup = pthread_mutex_unlock(&U->mutex)) != 0) {
+		warn0("pthread_mutex_unlock: %s", strerror(rc_cleanup));
 
+		/* Do not destroy a mutex which we might still hold. */
+		goto done;
+	}
+	if ((rc_cleanup = pthread_cond_destroy(&U->cond)) != 0) {
+		warn0("pthread_cond_destroy: %s", strerror(rc_cleanup));
+		goto done;
+	}
+	if ((rc_cleanup = pthread_mutex_destroy(&U->mutex)) != 0)
+		warn0("pthread_mutex_destroy: %s", strerror(rc_cleanup));
+
+done:
 	/* Clean up. */
 	free(U);
 
@@ -147,7 +167,6 @@ err5:
 	 * is more important.
 	 */
 	pthread_mutex_unlock(&U->mutex);
-err4:
 	pthread_cancel(*thread);
 	pthread_join(*thread, NULL);
 err3:
