@@ -174,7 +174,7 @@ main(int argc, char * argv[])
 			if (opt_r_set)
 				usage();
 			opt_r_set = 1;
-			if (PARSENUM(&opt_r, optarg, 0, INFINITY))
+			if (PARSENUM(&opt_r, optarg, 0, INFINITY) || isnan(opt_r))
 				OPT_EPARSE(ch, optarg);
 			break;
 		GETOPT_OPT("-R"):
