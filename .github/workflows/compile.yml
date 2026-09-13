@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   # Shared variables amongst all projects / platforms / compilers.
   CFLAGS_ALL: -std=c99 -O2
@@ -42,7 +45,9 @@ jobs:
     - name: Install software
       run: sudo apt-get install --no-install-recommends valgrind
     - name: Checkout code
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
     - name: Compile with clang
       env:
         CC: clang-13
@@ -79,7 +84,9 @@ jobs:
     runs-on: macos-14
     steps:
     - name: Checkout code
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
     - name: Compile with clang
       env:
         CC: clang
