@@ -20,6 +20,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Coverity scan
+        shell: bash
         env:
           COVERITY_SCAN_PROJECT_NAME: ${{ github.repository }}
           COVERITY_SCAN_BRANCH_PATTERN: coverity-scan
@@ -28,9 +29,12 @@ jobs:
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
           TRAVIS_BRANCH: coverity-scan
         run: |
-          script="$RUNNER_TEMP/travisci_build_coverity_scan.sh"
+          set -euo pipefail
+          script="$(mktemp "${RUNNER_TEMP}/travisci_build_coverity_scan.XXXXXX")"
+          trap 'rm -f "${script}"' EXIT
           curl --fail-with-body --silent --show-error --location \
+            --proto '=https' --proto-redir '=https' \
             --max-time 30 --retry 3 --retry-all-errors --retry-max-time 90 \
             "https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh" \
-            --output "$script"
-          bash "$script"
+            --output "${script}"
+          bash "${script}"
