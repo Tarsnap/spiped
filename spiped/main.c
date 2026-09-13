@@ -224,9 +224,9 @@ main(int argc, char * argv[])
 	/* Set defaults. */
 	if (!opt_n_set)
 		opt_n = 100;
-	if (opt_o == 0.0)
+	if (!opt_o_set)
 		opt_o = 5.0;
-	if (opt_r == 0.0)
+	if (!opt_r_set)
 		opt_r = 60.0;
 
 	/* Sanity-check options. */
