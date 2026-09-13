@@ -25,6 +25,7 @@ scenario_cmd() {
 		else
 			echo 1 > "${c_exitfile}"
 		fi
+		rm -f "${spiped_stderr}"
 	done
 
 	rm -f "${spiped_stderr}"
