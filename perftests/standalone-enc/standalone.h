@@ -43,4 +43,11 @@ int standalone_transfer_noencrypt(const size_t *, size_t, size_t, size_t, int);
  */
 int standalone_pipe_socketpair_one(const size_t *, size_t, size_t, size_t);
 
+/**
+ * standalone_pipe_truncated_frame():
+ * Verify that decrypt-side EOF is accepted only on an encrypted packet
+ * boundary.
+ */
+int standalone_pipe_truncated_frame(void);
+
 #endif /* !STANDALONE_H_ */
