@@ -100,8 +100,15 @@ callback_pipe_read(void * cookie, int status)
 	ssize_t loop_outlen;
 
 	/* Did we read EOF? */
-	if (status == 1)
+	if (status == 1) {
+		/* A decrypt-side EOF is clean only on a packet boundary. */
+		if (P->decr) {
+			netbuf_read_peek(P->R, &inbuf, &inlen);
+			if (inlen != 0)
+				goto fail;
+		}
 		goto eof;
+	}
 
 	/* Did the read fail? */
 	if (status == -1)
@@ -145,6 +152,16 @@ callback_pipe_read(void * cookie, int status)
 
 	/* Let netbuf layer know what we've used. */
 	netbuf_read_consume(P->R, inpos);
+
+	/*
+	 * A short decrypt-side read leaves ciphertext buffered.  Wait for
+	 * more bytes or EOF instead of issuing a zero-length write.
+	 */
+	if (outpos == 0) {
+		if (netbuf_read_wait(P->R, P->minread, callback_pipe_read, P))
+			goto err1;
+		return (0);
+	}
 
 	/* Write the encrypted or decrypted data. */
 	P->wlen = (ssize_t)outpos;
