@@ -100,8 +100,15 @@ callback_pipe_read(void * cookie, int status)
 	ssize_t loop_outlen;
 
 	/* Did we read EOF? */
-	if (status == 1)
+	if (status == 1) {
+		/* A decrypt-side EOF is clean only on a packet boundary. */
+		if (P->decr) {
+			netbuf_read_peek(P->R, &inbuf, &inlen);
+			if (inlen != 0)
+				goto fail;
+		}
 		goto eof;
+	}
 
 	/* Did the read fail? */
 	if (status == -1)
