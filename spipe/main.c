@@ -212,7 +212,7 @@ main(int argc, char * argv[])
 	(void)argv; /* argv is not used beyond this point. */
 
 	/* Set defaults. */
-	if (opt_o == 0.0)
+	if (!opt_o_set)
 		opt_o = 5.0;
 
 	/* Sanity-check options. */
