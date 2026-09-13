@@ -95,7 +95,7 @@ _Pragma("clang diagnostic pop")
 				    " float with base != 0"), 1)) :	\
 		(((*(x)) = -1) > 0) ?					\
 			((*(x)) = parsenum_unsigned((s), 0, (*(x)),	\
-			    (*(x)), (base), (trailing))) :			\
+			    (*(x)), (base), (trailing))) :		\
 			(ASSERT_FAIL(_define_name " applied to signed"	\
 			    " integer without specified bounds"), 1),	\
 		errno != 0						\
@@ -150,8 +150,6 @@ parsenum_float(const char * s, double min, double max, int trailing)
 
 	val = strtod(s, &eptr);
 	if (eptr == s || (!trailing && (*eptr != '\0')))
-		errno = EINVAL;
-	else if (isnan(val))
 		errno = EINVAL;
 	else if ((val < min) || (val > max))
 		errno = ERANGE;
