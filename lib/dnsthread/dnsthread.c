@@ -265,20 +265,25 @@ dnsthread_resolveone(DNSTHREAD T, const char * addr,
 	T->callback = callback;
 	T->cookie = cookie;
 
+	/*
+	 * We want a callback when the worker thread pokes us.  Register this
+	 * before handing the work over: once the thread is running we cannot
+	 * take the work back, and without this registration nothing would
+	 * ever read the completion byte or free the results.
+	 */
+	if (events_network_register(callback_resolveone, T, T->wakeupsock[1],
+	    EVENTS_NETWORK_OP_READ)) {
+		warnp("Error registering wakeup listener");
+		goto err2;
+	}
+
 	/* There is now work for the thread to do. */
 	T->state = THREAD_HASWORK;
 
 	/* Wake up the worker thread. */
 	if ((rc = pthread_cond_signal(&T->cv)) != 0) {
 		warn0("pthread_cond_signal: %s", strerror(rc));
-		goto err1;
-	}
-
-	/* We want a callback when the worker thread pokes us. */
-	if (events_network_register(callback_resolveone, T, T->wakeupsock[1],
-	    EVENTS_NETWORK_OP_READ)) {
-		warnp("Error registering wakeup listener");
-		goto err1;
+		goto err3;
 	}
 
 ealready:
@@ -295,6 +300,11 @@ ealready:
 	/* Success! */
 	return (0);
 
+err3:
+	T->state = THREAD_SLEEPING;
+	events_network_cancel(T->wakeupsock[1], EVENTS_NETWORK_OP_READ);
+err2:
+	free(T->addr);
 err1:
 	pthread_mutex_unlock(&T->mtx);
 err0:
