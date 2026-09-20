@@ -13,6 +13,7 @@ LIB_DIR		=	../../lib
 
 # Main test code
 SRCS	=	main.c
+SRCS	+=	fault.c
 
 # libcperciva includes
 IDIRS	+=	-I${LIBCPERCIVA_DIR}/events
