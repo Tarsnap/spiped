@@ -7,6 +7,7 @@
 #include "warnp.h"
 
 #include "dnsthread.h"
+#include "fault.h"
 
 #define MAX_ADDRS 8
 static int doneloop = 0;
@@ -64,6 +65,12 @@ main(int argc, char ** argv)
 	/* Usage. */
 	if (argc < 2) {
 		fprintf(stderr, "usage: dnsthread-resolve ADDRESS\n");
+		goto err0;
+	}
+
+	/* Check rollback before starting the ordinary resolver test. */
+	if (check_faults()) {
+		warn0("dnsthread failure-path regression");
 		goto err0;
 	}
 
