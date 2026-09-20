@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "fault.h"
 #include "pthread_create_blocking_np.h"
 #include "timing.h"
 #include "warnp.h"
@@ -65,6 +66,10 @@ main(int argc, char ** argv)
 
 	/* Check basic stuff. */
 	if (check_basic())
+		goto err0;
+
+	/* Check failures while cleaning up after the thread has started. */
+	if (check_faults())
 		goto err0;
 
 	/* Check the relative timing of points in the code. */
