@@ -111,12 +111,13 @@ entropy_read_done(struct entropy_read_cookie * er)
 	/* Sanity check. */
 	assert(er != NULL);
 
-	/* Close the device. */
-	while (close(er->fd) == -1) {
-		if (errno != EINTR) {
-			warnp("close(/dev/urandom)");
-			goto err1;
-		}
+	/*
+	 * Close the device.  Do not retry after EINTR: the descriptor may
+	 * already have been released and reused by another thread.
+	 */
+	if (close(er->fd) && (errno != EINTR)) {
+		warnp("close(/dev/urandom)");
+		goto err1;
 	}
 
 	/* Clean up. */
