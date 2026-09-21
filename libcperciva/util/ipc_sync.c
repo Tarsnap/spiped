@@ -71,15 +71,16 @@ err0:
 	return (-1);
 }
 
-/* close(), but looping upon EINTR. */
+/* close(), without retrying upon EINTR. */
 static inline int
 ipc_sync_close(int fd)
 {
 
-	/* Loop until closed. */
-	while (close(fd)) {
-		if (errno == EINTR)
-			continue;
+	/*
+	 * Do not retry after EINTR: the descriptor may already have been
+	 * released and reused by another thread.
+	 */
+	if (close(fd) && (errno != EINTR)) {
 		warnp("close");
 		goto err0;
 	}
