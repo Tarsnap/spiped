@@ -91,6 +91,16 @@ tryagain:
 	return (0);
 
 eof:
+	/*
+	 * If EOF arrived after some bytes, report those bytes first.  The next
+	 * read will report EOF.  This mirrors ordinary stream read semantics and
+	 * prevents data accumulated below minlen from being silently discarded.
+	 */
+	if (C->bufpos > 0) {
+		assert(C->bufpos <= SSIZE_MAX);
+		return (docallback(C, (ssize_t)C->bufpos));
+	}
+
 	/* Invoke the callback with an EOF status and return. */
 	return (docallback(C, 0));
 
@@ -102,11 +112,12 @@ failed:
 /**
  * network_read(fd, buf, buflen, minread, callback, cookie):
  * Asynchronously read up to ${buflen} bytes of data from ${fd} into ${buf}.
- * When at least ${minread} bytes have been read or on error, invoke
- * ${callback}(${cookie}, lenread), where lenread is 0 on EOF or -1 on error,
- * and the number of bytes read (between ${minread} and ${buflen} inclusive)
- * otherwise.  Return a cookie which can be passed to network_read_cancel() in
- * order to cancel the read.
+ * When at least ${minread} bytes have been read, on EOF, or on error, invoke
+ * ${callback}(${cookie}, lenread), where lenread is 0 on EOF with no buffered
+ * bytes, -1 on error, and the number of bytes read otherwise.  If EOF arrives
+ * after fewer than ${minread} bytes have been read, those bytes are returned
+ * first and a subsequent network_read() reports EOF.  Return a cookie which
+ * can be passed to network_read_cancel() in order to cancel the read.
  */
 void *
 network_read(int fd, uint8_t * buf, size_t buflen, size_t minread,

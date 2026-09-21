@@ -176,6 +176,8 @@ main(int argc, char * argv[])
 			opt_r_set = 1;
 			if (PARSENUM(&opt_r, optarg, 0, INFINITY))
 				OPT_EPARSE(ch, optarg);
+			if (!isfinite(opt_r) || (opt_r > 1e9))
+				OPT_EPARSE(ch, optarg);
 			break;
 		GETOPT_OPT("-R"):
 			if (opt_R)
@@ -224,9 +226,9 @@ main(int argc, char * argv[])
 	/* Set defaults. */
 	if (!opt_n_set)
 		opt_n = 100;
-	if (opt_o == 0.0)
+	if (!opt_o_set)
 		opt_o = 5.0;
-	if (opt_r == 0.0)
+	if (!opt_r_set)
 		opt_r = 60.0;
 
 	/* Sanity-check options. */
@@ -238,7 +240,7 @@ main(int argc, char * argv[])
 		usage();
 	if (!(opt_o > 0.0))
 		usage();
-	if ((opt_r != 60.0) && opt_R)
+	if (opt_r_set && opt_R)
 		usage();
 	if ((opt_s == NULL) || sock_addr_validate(opt_s))
 		usage();

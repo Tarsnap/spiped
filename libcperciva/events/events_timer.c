@@ -1,5 +1,8 @@
 #include <sys/time.h>
 
+#include <limits.h>
+#include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -20,16 +23,42 @@ static struct timerqueue * Q = NULL;
 
 static void events_timer_shutdown(void);
 
+/* Return the largest non-negative value representable by time_t. */
+static uintmax_t
+time_t_maximum(time_t minus_one)
+{
+	const size_t bits = sizeof(time_t) * CHAR_BIT;
+	const size_t uintmax_bits = sizeof(uintmax_t) * CHAR_BIT;
+	size_t value_bits;
+
+	/* An unsigned time_t uses all bits; a signed time_t reserves one. */
+	if (minus_one > (time_t)0)
+		value_bits = bits;
+	else
+		value_bits = bits - 1;
+
+	return (UINTMAX_MAX >> (uintmax_bits - value_bits));
+}
+
 /* Set tv := <current time> + tdelta. */
 static int
 gettimeout(struct timeval * tv, const struct timeval * tdelta)
 {
+	uintmax_t tmax;
 
 	if (monoclock_get(tv))
+		goto err0;
+
+	/* Refuse to overflow time_t while constructing the absolute timeout. */
+	tmax = time_t_maximum((time_t)-1);
+	if ((tdelta->tv_sec > 0) &&
+	    ((uintmax_t)tdelta->tv_sec > tmax - (uintmax_t)tv->tv_sec))
 		goto err0;
 	tv->tv_sec += tdelta->tv_sec;
 	if ((tv->tv_usec += tdelta->tv_usec) >= 1000000) {
 		tv->tv_usec -= 1000000;
+		if ((uintmax_t)tv->tv_sec == tmax)
+			goto err0;
 		tv->tv_sec += 1;
 	}
 
@@ -104,6 +133,13 @@ events_timer_register_double(int (* func)(void *), void * cookie,
     double timeo)
 {
 	struct timeval tv;
+	uintmax_t tmax;
+
+	/* Reject values which cannot be represented safely as time_t. */
+	tmax = time_t_maximum((time_t)-1);
+	if ((!isfinite(timeo)) || (timeo < 0.0) ||
+	    (timeo >= (double)tmax))
+		return (NULL);
 
 	/* Convert timeo to a struct timeval. */
 	tv.tv_sec = (time_t)timeo;

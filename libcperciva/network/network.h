@@ -71,10 +71,11 @@ void network_connect_cancel(void *);
  * network_read(fd, buf, buflen, minread, callback, cookie):
  * Asynchronously read up to ${buflen} bytes of data from ${fd} into ${buf}.
  * When at least ${minread} bytes have been read or on error, invoke
- * ${callback}(${cookie}, lenread), where lenread is 0 on EOF or -1 on error,
- * and the number of bytes read (between ${minread} and ${buflen} inclusive)
- * otherwise.  Return a cookie which can be passed to network_read_cancel() in
- * order to cancel the read.
+ * ${callback}(${cookie}, lenread), where lenread is 0 on EOF with no bytes
+ * read, -1 on error, and the number of bytes read otherwise.  If EOF arrives
+ * after a short read, ${lenread} is the number of bytes already received
+ * (which may be less than ${minread}).  Return a cookie which can be passed
+ * to network_read_cancel() in order to cancel the read.
  */
 void * network_read(int, uint8_t *, size_t, size_t,
     int (*)(void *, ssize_t), void *);

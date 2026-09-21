@@ -6,6 +6,9 @@ on:
     branches:
       - coverity-scan
 
+permissions:
+  contents: read
+
 # Run coverity scan.  For now, we're re-using the Travis-CI script, which
 # requires us to fake a TRAVIS_BRANCH environment variable.
 jobs:
@@ -13,8 +16,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Coverity scan
+        shell: bash
         env:
           COVERITY_SCAN_PROJECT_NAME: ${{ github.repository }}
           COVERITY_SCAN_BRANCH_PATTERN: coverity-scan
@@ -22,4 +28,13 @@ jobs:
           COVERITY_SCAN_BUILD_COMMAND: make all
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
           TRAVIS_BRANCH: coverity-scan
-        run: curl -s "https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh" | bash || true
+        run: |
+          set -euo pipefail
+          script="$(mktemp "${RUNNER_TEMP}/travisci_build_coverity_scan.XXXXXX")"
+          trap 'rm -f "${script}"' EXIT
+          curl --fail-with-body --silent --show-error --location \
+            --proto '=https' --proto-redir '=https' \
+            --max-time 30 --retry 3 --retry-all-errors --retry-max-time 90 \
+            "https://scan.coverity.com/scripts/travisci_build_coverity_scan.sh" \
+            --output "${script}"
+          bash "${script}"
