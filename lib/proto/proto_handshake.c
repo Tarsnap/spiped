@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "crypto_entropy.h"
+#include "insecure_memzero.h"
 #include "network.h"
 
 #include "proto_crypt.h"
@@ -38,6 +39,19 @@ static int dhwrite(struct handshake_cookie *);
 static int callback_dh_write(void *, ssize_t);
 static int handshakedone(struct handshake_cookie *);
 
+/*
+ * handshake_cookie_free(H):
+ * Wipe all handshake state, including the Diffie-Hellman private value and
+ * derived MAC keys, before releasing the cookie.
+ */
+static void
+handshake_cookie_free(struct handshake_cookie * H)
+{
+
+	insecure_memzero(H, sizeof(*H));
+	free(H);
+}
+
 /* The handshake failed.  Call back and clean up. */
 static int
 handshakefail(struct handshake_cookie * H)
@@ -54,7 +68,7 @@ handshakefail(struct handshake_cookie * H)
 	rc = (H->callback)(H->cookie, NULL, NULL);
 
 	/* Free the cookie. */
-	free(H);
+	handshake_cookie_free(H);
 
 	/* Return status from callback. */
 	return (rc);
@@ -112,7 +126,7 @@ proto_handshake(int s, int decr, int nopfs, int requirepfs,
 err2:
 	network_write_cancel(H->write_cookie);
 err1:
-	free(H);
+	handshake_cookie_free(H);
 err0:
 	/* Failure! */
 	return (NULL);
@@ -303,7 +317,7 @@ handshakedone(struct handshake_cookie * H)
 	rc = (H->callback)(H->cookie, c, s);
 
 	/* Free the cookie. */
-	free(H);
+	handshake_cookie_free(H);
 
 	/* Return status code from callback. */
 	return (rc);
@@ -331,5 +345,5 @@ proto_handshake_cancel(void * cookie)
 		network_write_cancel(H->write_cookie);
 
 	/* Free the cookie. */
-	free(H);
+	handshake_cookie_free(H);
 }
