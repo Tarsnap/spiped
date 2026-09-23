@@ -299,7 +299,7 @@ main(int argc, char * argv[])
 	/* Loop until we're done with the connection. */
 	if (events_spin(&ET.conndone)) {
 		warnp("Error running event loop");
-		goto err5;
+		goto err7;
 	}
 
 	/* Wait for threads to finish (if necessary) */
