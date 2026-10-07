@@ -190,8 +190,9 @@ is_not_one(const uint8_t * x, size_t len)
  * proto_crypt_dh_validate(yh_r, dhmac_r, requirepfs):
  * Return non-zero if the value ${yh_r} received from the remote party is not
  * correctly MACed using the diffie-hellman parameter MAC key ${dhmac_r}, or
- * if the included y value is >= the diffie-hellman group modulus, or if
- * ${requirepfs} is non-zero and the included y value is 1.
+ * if the included y value is outside the range (1, p - 1), where p is the
+ * diffie-hellman group modulus, or if ${requirepfs} is non-zero and the
+ * included y value is 1.
  */
 int
 proto_crypt_dh_validate(const uint8_t yh_r[PCRYPT_YH_LEN],
