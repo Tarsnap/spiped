@@ -359,7 +359,7 @@ main(int argc, char * argv[])
 	s = -1;
 
 	/* Register a handler for SIGTERM. */
-	if (graceful_shutdown_initialize(&callback_graceful_shutdown,
+	if (graceful_shutdown_init(&callback_graceful_shutdown,
 	    dispatch_cookie)) {
 		warn0("Failed to start graceful_shutdown timer");
 		goto err7;

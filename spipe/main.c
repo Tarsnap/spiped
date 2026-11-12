@@ -54,7 +54,7 @@ callback_conndied(void * cookie, int reason)
 
 	/* Shut it down if there's an error. */
 	if (ET->connection_error)
-		graceful_shutdown_manual();
+		(void)graceful_shutdown_manual();
 
 	/* Quit event loop. */
 	ET->conndone = 1;
@@ -291,7 +291,7 @@ main(int argc, char * argv[])
 	}
 
 	/* Register a handler for SIGTERM. */
-	if (graceful_shutdown_initialize(&callback_graceful_shutdown, &ET)) {
+	if (graceful_shutdown_init(&callback_graceful_shutdown, &ET)) {
 		warn0("Failed to start graceful_shutdown timer");
 		goto err7;
 	}

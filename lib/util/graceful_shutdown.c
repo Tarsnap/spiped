@@ -9,10 +9,12 @@
 #include "graceful_shutdown.h"
 
 /* Data from parent code. */
-static int (* begin_shutdown)(void *);
+static int (* begin_shutdown)(void *) = NULL;
 static void (* sighandler_sigterm_orig)(int);
 static void * caller_cookie;
 static void * timer_cookie = NULL;
+static int shutdown_started = 0;
+static int initialized = 0;
 
 /* Flag to show that SIGTERM was received. */
 static volatile sig_atomic_t should_shutdown = 0;
@@ -43,11 +45,17 @@ graceful_shutdown(void * cookie)
 
 	(void)cookie; /* UNUSED */
 
+	/* Bail if we've already started a shutdown. */
+	if (shutdown_started)
+		return (0);
+
 	/* This timer has expired. */
 	timer_cookie = NULL;
 
 	/* Use the callback function, or schedule another check in 1 second. */
 	if (should_shutdown) {
+		shutdown_started = 1;
+
 		if (begin_shutdown(caller_cookie) != 0) {
 			warn0("Failed to begin shutdown");
 			goto err0;
@@ -73,15 +81,21 @@ err0:
 }
 
 /**
- * graceful_shutdown_initialize(callback, caller_cookie):
+ * graceful_shutdown_init(callback, caller_cookie):
  * Initialize a signal handler for SIGTERM, and start a continuous 1-second
  * timer which checks if SIGTERM was given; if detected, call ${callback} and
- * give it the ${caller_cookie}.
+ * give it the ${caller_cookie}.  Do not retry this function upon failure.
  */
 int
-graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
+graceful_shutdown_init(int (* begin_shutdown_parent)(void *),
     void * caller_cookie_parent)
 {
+
+	/* Sanity check; we can only have one (global) graceful_shutdown. */
+	if (begin_shutdown != NULL) {
+		warn0("graceful_shutdown_initialize() already called");
+		goto err0;
+	}
 
 	/* Record callback data. */
 	begin_shutdown = begin_shutdown_parent;
@@ -96,18 +110,25 @@ graceful_shutdown_initialize(int (* begin_shutdown_parent)(void *),
 
 	/* Clean up the timer cookie at exit. */
 	if (atexit(graceful_shutdown_atexit))
-		goto err0;
+		goto err1;
 
 	/* Periodically check whether a signal was received. */
 	if ((timer_cookie = events_timer_register_double(
 	    graceful_shutdown, NULL, 1.0)) == NULL) {
 		warnp("Failed to register the graceful shutdown timer");
-		goto err0;
+		goto err1;
 	}
+
+	/* We completed the initialization. */
+	initialized = 1;
 
 	/* Success! */
 	return (0);
 
+err1:
+	/* Restore original SIGTERM handler. */
+	if (signal(SIGTERM, sighandler_sigterm_orig) == SIG_ERR)
+		warnp("Failed to restore original SIGTERM handler");
 err0:
 	/* Failure! */
 	return (-1);
@@ -115,15 +136,20 @@ err0:
 
 /**
  * graceful_shutdown_manual(void):
- * Shutdown immediately, without needing a SIGTERM.
+ * Shutdown immediately, without needing a SIGTERM.  This must be called from
+ * the thread which called graceful_shutdown_initialize().  If a shutdown
+ * has already been started, do nothing.
  */
-void
+int
 graceful_shutdown_manual(void)
 {
 
 	/* Sanity check: we must be initialized. */
-	assert(begin_shutdown != NULL);
-	assert(caller_cookie != NULL);
+	assert(initialized);
+
+	/* Bail if we've already started a shutdown. */
+	if (shutdown_started)
+		return (0);
 
 	/* Stop the timer. */
 	if (timer_cookie != NULL) {
@@ -133,5 +159,5 @@ graceful_shutdown_manual(void)
 
 	/* Shut down. */
 	should_shutdown = 1;
-	graceful_shutdown(NULL);
+	return (graceful_shutdown(NULL));
 }
